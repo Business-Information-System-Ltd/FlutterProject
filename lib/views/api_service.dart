@@ -3,35 +3,35 @@ import 'package:advance_budget_request_system/views/data.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static String url = "http://ievent.southeastasia.cloudapp.azure.com:8000/api/budget/";
+  static String url = "http://127.0.0.1:8000/api/budget/";
 
-  static String projectEndPoint = "http://ievent.southeastasia.cloudapp.azure.com:8000/api/project/";
+  static String projectEndPoint = "http://127.0.0.1:8000/api/project/";
   final String projectBudgetEndPoint =
-      "http://ievent.southeastasia.cloudapp.azure.com:8000/api/projectbudget/";
-  final String tripEndPoint = "http://ievent.southeastasia.cloudapp.azure.com:8000/api/trip/";
-  final String tripBudgetEndPoint = "http://ievent.southeastasia.cloudapp.azure.com:8000/api/tripbudget/";
+      "http://127.0.0.1:8000/api/projectbudget/";
+  final String tripEndPoint = "http://127.0.0.1:8000/api/trip/";
+  final String tripBudgetEndPoint = "http://127.0.0.1:8000/api/tripbudget/";
   final String TripCodeAutoIncrementEndPoint =
-      "http://ievent.southeastasia.cloudapp.azure.com:8000/api/trips/next-code/";
-  final String operationEndPoint = "http://ievent.southeastasia.cloudapp.azure.com:8000/api/operation/";
+      "http://127.0.0.1:8000/api/trips/next-code/";
+  final String operationEndPoint = "http://127.0.0.1:8000/api/operation/";
   final String operationBudgetEndPoint =
-      "http://ievent.southeastasia.cloudapp.azure.com:8000/api/operationbudget/";
+      "http://127.0.0.1:8000/api/operationbudget/";
   final String operationCodeAutoIncrementEndPoint =
-      "http://ievent.southeastasia.cloudapp.azure.com:8000/api/operations/next-code/";
+      "http://127.0.0.1:8000/api/operations/next-code/";
   final String advanceRequestEndPoint =
-      "http://ievent.southeastasia.cloudapp.azure.com:8000/api/advancerequest/";
+      "http://127.0.0.1:8000/api/advancerequest/";
   final String advanceCodeAutoIncrementEndPoint =
-      "http://ievent.southeastasia.cloudapp.azure.com:8000/api/requests/next-code/";
-  final String cashPaymentEndPoint = "http://ievent.southeastasia.cloudapp.azure.com:8000/api/cashpayment/";
-  final String cashPaymentAutoIncrementEndPoint= "http://ievent.southeastasia.cloudapp.azure.com:8000/api/requests/next-code/";
-  final String settlementEndPoint = "http://ievent.southeastasia.cloudapp.azure.com:8000/api/settlement/";
+      "http://127.0.0.1:8000/api/requests/next-code/";
+  final String cashPaymentEndPoint = "http://127.0.0.1:8000/api/cashpayment/";
+  final String cashPaymentAutoIncrementEndPoint= "http://127.0.0.1:8000/api/requests/next-code/";
+  final String settlementEndPoint = "http://127.0.0.1:8000/api/settlement/";
   final String settlementDetailEndPoint =
-      "http://ievent.southeastasia.cloudapp.azure.com:8000/api/settlementdetail/";
-  final String userLoginEndPoint = "http://ievent.southeastasia.cloudapp.azure.com:8000/api/user/";
-  final String departmentEndPoint = "http://ievent.southeastasia.cloudapp.azure.com:8000/api/department/";
+      "http://127.0.0.1:8000/api/settlementdetail/";
+  final String userLoginEndPoint = "http://127.0.0.1:8000/api/user/";
+  final String departmentEndPoint = "http://127.0.0.1:8000/api/department/";
   static String approvalsetupEndPoint =
-      "http://ievent.southeastasia.cloudapp.azure.com:8000/api/requestsetup/";
+      "http://127.0.0.1:8000/api/requestsetup/";
   static String approvalstepEndPoint =
-      "http://ievent.southeastasia.cloudapp.azure.com:8000/api/approversetupstep/";
+      "http://127.0.0.1:8000/api/approversetupstep/";
 
   Future<List<Budget>> fetchBudgetCodeData() async {
     final response = await http.get(Uri.parse(url));
@@ -485,7 +485,7 @@ class ApiService {
 
   Future<void> registerUser(Map<String, dynamic> userData) async {
     final response = await http.post(
-      Uri.parse('http://ievent.southeastasia.cloudapp.azure.com:8000/api/user/'),
+      Uri.parse('http://127.0.0.1:8000/api/user/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'UserName': userData['username'],
@@ -508,7 +508,7 @@ class ApiService {
   Future<Map<String, dynamic>?> loginUser(
       String email, String password, String departmentId) async {
     final response = await http.post(
-      Uri.parse('http://ievent.southeastasia.cloudapp.azure.com:8000/api/login/'),
+      Uri.parse('http://127.0.0.1:8000/api/login/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'User_Email': email,

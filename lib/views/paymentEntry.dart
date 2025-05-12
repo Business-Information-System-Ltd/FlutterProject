@@ -417,110 +417,120 @@ class AdvanceRequestTable extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(30.0),
-        child: Center(
-          child: Column(
-            children: [
-              const Text(
-                "Choose Advance Request",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.4,
-                    child: DataTable(
-                      showCheckboxColumn: false,
-                      border: TableBorder.all(),
-                      headingRowColor: MaterialStateProperty.resolveWith(
-                        (Set<MaterialState> states) {
-                          return const Color.fromARGB(255, 167, 230, 232);
-                        },
-                      ),
-                      columns: const [
-                        DataColumn(
-                            label: Text(
-                          "Request No",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          "Request Type",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          "Request Amount",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          "Currency",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          "Status",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )),
-                      ],
-                      rows: filterAdvance.map((request) {
-                        return DataRow(
-                          cells: [
-                            DataCell(Text(request.requestNo)),
-                            DataCell(Text(request.requestType)),
-                            DataCell(Text(request.requestAmount.toString())),
-                            DataCell(Text(request.currency)),
-                            DataCell(Text(request.status)),
-                          ],
-                          onSelectChanged: (selected) {
-                            if (selected != null) {
-                              onRowSelected(request);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      PaymentEntry(selectedRequest: request),
-                                ),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Center(
+            child: Container(
+              height: 500,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Choose Advance Request",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Container(
+                        height: MediaQuery.of(context).size.height,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: DataTable(
+                            showCheckboxColumn: false,
+                            border: TableBorder.all(),
+                            headingRowColor: MaterialStateProperty.resolveWith(
+                              (Set<MaterialState> states) {
+                                return const Color.fromARGB(255, 167, 230, 232);
+                              },
+                            ),
+                            columns: const [
+                              DataColumn(
+                                  label: Text(
+                                "Request No",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              )),
+                              DataColumn(
+                                  label: Text(
+                                "Request Type",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              )),
+                              DataColumn(
+                                  label: Text(
+                                "Request Amount",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              )),
+                              DataColumn(
+                                  label: Text(
+                                "Currency",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              )),
+                              DataColumn(
+                                  label: Text(
+                                "Status",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              )),
+                            ],
+                            rows: filterAdvance.map((request) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(Text(request.requestNo)),
+                                  DataCell(Text(request.requestType)),
+                                  DataCell(Text(request.requestAmount.toString())),
+                                  DataCell(Text(request.currency)),
+                                  DataCell(Text(request.status)),
+                                ],
+                                onSelectChanged: (selected) {
+                                  if (selected != null) {
+                                    onRowSelected(request);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            PaymentEntry(selectedRequest: request),
+                                      ),
+                                    );
+                                  }
+                                },
                               );
-                            }
-                          },
-                        );
-                      }).toList(),
+                            }).toList(),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          // Navigator.of(context).push(MaterialPageRoute(
+                          //     builder: (context) => const Cashpayment()));
+                          onRefresh();
+                          Navigator.pop(context);
+                          
+                        },
+                        style: ElevatedButton.styleFrom(
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                          ),
+                          backgroundColor: const Color.fromARGB(255, 76, 178, 182),
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          "Back",
+                          style:
+                              TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        )),
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                    onPressed: () {
-                      // Navigator.of(context).push(MaterialPageRoute(
-                      //     builder: (context) => const Cashpayment()));
-                      onRefresh();
-                      Navigator.pop(context);
-                      
-                    },
-                    style: ElevatedButton.styleFrom(
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                      ),
-                      backgroundColor: const Color.fromARGB(255, 76, 178, 182),
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      "Back",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    )),
-              ),
-            ],
+            ),
           ),
         ),
       ),

@@ -357,6 +357,7 @@ class _AdvancerequestState extends State<Advancerequest> {
       sortAscending = true;
       currentPage = 1;
       _updatePagination();
+      _fetchRequest();
     });
   }
 
