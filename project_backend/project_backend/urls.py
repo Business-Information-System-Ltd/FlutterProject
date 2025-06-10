@@ -18,6 +18,6 @@ urlpatterns = [
     path('api/trips/next-code/', get_next_trip_code),
     path('api/operations/next-code/', get_next_operation_code),
     path('api/requests/next-code/', get_next_request_code),
-    path('api/requests/next-code/', get_next_payment_code),
+    path('api/payments/next-code/', get_next_payment_code),
     path('api/login/', UserLoginView.as_view(), name='user_login')
 ]

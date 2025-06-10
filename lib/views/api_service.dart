@@ -22,7 +22,7 @@ class ApiService {
   final String advanceCodeAutoIncrementEndPoint =
       "http://127.0.0.1:8000/api/requests/next-code/";
   final String cashPaymentEndPoint = "http://127.0.0.1:8000/api/cashpayment/";
-  final String cashPaymentAutoIncrementEndPoint= "http://127.0.0.1:8000/api/requests/next-code/";
+  final String cashPaymentAutoIncrementEndPoint= "http://127.0.0.1:8000/api/payments/next-code/";
   final String settlementEndPoint = "http://127.0.0.1:8000/api/settlement/";
   final String settlementDetailEndPoint =
       "http://127.0.0.1:8000/api/settlementdetail/";
@@ -32,7 +32,7 @@ class ApiService {
       "http://127.0.0.1:8000/api/requestsetup/";
   static String approvalstepEndPoint =
       "http://127.0.0.1:8000/api/approversetupstep/";
-
+ 
   Future<List<Budget>> fetchBudgetCodeData() async {
     final response = await http.get(Uri.parse(url));
 

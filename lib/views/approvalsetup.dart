@@ -299,8 +299,8 @@ class _ApprovalSetupState extends State<ApprovalSetupStep> {
             setup.FlowName!
                 .toLowerCase()
                 .contains(flownameController.text.toLowerCase());
-        bool matchesManagement = !managementApprover ||
-            setup.ApprovalSteps.any((step) => step.approver == 'Management');
+        bool matchesManagement =
+            !managementApprover || (setup.Management?.toLowerCase() == 'yes');
 
         return matchesDepartment &&
             matchesType &&
@@ -711,33 +711,33 @@ class _ApprovalSetupState extends State<ApprovalSetupStep> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                IconButton(
-                                  onPressed: () async {
-                                    final updatedApproval =
-                                        await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ApprovalEditForm(
-                                          onSave: (updatedApproval) {
-                                            return updatedApproval;
-                                          },
-                                          existingData: row,
-                                        ),
-                                      ),
-                                    );
+                                // IconButton(
+                                //   onPressed: () async {
+                                //     final updatedApproval =
+                                //         await Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //         builder: (context) => ApprovalEditForm(
+                                //           onSave: (updatedApproval) {
+                                //             return updatedApproval;
+                                //           },
+                                //           existingData: row,
+                                //         ),
+                                //       ),
+                                //     );
 
-                                    if (updatedApproval != null) {
-                                      setState(() {
-                                        int rowIndex = flows.indexOf(row);
-                                        if (rowIndex != -1) {
-                                          flows[rowIndex] = updatedApproval;
-                                        }
-                                      });
-                                    }
-                                  },
-                                  icon: const Icon(Icons.edit),
-                                  color: Colors.black,
-                                ),
+                                //     if (updatedApproval != null) {
+                                //       setState(() {
+                                //         int rowIndex = flows.indexOf(row);
+                                //         if (rowIndex != -1) {
+                                //           flows[rowIndex] = updatedApproval;
+                                //         }
+                                //       });
+                                //     }
+                                //   },
+                                //   icon: const Icon(Icons.edit),
+                                //   color: Colors.black,
+                                // ),
                                 IconButton(
                                     onPressed: () {
                                       _deleteConfirmation(row);
