@@ -22,7 +22,7 @@ class ApiService {
   final String advanceCodeAutoIncrementEndPoint =
       "http://127.0.0.1:8000/api/requests/next-code/";
   final String cashPaymentEndPoint = "http://127.0.0.1:8000/api/cashpayment/";
-  final String cashPaymentAutoIncrementEndPoint= "http://127.0.0.1:8000/api/payments/next-code/";
+  final String cashPaymentAutoIncrementEndPoint= "http://127.0.0.1:8000/api/requests/next-code/";
   final String settlementEndPoint = "http://127.0.0.1:8000/api/settlement/";
   final String settlementDetailEndPoint =
       "http://127.0.0.1:8000/api/settlementdetail/";
@@ -32,7 +32,7 @@ class ApiService {
       "http://127.0.0.1:8000/api/requestsetup/";
   static String approvalstepEndPoint =
       "http://127.0.0.1:8000/api/approversetupstep/";
- 
+
   Future<List<Budget>> fetchBudgetCodeData() async {
     final response = await http.get(Uri.parse(url));
 
@@ -406,61 +406,7 @@ class ApiService {
     }
   }
 
-  //Settlement
-  Future<List<SettlementInfo>> fetchSettlementData() async {
-    final response = await http.get(Uri.parse(settlementEndPoint));
-    if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
-      return body.map((dynamic item) => SettlementInfo.fromJson(item)).toList();
-    } else {
-      throw Exception(
-          'Failed to load Settlement ${response.statusCode}  ${response.body}');
-    }
-  }
-
-  Future<void> postSettlement(SettlementInfo newSettlement) async {
-    final response = await http.post(Uri.parse(settlementEndPoint),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(newSettlement.toJson()));
-    print(response.statusCode);
-    print(response.body);
-    if (response.statusCode != 201) {
-      throw Exception(
-          'Failed to insert Settlement ${response.statusCode}  ${response.body}');
-      // print('Request can create successfully!');
-    }
-  }
-
-  //settlement detail
-  Future<List<SettlementDetail>> fetchSettlementDetailData() async {
-    final response = await http.get(Uri.parse(settlementDetailEndPoint));
-    if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
-      return body
-          .map((dynamic item) => SettlementDetail.fromJson(item))
-          .toList();
-    } else {
-      throw Exception(
-          'Failed to load Settlement Detail ${response.statusCode}  ${response.body}');
-    }
-  }
-
-  Future<void> postSettlementDetail(SettlementDetail newSettlement) async {
-    final response = await http.post(Uri.parse(settlementDetailEndPoint),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(newSettlement.toJson()));
-    print(response.statusCode);
-    print(response.body);
-    if (response.statusCode != 201) {
-      throw Exception(
-          'Failed to insert Settlement Detail ${response.statusCode}  ${response.body}');
-      // print('Request can create successfully!');
-    }
-  }
+  
 
   //User
   Future<List<User>> fetchUser() async {
@@ -598,37 +544,7 @@ class ApiService {
     }
   }
 
-//   static Future<ApprovalSetup> postApprovalSetup(ApprovalSetup newSetup) async {
-//   // First create the RequestSetUp without steps
-//   final setupBody = {
-//     'Flow_Name': newSetup.FlowName,
-//     'Department_ID': newSetup.departmentId,
-//     'Flow_Type': newSetup.RequestType,
-//     'Currency': newSetup.Currency,
-//     'Description': newSetup.Description,
-//     'No_Of_Steps': newSetup.No_of_Steps,
-//     'Management_Approver': newSetup.Management,
-//   };
 
-//   final response = await http.post(
-//     Uri.parse(approvalsetupEndPoint),
-//     headers: {'Content-Type': 'application/json'},
-//     body: json.encode(newSetup.toJson()),
-//   );
-
-//   if (response.statusCode == 201) {
-//     final createdSetup = ApprovalSetup.fromJson(json.decode(response.body));
-
-//     // Then create the ApprovalSteps
-//     for (final step in newSetup.ApprovalSteps) {
-//       await postApprovalStep(step.copyWith(setupid: createdSetup.id));
-//     }
-
-//     return createdSetup.copyWith(ApprovalSteps: newSetup.ApprovalSteps);
-//   } else {
-//     throw Exception('Failed to create setup: ${response.body}');
-//   }
-// }
 
   static Future<ApprovalSetup> postApprovalSetup(ApprovalSetup newSetup) async {
     final response = await http.post(
