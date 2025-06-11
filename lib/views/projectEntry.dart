@@ -304,6 +304,13 @@ class _EntryFormState extends State<EntryForm> {
       for (var budget in chooseBudgetCodes) {
         await ApiService().postProjectBudget(newProject.id, budget.id);
         _fetchData();
+         ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text( "Project created successfully!"
+              ),
+        ),
+
+      );
       }
        Navigator.pop(context, true);
 
@@ -311,13 +318,7 @@ class _EntryFormState extends State<EntryForm> {
       await _callLogicApps(newProject);
 
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text( "Project created successfully!"
-              ),
-        ),
-
-      );
+     
 
       // Clear form and generate new project code
       _clearText();

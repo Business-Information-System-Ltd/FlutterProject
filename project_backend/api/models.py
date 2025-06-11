@@ -12,7 +12,7 @@ class Budget(models.Model):
     Revise_Amount = models.FloatField()
     Total_Amount = models.FloatField()
 
-    class Meta:
+    class Meta: 
         managed = False
         db_table = 'budget' 
 

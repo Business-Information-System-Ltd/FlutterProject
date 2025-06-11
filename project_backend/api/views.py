@@ -83,25 +83,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    # def update(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     serializer = self.get_serializer(instance, data=request.data, partial=False)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_update(serializer)
-    #      # Handle budget updates
-    #     if 'budgets' in request.data:
-    #         # Clear existing budgets
-    #         instance.projectbudget_set.all().delete()
-            
-    #         # Add new budgets
-    #         for budget_id in request.data['budgets']:
-    #             ProjectBudget.objects.create(
-    #                 Project_ID=instance,
-    #                 Budget_ID_id=budget_id
-    #             )
-        
-    #     return Response(serializer.data)
-
 
 @api_view(['GET'])
 def get_next_project_code(request):
