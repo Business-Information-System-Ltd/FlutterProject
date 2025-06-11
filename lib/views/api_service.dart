@@ -26,8 +26,8 @@ class ApiService {
   final String settlementEndPoint = "https://backendpyth-fxenfvbhadeddxfn.canadacentral-01.azurewebsites.net/api/settlement/";
   final String settlementDetailEndPoint =
       "https://backendpyth-fxenfvbhadeddxfn.canadacentral-01.azurewebsites.net/api/settlementdetail/";
-  final String userLoginEndPoint = "https://backendpyth-fxenfvbhadeddxfn.canadacentral-01.azurewebsites.net/api/user/";
-  final String departmentEndPoint = "https://backendpyth-fxenfvbhadeddxfn.canadacentral-01.azurewebsites.net/api/department/";
+  final String userLoginEndPoint = "https://backendpyth-fxenfvbhadeddxfn.canadacentral-01.azurewebsites.net:8000/api/user/";
+  final String departmentEndPoint = "https://backendpyth-fxenfvbhadeddxfn.canadacentral-01.azurewebsites.net:8000/api/department/";
   static String approvalsetupEndPoint =
       "https://backendpyth-fxenfvbhadeddxfn.canadacentral-01.azurewebsites.net/api/requestsetup/";
   static String approvalstepEndPoint =
