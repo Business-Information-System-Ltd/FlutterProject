@@ -678,14 +678,14 @@ class ApiService {
       throw Exception(
           'Failed to load paginated payments: ${response.statusCode}');
     }
-  }
+  } 
 
   //paginatedDataForSettlement
   Future<List<Settlement>> getPaginatedSettlements(int page, int limit) async {
     final response = await http
         .get(Uri.parse('$baseUrl/settlements?_page=$page&_limit=$limit'));
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200) {  
       final List<dynamic> body = jsonDecode(response.body);
       return body.map((item) => Settlement.fromJson(item)).toList();
     } else {
