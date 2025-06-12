@@ -725,7 +725,7 @@ class _EditPaymentState extends State<EditPayment> {
                                       controller: _paymentNoController,
                                       decoration: const InputDecoration(
                                           labelText: "Payment No"),
-                                      // readOnly: true,
+                                      readOnly: true,
                                     ),
                                   ),
                                   ListTile(

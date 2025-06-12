@@ -229,7 +229,7 @@ class _EntryFormState extends State<EntryForm> {
 //   }
   Future<String> fetchNextProjectCode() async {
     final response = await http
-        .get(Uri.parse('http://127.0.0.1:8000/api/projects/next-code/'));
+        .get(Uri.parse('https://backendpyth-fxenfvbhadeddxfn.canadacentral-01.azurewebsites.net/api/projects/next-code/'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -304,6 +304,13 @@ class _EntryFormState extends State<EntryForm> {
       for (var budget in chooseBudgetCodes) {
         await ApiService().postProjectBudget(newProject.id, budget.id);
         _fetchData();
+         ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text( "Project created successfully!"
+              ),
+        ),
+
+      );
       }
        Navigator.pop(context, true);
 
@@ -311,13 +318,7 @@ class _EntryFormState extends State<EntryForm> {
       await _callLogicApps(newProject);
 
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text( "Project created successfully!"
-              ),
-        ),
-
-      );
+     
 
       // Clear form and generate new project code
       _clearText();

@@ -1068,9 +1068,9 @@ class _EditProjectState extends State<EditProject> {
       );
       try {
         await ApiService().updateProjectInfo(updatedProject);
-        // for (var budget in chooseBudgetCodes) {
-        //   await ApiService().updateProjectBudget(updatedProject, budget.id);
-        // }
+
+
+        
         widget.onProjectUpdated();
 
         Navigator.pop(context); // Close the edit form

@@ -466,113 +466,8 @@ class CashPayment {
   }
 }
 
-//for Settlement
-class SettlementInfo {
-  final int id;
-  final DateTime date;
-  final int paymentId;
-  final String paymentNo;
-  final String requestNo;
-  final double withdrawnAmount;
-  final double settleAmount;
-  final double refundAmount;
-  final String currency;
-  final List<SettlementDetail>? settlementDetails;
-  final List<Budget>? budgetDetails;
 
-  SettlementInfo(
-      {required this.id,
-      required this.date,
-      required this.paymentId,
-      required this.paymentNo,
-      required this.requestNo,
-      required this.withdrawnAmount,
-      required this.settleAmount,
-      required this.refundAmount,
-      required this.currency,
-      required this.settlementDetails,
-      required this.budgetDetails
-      });
 
-  factory SettlementInfo.fromJson(Map<String, dynamic> json) {
-    return SettlementInfo(
-      id: json['ID'] ?? 1,
-      date: DateFormat('yyyy-MM-dd').parse(json['Settlement_Date']),
-      paymentId: json['Payment_ID']?? 1,
-      paymentNo: json['Payment_No']?? 'Payment No',
-      requestNo: json['Request_No']?? 'Request No',
-      withdrawnAmount: json['Withdrawn_Amount'].toDouble() ?? 0.0,
-      settleAmount: json['Settlement_Amount'].toDouble() ?? 0.0,
-      refundAmount: json['Refund_Amount'].toDouble() ?? 0.0,
-      currency: json['Currency'],
-      settlementDetails: json['SettlementDetails'] != null
-          ? (json['SettlementDetails'] as List)
-              .map((i) => SettlementDetail.fromJson(i))
-              .toList()
-          : null,
-      budgetDetails: json['Budget_Details'] != null
-          ? (json['Budget_Details'] as List)
-              .map((i) => Budget.fromJson(i))
-              .toList()
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'ID': id,
-      'Settlement_Date': DateFormat('yyyy-MM-dd').format(date),
-      "Payment_ID": paymentId,
-      "Payment_No": paymentNo,
-      "Request_No": requestNo,
-      "Withdrawn_Amount": withdrawnAmount,
-      "Settlement_Amount": settleAmount,
-      "Refund_Amount": refundAmount,
-      "Currency": currency,
-      'SettlementDetails': settlementDetails?.map((e) => e.toJson()).toList(),
-      'Budget_Details': budgetDetails?.map((e) => e.toJson()).toList(), 
-    };
-  }
-}
-
-//settlement detail
-class SettlementDetail {
-  final int id;
-  final int settlementId;
-  final int budgetId;
-  final double budgetAmount;
-  final Budget? budgetDetails;
-
-  SettlementDetail({
-    required this.id,
-    required this.settlementId,
-    required this.budgetId,
-    required this.budgetAmount,
-    this.budgetDetails,
-  });
-
-  factory SettlementDetail.fromJson(Map<String, dynamic> json) {
-    return SettlementDetail(
-      id: json['ID'] ?? 0,
-      settlementId: json['Settlement_ID'] ??0,
-      budgetId: json['Budget_ID'] ?? 0,
-      budgetAmount: json['Budget_Amount'].toDouble() ?? 0.0,
-      budgetDetails: json['Budget_Details'] != null
-          ? Budget.fromJson(json['Budget_Details'])
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'ID': id,
-      'Settlement_ID': settlementId,
-      'Budget_ID': budgetId,
-      'Budget_Amount': budgetAmount,
-      'Budget_Details': budgetDetails?.toJson(),
-    };
-  }
-}
 
 //User
 class User {
@@ -797,3 +692,199 @@ class ApprovalStep {
 // String getApprovers(List<ApprovalStep> approvalStep){
 //   return approvalStep.map((step) => step.approver).join(',');
 // }
+
+// data.dart
+
+class Advance {
+  final int id;
+  final String date;
+  final String requestNo;
+  final String requestCode;
+  final String requestType;
+  final int requestAmount;
+  final String currency;
+  final String requester;
+  final String department;
+  final int approvedAmount;
+  final String purpose;
+  final String status;
+
+  Advance({
+    required this.id,
+    required this.date,
+    required this.requestNo,
+    required this.requestCode,
+    required this.requestType,
+    required this.requestAmount,
+    required this.currency,
+    required this.requester,
+    required this.department,
+    required this.approvedAmount,
+    required this.purpose,
+    required this.status,
+  });
+
+  factory Advance.fromJson(Map<String, dynamic> json) {
+    return Advance(
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      date: json['Date'],
+      requestNo: json['RequestNo'],
+      requestCode: json['RequestCode'],
+      requestType: json['RequestType'],
+      requestAmount: json['RequestAmount'],
+      currency: json['Currency'],
+      requester: json['Requester'],
+      department: json['Department'],
+      approvedAmount: json['ApprovedAmount'],
+      purpose: json['Purpose'],
+      status: json['Status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'Date': date,
+      'RequestNo': requestNo,
+      'RequestCode': requestCode,
+      'RequestType': requestType,
+      'RequestAmount': requestAmount,
+      'Currency': currency,
+      'Requester': requester,
+      'Department': department,
+      'ApprovedAmount': approvedAmount,
+      'Purpose': purpose,
+      'Status': status,
+    };
+  }
+}
+
+class Payment {
+  final int id;
+  final String date;
+  final String paymentNo;
+  final int paymentAmount;
+  final String currency;
+  final String paymentMethod;
+  final String paidPerson;
+  final String receivedPerson;
+  final String paymentNote;
+  final String status;
+  final String settled;
+  final int requestId;
+  final List<Advance>? request;
+
+  Payment({
+    required this.id,
+    required this.date,
+    required this.paymentNo,
+    required this.paymentAmount,
+    required this.currency,
+    required this.paymentMethod,
+    required this.paidPerson,
+    required this.receivedPerson,
+    required this.paymentNote,
+    required this.status,
+    required this.settled,
+    required this.requestId,
+    this.request,
+  });
+
+  factory Payment.fromJson(Map<String, dynamic> json) {
+    return Payment(
+     id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      date: json['Date'],
+      paymentNo: json['PaymentNo'],
+      paymentAmount: json['PaymentAmount'],
+      currency: json['Currency'],
+      paymentMethod: json['PaymentMethod'],
+      paidPerson: json['PaidPerson'],
+      receivedPerson: json['ReceivedPerson'],
+      paymentNote: json['PaymentNote'],
+      status: json['Status'],
+      settled: json['Settled'],
+      requestId: json['RequestID'],
+      request: json['Requests'] != null
+          ? (json['Requests'] as List)
+              .map((item) => Advance.fromJson(item))
+              .toList()
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'Date': date,
+      'PaymentNo': paymentNo,
+      'PaymentAmount': paymentAmount,
+      'Currency': currency,
+      'PaymentMethod': paymentMethod,
+      'PaidPerson': paidPerson,
+      'ReceivedPerson': receivedPerson,
+      'PaymentNote': paymentNote,
+      'Status': status,
+      'Settled': settled,
+      'RequestID': requestId,
+      'Requests': request?.map((item) => item.toJson()).toList(),
+    };
+  }
+}
+
+class Settlement {
+  final int id;
+  final String settlementDate;
+  final String paymentNo;
+  final int withdrawnAmount;
+  final int settleAmount;
+  final int refundAmount;
+  final String settled;
+  final int paymentId;
+  final List<Payment>? payment;
+
+  Settlement({
+    required this.id,
+    required this.settlementDate,
+    required this.paymentNo,
+    required this.withdrawnAmount,
+    required this.settleAmount,
+    required this.refundAmount,
+    required this.settled,
+    required this.paymentId,
+    this.payment,
+  });
+
+  factory Settlement.fromJson(Map<String, dynamic> json) {
+    return Settlement(
+      id: json['id'],
+      settlementDate: json['SettlementDate'],
+      paymentNo: json['PaymentNo'],
+      withdrawnAmount: json['WithdrawnAmount'],
+      settleAmount: json['SettleAmount'],
+      refundAmount: json['RefundAmount'],
+      settled: json['Settled'],
+      paymentId: json['PaymentID'],
+      payment: json['Payments'] != null
+          ? (json['Payments'] is List
+              ? (json['Payments'] as List)
+                  .map((item) => Payment.fromJson(item))
+                  .toList()
+              : [Payment.fromJson(json['Payments'])])
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'SettlementDate': settlementDate,
+      'PaymentNo': paymentNo,
+      'WithdrawnAmount': withdrawnAmount,
+      'SettleAmount': settleAmount,
+      'RefundAmount': refundAmount,
+      'Settled': settled,
+      'PaymentID': paymentId,
+      'Payments': payment?.map((item) => item.toJson()).toList(),
+    };
+  }
+}
