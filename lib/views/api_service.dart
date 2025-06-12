@@ -3,6 +3,8 @@ import 'package:advance_budget_request_system/views/data.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
+  static const String baseUrl =
+      'http://bizsoft.southeastasia.cloudapp.azure.com:3000';
   static String url = "http://127.0.0.1:8000/api/budget/";
 
   static String projectEndPoint = "http://127.0.0.1:8000/api/project/";
@@ -22,7 +24,8 @@ class ApiService {
   final String advanceCodeAutoIncrementEndPoint =
       "http://127.0.0.1:8000/api/requests/next-code/";
   final String cashPaymentEndPoint = "http://127.0.0.1:8000/api/cashpayment/";
-  final String cashPaymentAutoIncrementEndPoint= "http://127.0.0.1:8000/api/requests/next-code/";
+  final String cashPaymentAutoIncrementEndPoint =
+      "http://127.0.0.1:8000/api/requests/next-code/";
   final String settlementEndPoint = "http://127.0.0.1:8000/api/settlement/";
   final String settlementDetailEndPoint =
       "http://127.0.0.1:8000/api/settlementdetail/";
@@ -174,7 +177,7 @@ class ApiService {
     final response = await http.delete(Uri.parse('$projectEndPoint$id/'));
     print(response.statusCode);
     print("responsebody${response.body}");
-    if (response.statusCode != 200  && response.statusCode != 204) {
+    if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Failed to delete ProjectCode');
     }
   }
@@ -263,8 +266,7 @@ class ApiService {
   //delete trip
   Future<void> deleteTrip(String tripID) async {
     // Ensure there is no space between baseUrl and tripEndPoint
-    final response =
-        await http.delete(Uri.parse('$tripEndPoint$tripID/'));
+    final response = await http.delete(Uri.parse('$tripEndPoint$tripID/'));
 
     // Check if the request was successful
     if (response.statusCode != 200 && response.statusCode != 204) {
@@ -312,8 +314,7 @@ class ApiService {
 
 // advance request
   Future<List<AdvanceRequest>> fetchAdvanceRequestData() async {
-    final response =
-        await http.get(Uri.parse(advanceRequestEndPoint));
+    final response = await http.get(Uri.parse(advanceRequestEndPoint));
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(response.body);
       return body.map((dynamic item) => AdvanceRequest.fromJson(item)).toList();
@@ -324,17 +325,17 @@ class ApiService {
 
   Future<void> postAdvanceRequest(AdvanceRequest newAdvance) async {
     print("Posting advance request: ${newAdvance.toJson()}");
-    final response =
-        await http.post(Uri.parse(advanceRequestEndPoint),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: jsonEncode(newAdvance.toJson()));
+    final response = await http.post(Uri.parse(advanceRequestEndPoint),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(newAdvance.toJson()));
     print(response.statusCode);
     print(response.body);
     if (response.statusCode != 201) {
-      throw Exception('Failed to insert Advance Request ${response.statusCode} + ${response.body}');
-      
+      throw Exception(
+          'Failed to insert Advance Request ${response.statusCode} + ${response.body}');
+
       // print('Request can create successfully!');
     }
   }
@@ -351,7 +352,6 @@ class ApiService {
     }
   }
 
-
   // Cash Payment
   Future<List<CashPayment>> fetchCashPaymentData() async {
     final response = await http.get(Uri.parse(cashPaymentEndPoint));
@@ -365,7 +365,8 @@ class ApiService {
   }
 
   Future<String> fetchNextPaymentCode() async {
-    final response = await http.get(Uri.parse(cashPaymentAutoIncrementEndPoint));
+    final response =
+        await http.get(Uri.parse(cashPaymentAutoIncrementEndPoint));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -405,8 +406,6 @@ class ApiService {
       return true;
     }
   }
-
-  
 
   //User
   Future<List<User>> fetchUser() async {
@@ -544,8 +543,6 @@ class ApiService {
     }
   }
 
-
-
   static Future<ApprovalSetup> postApprovalSetup(ApprovalSetup newSetup) async {
     final response = await http.post(
       Uri.parse(approvalsetupEndPoint),
@@ -578,6 +575,124 @@ class ApiService {
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception(
           'Failed to delete approval setup ${response.statusCode}  ${response.body}');
+    }
+  }
+
+  //testing
+
+  // Advance Requests
+  Future<List<AdvanceRequest>> fetchAdvanceRequests() async {
+    final response = await http.get(Uri.parse('$baseUrl/advanceRequests'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((e) => AdvanceRequest.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load Advance Requests');
+    }
+  }
+
+  Future<void> postAdvanceRequests(AdvanceRequest request) async {
+    await http.post(
+      Uri.parse('$baseUrl/advanceRequests'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(request.toJson()),
+    );
+  }
+
+  // Payments
+  Future<List<Payment>> fetchPayments() async {
+    final response = await http.get(Uri.parse('$baseUrl/payments'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((e) => Payment.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load Payments');
+    }
+  }
+
+  Future<void> postPayment(Payment payment) async {
+    await http.post(
+      Uri.parse('$baseUrl/payments'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(payment.toJson()),
+    );
+  }
+
+  //updatePayment
+  Future<List<Payment>> updatePayment(
+      int id, Map<String, dynamic> updatedData) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/payments/$id'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(updatedData),
+    );
+
+    if (response.statusCode == 200) {
+      print('Payment updated successfully');
+      return jsonDecode(response.body); // Return the full response
+    } else {
+      throw Exception('Failed to update payment: ${response.statusCode}');
+    }
+  }
+
+  //GetPaymentByID
+  Future<List<Payment>> getPaymentById(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/payments/$id'));
+    return jsonDecode(response.body);
+  }
+
+  // Settlements
+  Future<List<Settlement>> fetchSettlements() async {
+    final response = await http.get(Uri.parse('$baseUrl/settlements'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((e) => Settlement.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load Settlements');
+    }
+  }
+
+  Future<void> postSettlement(Settlement settlement) async {
+    await http.post(
+      Uri.parse('$baseUrl/settlements'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(settlement.toJson()),
+    );
+  }
+
+  //getSettlementbyID
+  Future<List<Settlement>> getSettlementById(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/settlements/$id'));
+    return jsonDecode(response.body);
+  }
+
+  //paginatedDataForPayment
+  Future<List<Payment>> getPaginatedPayments(int page, int limit) async {
+    final response = await http
+        .get(Uri.parse('$baseUrl/payments?_page=$page&_limit=$limit'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = jsonDecode(response.body);
+      return body.map((item) => Payment.fromJson(item)).toList();
+    } else {
+      throw Exception(
+          'Failed to load paginated payments: ${response.statusCode}');
+    }
+  }
+
+  //paginatedDataForSettlement
+  Future<List<Settlement>> getPaginatedSettlements(int page, int limit) async {
+    final response = await http
+        .get(Uri.parse('$baseUrl/settlements?_page=$page&_limit=$limit'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = jsonDecode(response.body);
+      return body.map((item) => Settlement.fromJson(item)).toList();
+    } else {
+      throw Exception(
+          'Failed to load paginated settlements: ${response.statusCode}');
     }
   }
 }
