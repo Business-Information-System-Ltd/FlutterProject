@@ -3,10 +3,9 @@ import 'package:advance_budget_request_system/views/data.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
+  static String url = "http://127.0.0.1:8000/api/budget/";
   static const String baseUrl =
       'http://bizsoft.southeastasia.cloudapp.azure.com:3000';
-  static String url = "http://127.0.0.1:8000/api/budget/";
-
   static String projectEndPoint = "http://127.0.0.1:8000/api/project/";
   final String projectBudgetEndPoint =
       "http://127.0.0.1:8000/api/projectbudget/";
@@ -24,8 +23,7 @@ class ApiService {
   final String advanceCodeAutoIncrementEndPoint =
       "http://127.0.0.1:8000/api/requests/next-code/";
   final String cashPaymentEndPoint = "http://127.0.0.1:8000/api/cashpayment/";
-  final String cashPaymentAutoIncrementEndPoint =
-      "http://127.0.0.1:8000/api/requests/next-code/";
+  final String cashPaymentAutoIncrementEndPoint= "http://127.0.0.1:8000/api/requests/next-code/";
   final String settlementEndPoint = "http://127.0.0.1:8000/api/settlement/";
   final String settlementDetailEndPoint =
       "http://127.0.0.1:8000/api/settlementdetail/";
