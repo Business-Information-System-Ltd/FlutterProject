@@ -856,7 +856,7 @@ class Settlement {
 
   factory Settlement.fromJson(Map<String, dynamic> json) {
     return Settlement(
-      id: json['id'],
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
       settlementDate: json['SettlementDate'],
       paymentNo: json['PaymentNo'],
       withdrawnAmount: json['WithdrawnAmount'],

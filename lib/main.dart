@@ -1,6 +1,6 @@
-
 import 'package:advance_budget_request_system/views/login.dart';
-import 'package:advance_budget_request_system/views/settlementList.dart';
+import 'package:advance_budget_request_system/views/settlement.dart';
+//import 'package:advance_budget_request_system/views/settlementList.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:advance_budget_request_system/views/permission.dart'; 
@@ -16,12 +16,10 @@ void main(){
     // )
     // )
     MaterialApp(
-      home:Settlementlist(),
+      
+      home:SettlementPage(),
+      //home: SettlementGridPage(),
       debugShowCheckedModeBanner: false,
     )
-    // MaterialApp(
-    //   home: PaymentGridPage(),
-    //   debugShowCheckedModeBanner: false,
-    // )
   );
 }
