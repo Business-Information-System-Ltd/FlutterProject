@@ -34,10 +34,8 @@ class _SettlementPageState extends State<SettlementPage> {
         type: PlutoColumnType.text(), 
         readOnly: false,
          width: 211,  // width in pixels
-         //minWidth: 80,  // optional minimum width
-
-
-         ),
+         
+ ),
 
       PlutoColumn(
         title: 'PaymentNo', 
@@ -46,7 +44,6 @@ class _SettlementPageState extends State<SettlementPage> {
        readOnly: false,
        width: 211,
        ),
-       
 
       PlutoColumn(
         title: 'WithdrawnAmount',
@@ -63,7 +60,6 @@ class _SettlementPageState extends State<SettlementPage> {
       textAlign: TextAlign.right,
     );
   },
-       
        ),
 
       PlutoColumn(
@@ -80,10 +76,7 @@ class _SettlementPageState extends State<SettlementPage> {
       _formatter.format(value),
       textAlign: TextAlign.right,
     );
-  },
-       
-      
-     ),
+  }, ),
 
       PlutoColumn(
       title: 'RefundAmount', 
@@ -100,9 +93,7 @@ class _SettlementPageState extends State<SettlementPage> {
       textAlign: TextAlign.right,
     );
   },
-       
-
-      ),
+       ),
 
       PlutoColumn(
       title: "Action", 

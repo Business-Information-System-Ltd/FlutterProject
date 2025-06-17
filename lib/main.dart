@@ -1,9 +1,11 @@
 import 'package:advance_budget_request_system/views/login.dart';
 import 'package:advance_budget_request_system/views/settlement.dart';
-//import 'package:advance_budget_request_system/views/settlementList.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:advance_budget_request_system/views/permission.dart'; 
+import 'package:advance_budget_request_system/views/cashpaymentsettlemententry.dart';
+import 'package:advance_budget_request_system/views/advancerequestlist.dart';
 
 void main(){
   runApp(
@@ -14,11 +16,13 @@ void main(){
     // //  home: Dashboard(),
     //  home: Login(),
     // )
-    // )
+    //)
     MaterialApp(
       
-      home:SettlementPage(),
-      //home: SettlementGridPage(),
+      //home:SettlementPage(),
+      home:PaymentPage(),
+      //home:AdvanceRequestPage(),
+     // home: AdvanceRequestPage(),
       debugShowCheckedModeBanner: false,
     )
   );
