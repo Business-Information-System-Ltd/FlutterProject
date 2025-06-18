@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:advance_budget_request_system/views/permission.dart'; 
 import 'package:advance_budget_request_system/views/cashpaymentsettlemententry.dart';
 import 'package:advance_budget_request_system/views/advancerequestlist.dart';
+import 'package:advance_budget_request_system/views/cashpaymentlist.dart';
 
 void main(){
   runApp(
@@ -20,9 +21,10 @@ void main(){
     MaterialApp(
       
       //home:SettlementPage(),
-      home:PaymentPage(),
-      //home:AdvanceRequestPage(),
-     // home: AdvanceRequestPage(),
+     // home:PaymentPage(),
+      home:CashPaymentPage(),
+      
+     //home: AdvanceRequestPage(),
       debugShowCheckedModeBanner: false,
     )
   );
