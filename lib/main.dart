@@ -7,24 +7,33 @@ import 'package:advance_budget_request_system/views/permission.dart';
 import 'package:advance_budget_request_system/views/cashpaymentsettlemententry.dart';
 import 'package:advance_budget_request_system/views/advancerequestlist.dart';
 import 'package:advance_budget_request_system/views/cashpaymentlist.dart';
+import 'package:advance_budget_request_system/views/budgetinformation.dart';
+import 'package:advance_budget_request_system/views/budgetamounts.dart';
+
 
 void main(){
   runApp(
     // ChangeNotifierProvider(
     //   create: (context) => UserProvider(),
     //   child: const MaterialApp(
-    //   debugShowCheckedModeBanner: false,
+    //   debugShowCheckedModeBanner: false
+  
     // //  home: Dashboard(),
     //  home: Login(),
     // )
     //)
     MaterialApp(
       
-      //home:SettlementPage(),
-     // home:PaymentPage(),
-      home:CashPaymentPage(),
+    //home:SettlementPage(),  
+     //home:PaymentPage(),
+      //home:CashPaymentPage(),
       
      //home: AdvanceRequestPage(),
+     //home:SettlementForm(),
+    //  home: BudgetForm(),
+    home:BudgetAmount(),
+     
+
       debugShowCheckedModeBanner: false,
     )
   );
