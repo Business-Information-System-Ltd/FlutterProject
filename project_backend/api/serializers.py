@@ -122,28 +122,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             
         except IntegrityError as e:
             raise serializers.ValidationError(str(e))
-    # def update(self, instance, validated_data):
-    #     budgets_data = validated_data.pop('budgets', None)
-        
-    #     # Update project fields
-    #     for attr, value in validated_data.items():
-    #         setattr(instance, attr, value)
-    #     instance.save()
-        
-    #     # Update budgets if provided
-    #     if budgets_data is not None:
-    #         # Clear existing budgets
-    #         instance.projectbudget_set.all().delete()
-            
-    #         # Add new budgets
-    #         for budget in budgets_data:
-    #             ProjectBudget.objects.create(
-    #                 Project_ID=instance,
-    #                 Budget_ID=budget
-    #             )
-        
-    #     return instance
-    
+   
 class ProjectBudgetSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectBudget

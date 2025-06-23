@@ -380,7 +380,7 @@ class _RegisterViewState extends State<RegisterView> {
                                             },
                                             icon: Icon(
                                               _isObscured
-                                                  ? Icons.visibility
+                                                  ? Icons.visibility 
                                                   : Icons.visibility_off,
                                               color: Colors.white,
                                             )),

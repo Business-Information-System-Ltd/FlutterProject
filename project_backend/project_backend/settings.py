@@ -25,9 +25,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-u44bl5r2n&*0@#ns1i2i+%m274-m)m0p@-#o4y6+536%z1854$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'pythbackend-ezg5gyg6acbud0ax.canadacentral-01.azurewebsites.net',
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -42,7 +46,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'api.apps.ApiConfig',
     'corsheaders',
-    'django_filters'
+    'django_filters',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -54,8 +59,19 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
 ]
-CORS_ORIGIN_ALLOW_ALL = True
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://kind-sand-0a28e9100.6.azurestaticapps.net",
+    
+]
+
 ROOT_URLCONF = 'project_backend.urls'
 
 TEMPLATES = [
