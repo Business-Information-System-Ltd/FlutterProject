@@ -1,4 +1,35 @@
 {
+  "budgets":[
+    {
+      "id": 1,
+      "BudgetCode": "B-1",
+      "BudgetDescription": "For Expense",
+      "InitialAmount": 0
+    },
+    {
+      "id": 2,
+      "BudgetCode": "B-2",
+      "BudgetDescription": "For Marketing",
+      "InitialAmount": 0
+    },
+    {
+      "id": 3,
+      "BudgetCode": "B-3",
+      "BudgetDescription": "For Advertising",
+      "InitialAmount": 0
+    },
+    {
+      "id": 4,
+      "BudgetCode": "B-4",
+      "BudgetDescription": "For Repair and Maintenance",
+      "InitialAmount": 0
+    }
+  ],
+  "projects": [
+    {
+      
+    }
+  ],
   "advanceRequests": [
     {
       "id": 1,
