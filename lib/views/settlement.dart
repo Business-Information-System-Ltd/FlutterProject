@@ -121,10 +121,13 @@ class _SettlementPageState extends State<SettlementPage> {
   void _fetchData() async {
     try {
       List<Settlement> settlements = await ApiService().fetchSettlements();
+
       setState(() {
         _rows = _buildRows(settlements);
       });
-    } catch (e) {
+
+    }
+     catch (e) {
       print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load settlements')),

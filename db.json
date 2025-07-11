@@ -1,14 +1,416 @@
 {
+  "budgets": [
+    {
+      "id": "1",
+      "BudgetCode": "B-1",
+      "BudgetDescription": "For Expense",
+      "InitialAmount": 0
+    },
+    {
+      "id": "2",
+      "BudgetCode": "B-4",
+      "BudgetDescription": "For Accounts",
+      "InitialAmount": 0
+    },
+    {
+      "id": "1",
+      "BudgetCode": "B-3",
+      "BudgetDescription": "For Marketing",
+      "InitialAmount": 0
+    },
+    {
+      "id": "2",
+      "BudgetCode": "B-4",
+      "BudgetDescription": "For Accounts",
+      "InitialAmount": 0
+    },
+    {
+      "id": "3",
+      "BudgetCode": "B-5",
+      "BudgetDescription": "For Finances",
+      "InitialAmount": 2300000
+    },
+    {
+      "id": "4",
+      "BudgetCode": "B-6",
+      "BudgetDescription": "For ERP",
+      "InitialAmount": 0
+    },
+    {
+      "id": "5",
+      "BudgetCode": "B-7",
+      "BudgetDescription": "AI",
+      "InitialAmount": 1200000
+    },
+    {
+      "id": "6",
+      "BudgetCode": "B-8",
+      "BudgetDescription": "OOP",
+      "InitialAmount": 0
+    },
+    {
+      "id": "7",
+      "BudgetCode": "B-9",
+      "BudgetDescription": "for B9",
+      "InitialAmount": 0
+    },
+    {
+      "id": "8",
+      "BudgetCode": "B-10",
+      "BudgetDescription": "For B10",
+      "InitialAmount": 0
+    },
+    {
+      "id": "9",
+      "BudgetCode": "B-11",
+      "BudgetDescription": "For B11",
+      "InitialAmount": 0
+    },
+    {
+      "id": "10",
+      "BudgetCode": "B-12",
+      "BudgetDescription": "For B12",
+      "InitialAmount": 0
+    },
+    {
+      "id": "11",
+      "BudgetCode": "B-13",
+      "BudgetDescription": "For B13",
+      "InitialAmount": 0
+    },
+    {
+      "id": "12",
+      "BudgetCode": "B-14",
+      "BudgetDescription": "For B14",
+      "InitialAmount": 0
+    },
+    {
+      "id": 13,
+      "BudgetCode": "B15",
+      "BudgetDescription": "For B15",
+      "InitialAmount": 0
+    },
+    {
+      "id": 14,
+      "BudgetCode": "B15",
+      "BudgetDescription": "For B15s",
+      "InitialAmount": 0
+    },
+    {
+      "id": 15,
+      "BudgetCode": "B15",
+      "BudgetDescription": "For B15",
+      "InitialAmount": 0
+    },
+    {
+      "id": 16,
+      "BudgetCode": "s",
+      "BudgetDescription": "s",
+      "InitialAmount": 0
+    },
+    {
+      "id": 17,
+      "BudgetCode": "B16",
+      "BudgetDescription": "For B16",
+      "InitialAmount": 0
+    },
+    {
+      "id": 18,
+      "BudgetCode": "B17",
+      "BudgetDescription": "For B17",
+      "InitialAmount": 0
+    },
+    {
+      "id": 19,
+      "BudgetCode": "B17",
+      "BudgetDescription": "For B17s",
+      "InitialAmount": 0
+    },
+    {
+      "id": 20,
+      "BudgetCode": "B-14",
+      "BudgetDescription": "For B14s",
+      "InitialAmount": 0
+    },
+    {
+      "id": 21,
+      "BudgetCode": "B-14",
+      "BudgetDescription": "For B14",
+      "InitialAmount": 0
+    },
+    {
+      "id": 22,
+      "BudgetCode": "B-14",
+      "BudgetDescription": "For B14",
+      "InitialAmount": 0
+    }
+  ],
+  "projects": [
+    {
+      "id": "1",
+      "Date": "2025-07-10",
+      "ProjectCode": "PRJ_000_001",
+      "ProjectDescription": "project 1",
+      "TotalAmount": 2500000000,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "Pending",
+      "BudgetDetails": []
+    },
+    {
+      "Date": "2025-07-10",
+      "ProjectCode": "PRJ_000_002",
+      "ProjectDescription": "project 2",
+      "TotalAmount": 200000000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "Pending",
+      "BudgetDetails": [],
+      "id": "2"
+    },
+    {
+      "id": "3",
+      "Date": "2025-07-10",
+      "ProjectCode": "PRJ_000_003",
+      "ProjectDescription": "project 3",
+      "TotalAmount": 2800000000,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "",
+      "BudgetDetails": []
+    },
+    {
+      "id": "4",
+      "Date": "2025-07-10",
+      "ProjectCode": "PRJ_000_004",
+      "ProjectDescription": "project 4",
+      "TotalAmount": 1500000000,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "",
+      "BudgetDetails": []
+    },
+    {
+      "id": "5",
+      "Date": "2025-07-08",
+      "ProjectCode": "PRJ_000_005",
+      "ProjectDescription": "project5",
+      "TotalAmount": 280000000,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "",
+      "BudgetDetails": []
+    },
+    {
+      "id": "6",
+      "Date": "2025-07-08",
+      "ProjectCode": "PRJ_000_006",
+      "ProjectDescription": "project 6",
+      "TotalAmount": 110000000,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "",
+      "BudgetDetails": []
+    },
+    {
+      "id": "7",
+      "Date": "2025-07-08",
+      "ProjectCode": "PRJ_000_007",
+      "ProjectDescription": "project 7",
+      "TotalAmount": 250000000,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "",
+      "BudgetDetails": []
+    },
+    {
+      "id": "4161",
+      "Date": "2025-07-10",
+      "ProjectCode": "PRJ-000-009",
+      "ProjectDescription": "project9",
+      "TotalAmount": 15000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "Pending",
+      "BudgetDetails": []
+    },
+    {
+      "id": "8eba",
+      "Date": "2025-07-10",
+      "ProjectCode": "PRJ-000-009",
+      "ProjectDescription": "project9",
+      "TotalAmount": 150000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "Pending",
+      "BudgetDetails": []
+    },
+    {
+      "id": "341e",
+      "Date": "2025-07-10",
+      "ProjectCode": "PRJ_000_002",
+      "ProjectDescription": "project 2",
+      "TotalAmount": 200,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "Pending",
+      "BudgetDetails": []
+    },
+    {
+      "id": "85bc",
+      "Date": "2025-07-10",
+      "ProjectCode": "P_002",
+      "ProjectDescription": "new project",
+      "TotalAmount": 80000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Marketing",
+      "Requestable": "Pending",
+      "BudgetDetails": []
+    },
+    {
+      "id": "81a5",
+      "Date": "2025-07-10",
+      "ProjectCode": "Pj2",
+      "ProjectDescription": "new",
+      "TotalAmount": 200,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Engineering",
+      "Requestable": "Pending",
+      "BudgetDetails": []
+    },
+    {
+      "Date": "2025-07-10",
+      "ProjectCode": "p002",
+      "ProjectDescription": "test p002",
+      "TotalAmount": 200,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "Admin",
+      "Requestable": "Pending",
+      "BudgetDetails": [],
+      "id": "3669"
+    }
+  ],
+  "trips": [
+    {
+      "id": "1",
+      "Date": "2025-06-27",
+      "TripCode": "TRP_000_001",
+      "TripDescription": "Trip 1",
+      "TotalAmount": 20000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "Yes",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": 1,
+          "BudgetCode": "B-1",
+          "BudgetDescription": "For Expense",
+          "InitialAmount": 0
+        },
+        {
+          "id": 3,
+          "BudgetCode": "B-3",
+          "BudgetDescription": "For Advertising",
+          "InitialAmount": 0
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "Date": "2025-06-27",
+      "TripCode": "TRP_000_002",
+      "TripDescription": "Trip 2",
+      "TotalAmount": 30000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "Yes",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": 1,
+          "BudgetCode": "B-1",
+          "BudgetDescription": "For Expense",
+          "InitialAmount": 0
+        },
+        {
+          "id": 3,
+          "BudgetCode": "B-3",
+          "BudgetDescription": "For Advertising",
+          "InitialAmount": 0
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "Date": "2025-06-27",
+      "TripCode": "TRP_000_003",
+      "TripDescription": "Trip 3",
+      "TotalAmount": 2000,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "Status": "Yes",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": 1,
+          "BudgetCode": "B-1",
+          "BudgetDescription": "For Expense",
+          "InitialAmount": 0
+        },
+        {
+          "id": 3,
+          "BudgetCode": "B-3",
+          "BudgetDescription": "For Advertising",
+          "InitialAmount": 0
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "id": "b86b"
+    }
+  ],
   "advanceRequests": [
     {
-      "id": 1,
+      "id": "1",
       "requestNo": "AR001",
       "requestAmount": 1000,
       "currency": "USD",
       "status": "Approved"
     },
     {
-      "id": 2,
+      "id": "2",
       "requestNo": "AR002",
       "requestAmount": 2000,
       "currency": "MMK",
@@ -17,7 +419,7 @@
   ],
   "payments": [
     {
-      "id": 1,
+      "id": "1",
       "paymentNo": "P001",
       "date": "2025-06-10",
       "paymentAmount": 500,
@@ -27,7 +429,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 2,
+      "id": "2",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -37,7 +439,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 3,
+      "id": "3",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -47,7 +449,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 4,
+      "id": "4",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -57,7 +459,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 5,
+      "id": "5",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -67,7 +469,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 6,
+      "id": "6",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -77,7 +479,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 7,
+      "id": "7",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -87,7 +489,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 8,
+      "id": "8",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -97,7 +499,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 9,
+      "id": "9",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -107,7 +509,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 10,
+      "id": "10",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -117,7 +519,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 11,
+      "id": "11",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -127,7 +529,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 12,
+      "id": "12",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -137,7 +539,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 13,
+      "id": "13",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -147,7 +549,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 14,
+      "id": "14",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 300,
@@ -157,7 +559,7 @@
       "advanceRequestId": 1
     },
     {
-      "id": 15,
+      "id": "15",
       "paymentNo": "P002",
       "date": "2025-06-11",
       "paymentAmount": 7000000,
