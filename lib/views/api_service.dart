@@ -1,11 +1,15 @@
 import 'dart:convert';
+import 'dart:core';
 import 'package:advance_budget_request_system/views/data.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
   static String url = "http://127.0.0.1:8000/api/budget/";
+  
   static const String baseUrl =
       'http://localhost:3000';
+      //  static const String baseUrl =
+      // 'http://bizsoft.southeastasia.cloudapp.azure.com:3000';
   static String projectEndPoint = "http://127.0.0.1:8000/api/project/";
   final String projectBudgetEndPoint =
       "http://127.0.0.1:8000/api/projectbudget/";
@@ -311,32 +315,32 @@ class ApiService {
   }
 
 // advance request
-  Future<List<AdvanceRequest>> fetchAdvanceRequestData() async {
-    final response = await http.get(Uri.parse(advanceRequestEndPoint));
-    if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
-      return body.map((dynamic item) => AdvanceRequest.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load Advance Requests');
-    }
-  }
+  // Future<List<AdvanceRequest>> fetchAdvanceRequestData() async {
+  //   final response = await http.get(Uri.parse(advanceRequestEndPoint));
+  //   if (response.statusCode == 200) {
+  //     List<dynamic> body = json.decode(response.body);
+  //     return body.map((dynamic item) => AdvanceRequest.fromJson(item)).toList();
+  //   } else {
+  //     throw Exception('Failed to load Advance Requests');
+  //   }
+  // }
 
-  Future<void> postAdvanceRequest(AdvanceRequest newAdvance) async {
-    print("Posting advance request: ${newAdvance.toJson()}");
-    final response = await http.post(Uri.parse(advanceRequestEndPoint),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(newAdvance.toJson()));
-    print(response.statusCode);
-    print(response.body);
-    if (response.statusCode != 201) {
-      throw Exception(
-          'Failed to insert Advance Request ${response.statusCode} + ${response.body}');
+  // Future<void> postAdvanceRequest(AdvanceRequest newAdvance) async {
+  //   print("Posting advance request: ${newAdvance.toJson()}");
+  //   final response = await http.post(Uri.parse(advanceRequestEndPoint),
+  //       headers: <String, String>{
+  //         'Content-Type': 'application/json; charset=UTF-8',
+  //       },
+  //       body: jsonEncode(newAdvance.toJson()));
+  //   print(response.statusCode);
+  //   print(response.body);
+  //   if (response.statusCode != 201) {
+  //     throw Exception(
+  //         'Failed to insert Advance Request ${response.statusCode} + ${response.body}');
 
-      // print('Request can create successfully!');
-    }
-  }
+  //     // print('Request can create successfully!');
+  //   }
+  // }
 
   Future<String> fetchNextAdvanceCode() async {
     final response =
@@ -658,23 +662,26 @@ class ApiService {
   }
 
    //updateProject
-  Future<List<Project>> updateProject(
-      int id, Map<String, dynamic> updatedData) async {
+  Future<void> updateProject(Project updatedProject) async {
+    final jsonData = updatedProject.toJson();
+    print("Sending updated JSON data: $jsonData");
+
     final response = await http.put(
-      Uri.parse('$baseUrl/projects/$id'),
-      headers: {
-        'Content-Type': 'application/json',
+      Uri.parse('$baseUrl/projects/${updatedProject.id}/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(updatedData),
+      body: jsonEncode(jsonData), // Send the JSON data
     );
 
-    if (response.statusCode == 200) {
-      print('Project updated successfully');
-      return jsonDecode(response.body); // Return the full response
-    } else {
-      throw Exception('Failed to update projects: ${response.statusCode}');
+    print("API Response Status: ${response.statusCode}");
+    print("API Response Body: ${response.body}");
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update project: ${response.body}');
     }
   }
+
 
   //GetProjectByID
   Future<List<Project>> getProjectById(int id) async {
@@ -745,7 +752,7 @@ class ApiService {
   }
 
   //GetTripByID
-  Future<List<Trips>> getTripById(int id) async {
+  Future<List<Trips>> getTripById(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/trips/$id'));
     return jsonDecode(response.body);
   }

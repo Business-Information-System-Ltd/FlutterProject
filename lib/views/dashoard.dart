@@ -2,12 +2,16 @@ import 'package:advance_budget_request_system/views/advanceRequest.dart';
 import 'package:advance_budget_request_system/views/approvalsetup.dart';
 import 'package:advance_budget_request_system/views/budgetAmount.dart';
 import 'package:advance_budget_request_system/views/budgetcodeview.dart';
+import 'package:advance_budget_request_system/views/budgetinformation.dart';
 import 'package:advance_budget_request_system/views/cashPayment.dart';
 import 'package:advance_budget_request_system/views/data.dart';
 import 'package:advance_budget_request_system/views/login.dart';
 import 'package:advance_budget_request_system/views/permission.dart';
 import 'package:advance_budget_request_system/views/project.dart';
+import 'package:advance_budget_request_system/views/projecttable.dart';
 import 'package:advance_budget_request_system/views/trip.dart';
+import 'package:advance_budget_request_system/views/tripForm.dart';
+import 'package:advance_budget_request_system/views/triptable.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -33,11 +37,11 @@ class _DashboardState extends State<Dashboard>
 
   late List<Widget> _widgetOptions = <Widget>[
     DashboardView(department: department),
-    const Budgetcodeview(),
+     BudgetForm(),
     const Budgetamount(),
-    ProjectInfo(),
-    const TripInfo(),
-     Advancerequest(userData: widget.userData,),
+    ProjectInformation(),
+    TripInformation(currentUser: UserModel(name: 'MM', department: 'Admin'),tripId: "0",),
+    //  Advancerequest(userData: widget.userData,),
     const Cashpayment(),
     // const Settlement(),
     ApprovalSetupStep(),
@@ -90,12 +94,14 @@ class _DashboardState extends State<Dashboard>
     if (department == 'HR' ||
         department == 'Marketing' ||
         department == 'Engineering') {
-      pages = [ProjectInfo(), const TripInfo(),  Advancerequest(userData: widget.userData)];
+      pages = [ProjectInfo(), const TripInfo(),  
+      // Advancerequest(userData: widget.userData)
+      ];
     } else if (department == 'Finance') {
       pages = [
         ProjectInfo(),
         const TripInfo(),
-         Advancerequest(userData: widget.userData,),
+        //  Advancerequest(userData: widget.userData,),
         const Cashpayment(),
         // Settlement()
       ];
@@ -106,7 +112,7 @@ class _DashboardState extends State<Dashboard>
         const Budgetamount(),
         ProjectInfo(),
         const TripInfo(),
-         Advancerequest(userData: widget.userData,),
+        //  Advancerequest(userData: widget.userData,),
         const Cashpayment(),
         // const Settlement(),
         ApprovalSetupStep(),
@@ -335,7 +341,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
       const Budgetamount(),
       ProjectInfo(),
       const TripInfo(),
-       Advancerequest(userData: widget.userData,),
+      //  Advancerequest(userData: widget.userData,),
       const Cashpayment(),
       // const Settlement(),
       ApprovalSetupStep(),

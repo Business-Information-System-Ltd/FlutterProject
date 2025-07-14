@@ -28,28 +28,28 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
         title: 'Request Date',
         field: 'requestdate',
         type: PlutoColumnType.text(),
-        readOnly: false,
+          enableEditingMode: false,
         width: 211,
       ),
       PlutoColumn(
         title: 'Request No',
         field: 'requestno',
         type: PlutoColumnType.text(),
-        readOnly: false,
+          enableEditingMode: false,
         width: 211,
       ),
       PlutoColumn(
         title: 'Request Type',
         field: 'requesttype',
         type: PlutoColumnType.text(),
-        readOnly: false,
+          enableEditingMode: false,
         width: 211,
       ),
       PlutoColumn(
         title: 'Request Code',
         field: 'requestcode',
         type: PlutoColumnType.text(),
-        readOnly:false,
+          enableEditingMode: false,
         width: 211,
         textAlign: PlutoColumnTextAlign.left,
         titleTextAlign: PlutoColumnTextAlign.left,
@@ -59,7 +59,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
         title: 'Request Amount',
         field: 'requestamount',
         type: PlutoColumnType.number(),
-        readOnly: false,
+          enableEditingMode: false,
         width: 211,
          textAlign: PlutoColumnTextAlign.right,
         titleTextAlign: PlutoColumnTextAlign.right,
@@ -72,20 +72,20 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
         title: 'Currency',
         field: 'currency',
         type: PlutoColumnType.text(),
-        readOnly: false,
+          enableEditingMode: false,
         width: 211,
-        textAlign: PlutoColumnTextAlign.center,
-        titleTextAlign: PlutoColumnTextAlign.center,
+        textAlign: PlutoColumnTextAlign.left,
+        titleTextAlign: PlutoColumnTextAlign.left,
 
       ),
       PlutoColumn(
         title: 'Requester',
         field: 'requester',
         type: PlutoColumnType.text(),
-        readOnly: false,
+          enableEditingMode: false,
         width: 211,
-        textAlign: PlutoColumnTextAlign.center,
-        titleTextAlign: PlutoColumnTextAlign.center,
+        textAlign: PlutoColumnTextAlign.left,
+        titleTextAlign: PlutoColumnTextAlign.left,
 
 
       ),
@@ -96,6 +96,17 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
         width: 211,
         textAlign: PlutoColumnTextAlign.center,
         titleTextAlign: PlutoColumnTextAlign.center,
+          enableEditingMode: false,
+           renderer: (rendererContext) {
+    return IconButton(
+      icon: Icon(Icons.edit,color: Colors.blue),
+      tooltip: 'Edit',
+      onPressed: () {
+        print('Action icon pressed on row ${rendererContext.row.key}');
+        // You can add your onPressed code here
+      },
+    );
+  },
          
 
                
@@ -150,7 +161,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
       
     ];
 
-   return data.map((s) {
+  return data.map((s) {
   return PlutoRow(cells: {
     'requestdate': PlutoCell(value: s['requestdate']),
     'requestno': PlutoCell(value: s['requestno']),
@@ -166,6 +177,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
   });
 }).toList(); 
   }
+
   @override
     Widget build(BuildContext context) {
     return Scaffold(

@@ -32,7 +32,7 @@ class _SettlementPageState extends State<SettlementPage> {
         title: 'SettlementDate',
        field: 'SettlementDate',
         type: PlutoColumnType.text(), 
-        readOnly: false,
+        enableEditingMode: false,
          width: 211,  // width in pixels
          
  ),
@@ -41,7 +41,7 @@ class _SettlementPageState extends State<SettlementPage> {
         title: 'PaymentNo', 
       field: 'PaymentNo',
        type: PlutoColumnType.text(),
-       readOnly: false,
+        enableEditingMode: false,
        width: 211,
        ),
 
@@ -49,7 +49,7 @@ class _SettlementPageState extends State<SettlementPage> {
         title: 'WithdrawnAmount',
        field: 'WithdrawnAmount', 
        type: PlutoColumnType.number(),
-       readOnly: false,
+        enableEditingMode: false,
        width: 211,
        textAlign: PlutoColumnTextAlign.right,
        titleTextAlign: PlutoColumnTextAlign.right,
@@ -66,7 +66,7 @@ class _SettlementPageState extends State<SettlementPage> {
         title: 'SettleAmount', 
       field: 'SettleAmount', 
       type: PlutoColumnType.number(),
-      readOnly: false,
+       enableEditingMode: false,
       width: 211,
       textAlign: PlutoColumnTextAlign.right,
       titleTextAlign: PlutoColumnTextAlign.right,
@@ -82,7 +82,7 @@ class _SettlementPageState extends State<SettlementPage> {
       title: 'RefundAmount', 
       field: 'RefundAmount',
       type: PlutoColumnType.number(),
-      readOnly: false,
+       enableEditingMode: false,
       width: 211,
       textAlign: PlutoColumnTextAlign.right,
       titleTextAlign: PlutoColumnTextAlign.right,
@@ -99,10 +99,20 @@ class _SettlementPageState extends State<SettlementPage> {
       title: "Action", 
       field: "Action", 
       type: PlutoColumnType.text(),
-      readOnly: false,
+       enableEditingMode: false,
       width: 211,
       titleTextAlign: PlutoColumnTextAlign.center,
       textAlign: PlutoColumnTextAlign.center,
+      renderer: (rendererContext) {
+    return IconButton(
+      icon: Icon(Icons.edit,color: Colors.blue),
+      tooltip: 'Edit',
+      onPressed: () {
+        print('Action icon pressed on row ${rendererContext.row.key}');
+        // You can add your onPressed code here
+      },
+    );
+  },
       ),
      
     ];
@@ -111,10 +121,13 @@ class _SettlementPageState extends State<SettlementPage> {
   void _fetchData() async {
     try {
       List<Settlement> settlements = await ApiService().fetchSettlements();
+
       setState(() {
         _rows = _buildRows(settlements);
       });
-    } catch (e) {
+
+    }
+     catch (e) {
       print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to load settlements')),
@@ -131,7 +144,7 @@ class _SettlementPageState extends State<SettlementPage> {
         'WithdrawnAmount': PlutoCell(value: s.withdrawnAmount.toString()),
         'SettleAmount': PlutoCell(value: s.settleAmount.toString()),
         'RefundAmount': PlutoCell(value: s.refundAmount.toString()),
-       'Action':PlutoCell(value: const IconButton(onPressed: null, icon: Icon(Icons.more_horiz_outlined)))
+       'Action':PlutoCell(value: '')
         
       });
     }).toList();

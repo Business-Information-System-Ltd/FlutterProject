@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+
 import 'package:intl/intl.dart';
 
 class Budget {
@@ -221,6 +221,7 @@ class Trip {
       'Status': status,
       'Approved_Amount': approveAmount,
       'Budget_Details': budgetDetails.map((detail) => detail.toJson()).toList(),
+      // 'Budget_Details': budgetDetails.map((detail) => detail.toJson()).toList(),
     };
   }
 }
@@ -290,104 +291,161 @@ class Operation {
 }
 
 //for Advance Request
-class AdvanceRequest {
-  final int id;
-  final DateTime date;
-  final String requestNo;
-  final String requestCode;
-  final String requestType;
-  final double requestAmount;
-  final String currency;
-  final String requester;
-  final double approveAmount;
-  final String purpose;
-  final String status;
-  //final int setupId;
-  final int? tripId;
-  final int? projectId;
-  final int? operationId;
-  final List<Budget> budgetDetails;
+// class AdvanceRequest {
+//   final int id;
+//   final DateTime date;
+//   final String requestNo;
+//   final String requestCode;
+//   final String requestType;
+//   final double requestAmount;
+//   final String currency;
+//   final String requester;
+//   final double approveAmount;
+//   final String purpose;
+//   final String status;
+//   //final int setupId;
+//   final int? tripId;
+//   final int? projectId;
+//   final int? operationId;
+//   final List<Budget> budgetDetails;
 
-  AdvanceRequest(
-      {required this.id,
-      required this.date,
-      required this.requestNo,
-      required this.requestCode,
-      required this.requestType,
-      required this.requestAmount,
-      required this.currency,
-      required this.requester,
-      required this.approveAmount,
-      required this.purpose,
-      required this.status,
-      //required this.setupId,
-      required this.tripId,
-      required this.projectId,
-      required this.operationId,
-      required this.budgetDetails});
+//   AdvanceRequest(
+//       {required this.id,
+//       required this.date,
+//       required this.requestNo,
+//       required this.requestCode,
+//       required this.requestType,
+//       required this.requestAmount,
+//       required this.currency,
+//       required this.requester,
+//       required this.approveAmount,
+//       required this.purpose,
+//       required this.status,
+//       //required this.setupId,
+//       required this.tripId,
+//       required this.projectId,
+//       required this.operationId,
+//       required this.budgetDetails});
 
-  factory AdvanceRequest.fromJson(Map<String, dynamic> json) {
-    return AdvanceRequest(
-      id: json['ID'],
-      // setupId: json['Setup_ID'] ?? 1,
-      requestNo: json['Request_No'],
-      requester: json['Requester'],
-      requestCode: json['Request_Code'] ?? '',
-      requestType: json['Request_Type'],
-      tripId: json['Trip_ID'] ?? null,
-      projectId: json['Project_ID'] ?? null,
-      operationId: json['Operation_ID'] ?? null,
-      requestAmount: json['Request_Amount'] != null
-          ? (json['Request_Amount'] is String
-              ? double.tryParse(json['Request_Amount']) ?? 0.0
-              : json['Request_Amount'].toDouble())
-          : 0.0,
-      approveAmount: json['Approved_Amount'] != null
-          ? (json['Approved_Amount'] is String
-              ? double.tryParse(json['Approved_Amount']) ?? 0.0
-              : json['Approved_Amount'].toDouble())
-          : 0.0,
-      currency: json['Currency'],
-      purpose: json['Purpose_Of_Request'],
-      date: DateFormat('yyyy-MM-dd').parse(json['Requested_Date']),
-      status: json['Workflow_Status'],
-      budgetDetails: json['BudgetDetails'] != null
-          ? List<Budget>.from(
-              json['BudgetDetails'].map((detail) => Budget.fromJson(detail)),
-            )
-          : [],
-    );
-  }
 
-  Map<String, dynamic> toJson() {
-    final data = {
-      'ID': id,
-      //'Setup_ID': setupId,
-      'Request_No': requestNo,
-      'Request_Code': requestCode,
-      'Requester': requester,
-      'Request_Type': requestType,
-      'Request_Amount': requestAmount,
-      'Approved_Amount': approveAmount,
-      'Currency': currency,
-      'Purpose_Of_Request': purpose,
-      'Requested_Date': DateFormat('yyyy-MM-dd').format(date),
-      'Workflow_Status': status,
-      'Budget_Details ': budgetDetails.map((detail) => detail.toJson()).toList()
-    };
+//   factory AdvanceRequest.fromJson(Map<String, dynamic> json) {
+//     return AdvanceRequest(
+//       id: json['ID'],
+//       // setupId: json['Setup_ID'] ?? 1,
+//       requestNo: json['Request_No'],
+//       requester: json['Requester'],
+//       requestCode: json['Request_Code'] ?? '',
+//       requestType: json['Request_Type'],
+//       tripId: json['Trip_ID'] ?? null,
+//       projectId: json['Project_ID'] ?? null,
+//       operationId: json['Operation_ID'] ?? null,
+//       requestAmount: json['Request_Amount'] != null
+//           ? (json['Request_Amount'] is String
+//               ? double.tryParse(json['Request_Amount']) ?? 0.0
+//               : json['Request_Amount'].toDouble())
+//           : 0.0,
+//       approveAmount: json['Approved_Amount'] != null
+//           ? (json['Approved_Amount'] is String
+//               ? double.tryParse(json['Approved_Amount']) ?? 0.0
+//               : json['Approved_Amount'].toDouble())
+//           : 0.0,
+//       currency: json['Currency'],
+//       purpose: json['Purpose_Of_Request'],
+//       date: DateFormat('yyyy-MM-dd').parse(json['Requested_Date']),
+//       status: json['Workflow_Status'],
+//       budgetDetails: json['BudgetDetails'] != null
+//           ? List<Budget>.from(
+//               json['BudgetDetails'].map((detail) => Budget.fromJson(detail)),
+//             )
+//           : [],
+//     );
+//   }
+//     return AdvanceRequest(
+//       id: json['ID'],
+//       // setupId: json['Setup_ID'] ?? 1,
+//       requestNo: json['Request_No'],
+//       requester: json['Requester'],
+//       requestCode: json['Request_Code'] ?? '',
+//       requestType: json['Request_Type'],
+//       tripId: json['Trip_ID'] ?? null,
+//       projectId: json['Project_ID'] ?? null,
+//       operationId: json['Operation_ID'] ?? null,
+//       requestAmount: json['Request_Amount'] != null
+//           ? (json['Request_Amount'] is String
+//               ? double.tryParse(json['Request_Amount']) ?? 0.0
+//               : json['Request_Amount'].toDouble())
+//           : 0.0,
+//       approveAmount: json['Approved_Amount'] != null
+//           ? (json['Approved_Amount'] is String
+//               ? double.tryParse(json['Approved_Amount']) ?? 0.0
+//               : json['Approved_Amount'].toDouble())
+//           : 0.0,
+//       currency: json['Currency'],
+//       purpose: json['Purpose_Of_Request'],
+//       date: DateFormat('yyyy-MM-dd').parse(json['Requested_Date']),
+//       status: json['Workflow_Status'],
+//       budgetDetails: json['BudgetDetails'] != null
+//           ? List<Budget>.from(
+//               json['BudgetDetails'].map((detail) => Budget.fromJson(detail)),
+//             )
+//           : [],
+//     );
+//   }
 
-    // Only include the valid one
-    if (tripId != null && requestType == "Trip") {
-      data['Trip_ID'] = int.tryParse(tripId.toString()) ?? 0;
-    } else if (projectId != null && requestType == "Project") {
-      data['Project_ID'] = int.tryParse(projectId.toString()) ?? 0;
-    } else if (operationId != null && requestType == "Operation") {
-      data['Operation_ID'] = int.tryParse(operationId.toString()) ?? 0;
-    }
+//   Map<String, dynamic> toJson() {
+//     final data = {
+//       'ID': id,
+//       //'Setup_ID': setupId,
+//       'Request_No': requestNo,
+//       'Request_Code': requestCode,
+//       'Requester': requester,
+//       'Request_Type': requestType,
+//       'Request_Amount': requestAmount,
+//       'Approved_Amount': approveAmount,
+//       'Currency': currency,
+//       'Purpose_Of_Request': purpose,
+//       'Requested_Date': DateFormat('yyyy-MM-dd').format(date),
+//       'Workflow_Status': status,
+//       'Budget_Details ': budgetDetails.map((detail) => detail.toJson()).toList()
+//     };
+//     final data = {
+//       'ID': id,
+//       //'Setup_ID': setupId,
+//       'Request_No': requestNo,
+//       'Request_Code': requestCode,
+//       'Requester': requester,
+//       'Request_Type': requestType,
+//       'Request_Amount': requestAmount,
+//       'Approved_Amount': approveAmount,
+//       'Currency': currency,
+//       'Purpose_Of_Request': purpose,
+//       'Requested_Date': DateFormat('yyyy-MM-dd').format(date),
+//       'Workflow_Status': status,
+//       'Budget_Details ': budgetDetails.map((detail) => detail.toJson()).toList()
+//     };
 
-    return data;
-  }
-}
+//     // Only include the valid one
+//     if (tripId != null && requestType == "Trip") {
+//       data['Trip_ID'] = int.tryParse(tripId.toString()) ?? 0;
+//     } else if (projectId != null && requestType == "Project") {
+//       data['Project_ID'] = int.tryParse(projectId.toString()) ?? 0;
+//     } else if (operationId != null && requestType == "Operation") {
+//       data['Operation_ID'] = int.tryParse(operationId.toString()) ?? 0;
+//     }
+//     // Only include the valid one
+//     if (tripId != null && requestType == "Trip") {
+//       data['Trip_ID'] = int.tryParse(tripId.toString()) ?? 0;
+//     } else if (projectId != null && requestType == "Project") {
+//       data['Project_ID'] = int.tryParse(projectId.toString()) ?? 0;
+//     } else if (operationId != null && requestType == "Operation") {
+//       data['Operation_ID'] = int.tryParse(operationId.toString()) ?? 0;
+//     }
+
+//     return data;
+//   }
+//     return data;
+//   }
+// }
 
 //for Cash Payment
 class CashPayment {
@@ -783,7 +841,7 @@ class Project {
 }
 
 class Trips {
-  final int id;
+  final String id;
   final DateTime date;
   final String tripCode;
   final String tripDescription;
@@ -828,7 +886,7 @@ class Trips {
 
   factory Trips.fromJson(Map<String, dynamic> json) {
     return Trips(
-      id: int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'],
           // ? json['id']
           // : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       date: DateTime.parse(

@@ -9,16 +9,16 @@ class TripRequestForm extends StatefulWidget {
   final bool isEditMode;
   final bool isViewMode;
   final UserModel currentUser;
-  final int tripId;
+  final String tripId;
 
-  const TripRequestForm({
-    Key? key,
-    this.trip,
-    this.isEditMode = false,
-    this.isViewMode = false,
-    required this.currentUser,
-    required this.tripId
-  }) : super(key: key);
+  const TripRequestForm(
+      {Key? key,
+      this.trip,
+      this.isEditMode = false,
+      this.isViewMode = false,
+      required this.currentUser,
+      required this.tripId})
+      : super(key: key);
 
   @override
   _TripRequestFormState createState() => _TripRequestFormState();
@@ -29,8 +29,10 @@ class _TripRequestFormState extends State<TripRequestForm> {
   bool _directAdvanceRequest = false;
   PlutoGridStateManager? _stateManager;
   final _formKey = GlobalKey<FormState>();
+
   late List<PlutoColumn> _columns;
   late List<PlutoRow> _rows;
+
   final TextEditingController _name = TextEditingController();
   final TextEditingController _tripDescription = TextEditingController();
   final TextEditingController _source = TextEditingController();
@@ -39,9 +41,11 @@ class _TripRequestFormState extends State<TripRequestForm> {
   final TextEditingController _returnDate = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _tripCodeController = TextEditingController();
+
   // Form fields
   bool _isForOtherPerson = false;
   bool _isRoundTrip = false;
+
   String? _department;
   String _currency = 'MMK';
 
@@ -79,7 +83,6 @@ class _TripRequestFormState extends State<TripRequestForm> {
       _isRoundTrip= trip.roundTrip;
       _directAdvanceRequest=trip.directAdvanceReq;
       _expenditureOption=trip.expenditureOption;
-
     } else {
       _name.text = widget.currentUser.name;
       _department = widget.currentUser.department;
@@ -92,6 +95,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
   bool _determineIfRoundTrip(Trips trip) {
     return true; // Placeholder
   }
+
 
   void _loadBudgets() async {
     try {
@@ -141,17 +145,19 @@ class _TripRequestFormState extends State<TripRequestForm> {
         type: PlutoColumnType.number(),
         width: 120,
         enableEditingMode: false,
+        textAlign: PlutoColumnTextAlign.right,
+        titleTextAlign: PlutoColumnTextAlign.right,
         footerRenderer: (rendererContext) {
           return PlutoAggregateColumnFooter(
             rendererContext: rendererContext,
             type: PlutoAggregateColumnType.sum,
-            formatAsCurrency: true,
-            alignment: Alignment.center,
+            alignment: Alignment.centerRight,
           );
         },
       ),
     ];
   }
+
 
   void _initializeTableRows() {
     _rows = [];
@@ -276,6 +282,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
     final qty = row.cells['qty']?.value ?? 0;
     final total = rate * qty;
     row.cells['total']?.value = total;
+  
 
     // If you want to format the display, handle it in the UI when displaying the value.
     // row.cells['total']?.valueFormatted = NumberFormat('#,##0.00').format(total);
@@ -296,19 +303,35 @@ class _TripRequestFormState extends State<TripRequestForm> {
 
   final ApiService apiService = ApiService();
 
-  Future<int> generateTripID() async {
-    List<Trips> existingTrip = await apiService.fetchTrips();
+  // Future<int> generateTripID() async {
+  //   List<Trips> existingTrip = await apiService.fetchTrips();
 
-    if (existingTrip.isEmpty) {
-      return 1;
+  //   if (existingTrip.isEmpty) {
+  //     return 1;
+  //   }
+  //   int maxId = existingTrip.map((b) => b.id).reduce((a, b) => a > b ? a : b);
+  //   return maxId + 1;
+  // }
+  Future<String> generateStringBudgetID() async {
+  try {
+    List<Budgets> existingBudgets = await ApiService().fetchBudgets();
+
+    if (existingBudgets.isEmpty) {
+      return "1";
     }
-    int maxId = existingTrip.map((b) => b.id).reduce((a, b) => a > b ? a : b);
-    return maxId + 1;
+
+    // Get the highest ID
+    int maxId = existingBudgets.map((b) => int.tryParse(b.id.toString()) ?? 0).reduce((a, b) => a > b ? a : b);
+    return (maxId + 1).toString(); // return as String
+  } catch (e) {
+    print("Error generating string budget ID: $e");
+    throw Exception('Failed to generate budget ID');
   }
+}
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
-    int newId =  widget.isEditMode ? widget.trip!.id : await generateTripID();
+    String newId = widget.isEditMode ? widget.trip!.id : await generateStringBudgetID();
     Trips newTrip = Trips(
         id: newId,
         date: DateFormat('yyyy-MM-dd').parse(_dateController.text),
@@ -334,25 +357,24 @@ class _TripRequestFormState extends State<TripRequestForm> {
         departmentId: _getDepartmentId(),
         departmentName: _department!,
         budgets: _getBudgetDetails());
+
     try {
       if (widget.isEditMode) {
         await ApiService().updateTrip(newTrip);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Trip updated successfully')),
         );
-      }else{
-         await ApiService().postTrips(newTrip);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Trip created successfully')),
-      );
+      } else {
+        await ApiService().postTrips(newTrip);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Trip created successfully')),
+        );
       }
-     
     } catch (e) {
       print("Fail to insert trips: $e");
     }
 
     try {
-      
       Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -361,6 +383,9 @@ class _TripRequestFormState extends State<TripRequestForm> {
     }
   }
 
+
+
+
   int _getDepartmentId() {
     return 1; // Placeholder
   }
@@ -368,7 +393,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
   List<Budgets> _getBudgetDetails() {
     return _rows.map((row) {
       return Budgets(
-        id: '0',
+        id: "0",
         budgetCode: '',
         budgetDescription: row.cells['expense']?.value.toString() ?? '',
         intialAmount: row.cells['rate']?.value ?? 0,
@@ -454,7 +479,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
               children: [
                 Expanded(
                   child: TextFormField(
-                    controller: _tripCodeController,
+                    initialValue: _tripCodeController.text,
                     decoration: const InputDecoration(
                       labelText: 'Trip Code',
                       border: OutlineInputBorder(),
@@ -590,6 +615,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
                       event.row.cells.containsKey('qty')) {
                     _recalculateRowTotal(event.row);
                     _recalculateTotals();
+                    
                   }
                 },
                 configuration: const PlutoGridConfiguration(
@@ -634,9 +660,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTotalAmountField()
-                ),
+                Expanded(child: _buildTotalAmountField()),
               ],
             ),
             const SizedBox(height: 20),

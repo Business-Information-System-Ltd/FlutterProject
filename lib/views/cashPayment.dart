@@ -18,7 +18,7 @@ class Cashpayment extends StatefulWidget {
 }
 
 class _CashpaymentState extends State<Cashpayment> {
-  List<AdvanceRequest> advancerequest = [];
+  // List<AdvanceRequest> advancerequest = [];
   List<CashPayment> cashpayment = [];
   List<CashPayment> draftData = [];
   List<CashPayment> postedData = [];
@@ -47,12 +47,12 @@ class _CashpaymentState extends State<Cashpayment> {
 
   void _fetchRequest() async {
     try {
-      List<AdvanceRequest> advanceRequests =
-          await ApiService().fetchAdvanceRequestData();
+      // List<AdvanceRequest> advanceRequests =
+          // await ApiService().fetchAdvanceRequestData();
       List<CashPayment> cashPayments =
           await ApiService().fetchCashPaymentData();
       setState(() {
-        advancerequest = advanceRequests;
+        // advancerequest = advanceRequests;
         cashpayment = cashPayments;
         _filteredDataByStatus();
         filteredData = selectedTab == 'Draft' ? draftData : postedData;
@@ -722,22 +722,22 @@ class _CashpaymentState extends State<Cashpayment> {
                 children: [
                   IconButton(
                     onPressed: () async {
-                      final result = await Navigator.push<AdvanceRequest>(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => AdvanceRequestTable(
-                                  onRowSelected: (request) {
-                                    return request;
-                                  },
-                                  advance: advancerequest,
-                                  payment: [],
-                                  onRefresh: _fetchRequest,
-                                )),
-                      );
-                      // ignore: unrelated_type_equality_checks
-                      if (result == true) {
-                        _fetchRequest();
-                      }
+                      // final result = await Navigator.push<AdvanceRequest>(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //       builder: (context) => AdvanceRequestTable(
+                      //             onRowSelected: (request) {
+                      //               return request;
+                      //             },
+                      //             advance: advancerequest,
+                      //             payment: [],
+                      //             onRefresh: _fetchRequest,
+                      //           )),
+                      // );
+                      // // ignore: unrelated_type_equality_checks
+                      // if (result == true) {
+                      //   _fetchRequest();
+                      // }
                     },
                     icon: const Icon(Icons.add),
                     color: Colors.black,
@@ -882,18 +882,18 @@ class _CashpaymentState extends State<Cashpayment> {
                             IconButton(
                               icon: const Icon(Icons.edit, color: Colors.black),
                               onPressed: () async {
-                                final shouldRefresh =
-                                    await Navigator.push<bool>(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        EditPayment(payment: row),
-                                  ),
-                                );
+                                // final shouldRefresh =
+                                //     await Navigator.push<bool>(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (context) =>
+                                //         EditPayment(payment: row),
+                                //   ),
+                                // );
 
-                                if (shouldRefresh ?? false) {
-                                  _fetchRequest(); 
-                                }
+                                // if (shouldRefresh ?? false) {
+                                //   _fetchRequest(); 
+                                // }
                               },
                             ),
                           if (isDraft)
