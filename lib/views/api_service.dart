@@ -592,10 +592,12 @@ class ApiService {
   }
 
   Future<void> postBudgets(Budgets budget) async {
+    
     final response = await http.post(
       Uri.parse('$baseUrl/budgets'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode(budget.toJson()),
+     body: json.encode(budget.toJson()),
+    
     );
     if (response.statusCode != 201) {
       throw Exception('Failed to create budget');
@@ -613,6 +615,22 @@ class ApiService {
     }
   }
    
+// Future<void> updateBudgets(Budgets budget) async {
+//   final url = Uri.parse('$baseUrl/budgets/${budget.id}');
+//   final response = await http.put(
+//     url,
+//     headers: {'Content-Type': 'application/json'},
+//     body: jsonEncode(budget.toJson()),
+
+//   );
+
+//   if (response.statusCode != 200) {
+//     throw Exception('Failed to update budget');
+//   }
+// }
+
+  
+
 
   Future<void> deleteBudgets(int id) async {
     final response = await http.delete(
@@ -653,18 +671,20 @@ class ApiService {
   //   }
   // }
 
-  // Future<void> deleteBudgetById(int id) async {
-  //   final response = await http.delete(
-  //     Uri.parse('$baseUrl/budgets/$id'),
-  //     headers: {'Content-Type': 'application/json'},
-  //   );
 
-  //   if (response.statusCode == 404) {
-  //     throw Exception('Budget not found');
-  //   } else if (response.statusCode != 200 && response.statusCode != 204) {
-  //     throw Exception('Delete failed with status ${response.statusCode}');
-  //   }
-  // }
+  Future<void> deleteBudgetById(int id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/budgets/$id'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 404) {
+      throw Exception('Budget not found');
+    } else if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Delete failed with status ${response.statusCode}');
+    }
+  }
+
 
   //Projects
   Future<List<Project>> fetchProjects() async {
@@ -737,11 +757,8 @@ class ApiService {
 
 
 
-
-
-
-
   //Trips
+
   Future<List<Trips>> fetchTrips() async {
     final response = await http.get(Uri.parse('$baseUrl/trips'));
     if (response.statusCode == 200) {
@@ -752,38 +769,93 @@ class ApiService {
     }
   }
 
-  Future<void> postTrips(Trip trips) async {
-    await http.post(
-      Uri.parse('$baseUrl/trips'),
+
+  Future<void> postTrips(Trips trips) async {
+final response= await http.post( Uri.parse('$baseUrl/trips'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(trips.toJson()),
     );
+     print(response.statusCode);
+    print(response.body);
+    if(response.statusCode!=201){
+      throw Exception('Fail to insert Trip');
+    }
+
   }
 
-  //updateTrip
-  Future<List<Trip>> updateTrip(
-      int id, Map<String, dynamic> updatedData) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/trips/$id'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(updatedData),
-    );
 
-    if (response.statusCode == 200) {
-      print('Trip updated successfully');
-      return jsonDecode(response.body); // Return the full response
-    } else {
-      throw Exception('Failed to update trips: ${response.statusCode}');
+  //updateTrip
+   Future<void> updateTrip(Trips trip) async {
+    try {
+      // First verify the trip exists
+      final existingTrip = await getTripById(trip.id);
+      if (existingTrip == null) {
+        throw Exception('Trip with ID ${trip.id} does not exist');
+      }
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/trips/${trip.id}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode(trip.toJson()),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Failed to update trip ${trip.id}: ${response.statusCode}\n${response.body}'
+        );
+      }
+    } catch (e) {
+      print('Error updating trip ${trip.id}: $e');
+      rethrow;
     }
   }
 
+  // Future<List<Trip>> updateTrip(
+  //     int id, Map<String, dynamic> updatedData) async {
+  //   final response = await http.put(
+  //     Uri.parse('$baseUrl/trips/$id'),
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: jsonEncode(updatedData),
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     print('Trip updated successfully');
+  //     return jsonDecode(response.body); // Return the full response
+  //   } else {
+  //     throw Exception('Failed to update trips: ${response.statusCode}');
+  //   }
+  // }
+
+
   //GetTripByID
-  Future<List<Trips>> getTripById(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/trips/$id'));
-    return jsonDecode(response.body);
+  // Future<List<Trips>> getTripById(int id) async {
+  //   final response = await http.get(Uri.parse('$baseUrl/trips/$id'));
+  //   return jsonDecode(response.body);
+  // }
+  Future<Trips?> getTripById(String id) async {
+  final response = await http.get(Uri.parse('$baseUrl/trips/$id'));
+  if (response.statusCode == 200) {
+    return Trips.fromJson(json.decode(response.body));
   }
+  return null;
+}
+
+
+ Future<void> deleteTrips(String id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/trips/$id'));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+          'Failed to delete trip. Status code: ${response.statusCode}');
+    }
+  }
+
+
+
 
   // Advance Requests
   Future<List<Advance>> fetchAdvanceRequests() async {
@@ -906,3 +978,6 @@ class ApiService {
     }
   }
 }
+
+ 
+ 

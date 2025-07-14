@@ -691,24 +691,25 @@ class Budgets {
   final int id;
   final String budgetCode;
   final String budgetDescription;
-  final double initialAmount;
+  final double intialAmount;
 
   Budgets(
       {required this.id,
       required this.budgetCode,
       required this.budgetDescription,
-      required this.initialAmount});
+      required this.intialAmount});
 
   factory Budgets.fromJson(Map<String, dynamic> json) {
     return Budgets(
         id: json['id'] is int
             ? json['id']
             : int.tryParse(json['id'].toString()) ?? 0,
+       
         budgetCode: json['BudgetCode'],
         budgetDescription: json['BudgetDescription'],
-      //  initialAmount: json['InitialAmount']
+       intialAmount: json['InitialAmount']
 
-         initialAmount: json['initialAmount']?.toDouble() ?? 0.0,
+        // initialAmount: json['initialAmount']?.toDouble() ?? 0.0,
 
         );
   }
@@ -718,7 +719,7 @@ class Budgets {
       'id': id,
       'BudgetCode': budgetCode,
       'BudgetDescription': budgetDescription,
-      'InitialAmount': initialAmount
+      'InitialAmount': intialAmount
     };
   }
 }
@@ -790,10 +791,19 @@ class Project {
 }
 
 class Trips {
-  final int id;
+  final String id;
   final DateTime date;
   final String tripCode;
   final String tripDescription;
+  final String source;
+  final String destination;
+  final DateTime departureDate;
+  final DateTime returnDate;
+  final bool otherPerson;
+  final bool roundTrip;
+  final bool directAdvanceReq;
+  final int expenditureOption;
+  final String requesterName;
   final double totalAmount;
   final String currency;
   final double approvedAmount;
@@ -807,6 +817,15 @@ class Trips {
       required this.date,
       required this.tripCode,
       required this.tripDescription,
+      required this.source,
+      required this.destination,
+      required this.departureDate,
+      required this.returnDate,
+      required this.otherPerson,
+      required this.roundTrip,
+      required this.directAdvanceReq,
+      required this.expenditureOption,
+      required this.requesterName,
       required this.totalAmount,
       required this.currency,
       required this.approvedAmount,
@@ -817,20 +836,36 @@ class Trips {
 
   factory Trips.fromJson(Map<String, dynamic> json) {
     return Trips(
-      id: json['id'] is int
-          ? json['id']
-          : int.tryParse(json['id'].toString()) ?? 0,
-      // date: json['Date'],
-      date:
-          json['Date'] != null ? DateTime.parse(json['Date']) : DateTime.now(),
-      tripCode: json['TripCode'],
-      tripDescription: json['TripDescription'],
-      totalAmount: json['TotalAmount'],
-      currency: json['Currency'],
-      approvedAmount: json['ApprovedAmount'],
-      status: json['Status'],
-      departmentId: json['DepartmentID'],
-      departmentName: json['DepartmentName'],
+      id: json['id'],
+          // ? json['id']
+          // : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      date: DateTime.parse(
+          json['Date']?.toString() ?? DateTime.now().toIso8601String()),
+      tripCode: json['TripCode']?.toString() ?? '',
+      tripDescription: json['TripDescription']?.toString() ?? '',
+      source: json['Source']?.toString() ?? '',
+      destination: json['Destination']?.toString() ?? '',
+      departureDate: DateTime.parse(json['DepartureDate']?.toString() ??
+          DateTime.now().toIso8601String()),
+      returnDate: DateTime.parse(
+          json['ReturnDate']?.toString() ?? DateTime.now().toIso8601String()),
+      otherPerson: json['OtherPerson'] is bool ? json['OtherPerson'] : false,
+      roundTrip: json['RoundTrip'] is bool ? json['RoundTrip'] : false,
+      directAdvanceReq:
+          json['DirectAdvance'] is bool ? json['DirectAdvance'] : false,
+      expenditureOption:
+          json['ExpenditureOption'] is int ? json['ExpenditureOption'] : 0,
+      requesterName: json['RequesterName']?.toString() ?? '',
+      totalAmount: json['TotalAmount'] is double
+          ? json['TotalAmount']
+          : double.tryParse(json['TotalAmount']?.toString() ?? '0') ?? 0.0,
+      currency: json['Currency']?.toString() ?? 'USD',
+      approvedAmount: json['ApprovedAmount'] is double
+          ? json['ApprovedAmount']
+          : double.tryParse(json['ApprovedAmount']?.toString() ?? '0') ?? 0.0,
+      status: json['Status']?.toString() ?? 'Active',
+      departmentId: json['DepartmentID'] is int ? json['DepartmentID'] : 0,
+      departmentName: json['DepartmentName']?.toString() ?? '',
       budgets: json['BudgetDetails'] != null
           ? (json['BudgetDetails'] as List)
               .map((item) => Budgets.fromJson(item))
@@ -841,9 +876,18 @@ class Trips {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'Date': date,
+      'Date': date.toIso8601String(),
       'TripCode': tripCode,
       'TripDescription': tripDescription,
+      'Source': source,
+      'Destination': destination,
+      'DepartureDate': departureDate.toIso8601String(),
+      'ReturnDate': returnDate.toIso8601String(),
+      'OtherPerson': otherPerson,
+      'RoundTrip': roundTrip,
+      'DirectAdvance': directAdvanceReq,
+      'ExpenditureOption': expenditureOption,
+      'RequesterName': requesterName,
       'TotalAmount': totalAmount,
       'Currency': currency,
       'ApprovedAmount': approvedAmount,

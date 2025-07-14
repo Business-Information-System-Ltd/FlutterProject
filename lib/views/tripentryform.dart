@@ -24,6 +24,7 @@ class _TripEntryFormState extends State<TripEntryForm> {
   final TextEditingController _attachFilesController = TextEditingController();
   String? _selectedDepartment = 'Admin';
   String? _selectedCurrency = 'MMK';
+  
     @override
   void initState() {
   super.initState();

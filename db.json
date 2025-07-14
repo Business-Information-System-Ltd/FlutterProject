@@ -3,7 +3,7 @@
     {
       "id": "1",
       "BudgetCode": "B-1",
-      "BudgetDescription": "For Expense",
+      "BudgetDescription": "For Expenses",
       "InitialAmount": 0
     },
     {
@@ -51,97 +51,37 @@
     {
       "id": "7",
       "BudgetCode": "B-9",
-      "BudgetDescription": "for B9",
+      "BudgetDescription": "HR",
       "InitialAmount": 0
     },
     {
       "id": "8",
       "BudgetCode": "B-10",
-      "BudgetDescription": "For B10",
+      "BudgetDescription": "Admin",
       "InitialAmount": 0
     },
     {
       "id": "9",
       "BudgetCode": "B-11",
-      "BudgetDescription": "For B11",
+      "BudgetDescription": "Account",
       "InitialAmount": 0
     },
     {
       "id": "10",
       "BudgetCode": "B-12",
-      "BudgetDescription": "For B12",
+      "BudgetDescription": "Finance",
       "InitialAmount": 0
     },
     {
       "id": "11",
       "BudgetCode": "B-13",
-      "BudgetDescription": "For B13",
+      "BudgetDescription": "HR & Account",
       "InitialAmount": 0
     },
     {
-      "id": "12",
+      "id": 12,
       "BudgetCode": "B-14",
-      "BudgetDescription": "For B14",
-      "InitialAmount": 0
-    },
-    {
-      "id": 13,
-      "BudgetCode": "B15",
-      "BudgetDescription": "For B15",
-      "InitialAmount": 0
-    },
-    {
-      "id": 14,
-      "BudgetCode": "B15",
-      "BudgetDescription": "For B15s",
-      "InitialAmount": 0
-    },
-    {
-      "id": 15,
-      "BudgetCode": "B15",
-      "BudgetDescription": "For B15",
-      "InitialAmount": 0
-    },
-    {
-      "id": 16,
-      "BudgetCode": "s",
-      "BudgetDescription": "s",
-      "InitialAmount": 0
-    },
-    {
-      "id": 17,
-      "BudgetCode": "B16",
-      "BudgetDescription": "For B16",
-      "InitialAmount": 0
-    },
-    {
-      "id": 18,
-      "BudgetCode": "B17",
-      "BudgetDescription": "For B17",
-      "InitialAmount": 0
-    },
-    {
-      "id": 19,
-      "BudgetCode": "B17",
-      "BudgetDescription": "For B17s",
-      "InitialAmount": 0
-    },
-    {
-      "id": 20,
-      "BudgetCode": "B-14",
-      "BudgetDescription": "For B14s",
-      "InitialAmount": 0
-    },
-    {
-      "id": 21,
-      "BudgetCode": "B-14",
-      "BudgetDescription": "For B14",
-      "InitialAmount": 0
-    },
-    {
-      "id": 22,
-      "BudgetCode": "B-14",
-      "BudgetDescription": "For B14",
+      "BudgetDescription": "ERP",
       "InitialAmount": 0
     }
   ],
@@ -328,6 +268,15 @@
       "Status": "Yes",
       "DepartmentID": 1,
       "DepartmentName": "Admin",
+      "source": "",
+      "destination": "",
+      "departureDate": "",
+      "returnDate": "",
+      "otherPerson": "false",
+      "roundTrip": "true",
+      "directAdvanceReq": "true",
+      "expenditureOption": "0",
+      "requesterName": "",
       "BudgetDetails": [
         {
           "id": 1,
@@ -371,27 +320,83 @@
     },
     {
       "id": "3",
-      "Date": "2025-06-27",
+      "Date": "2025-07-14T00:00:00.000",
       "TripCode": "TRP_000_003",
-      "TripDescription": "Trip 3",
-      "TotalAmount": 2000,
-      "Currency": "USD",
+      "TripDescription": "Trip 34",
+      "Source": "jj",
+      "Destination": "bb",
+      "DepartureDate": "2025-07-14T00:00:00.000",
+      "ReturnDate": "2025-07-23T00:00:00.000",
+      "OtherPerson": false,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "MM",
+      "TotalAmount": 3449996,
+      "Currency": "MMK",
       "ApprovedAmount": 0,
-      "Status": "Yes",
+      "Status": "pending",
       "DepartmentID": 1,
       "DepartmentName": "Admin",
       "BudgetDetails": [
         {
-          "id": 1,
-          "BudgetCode": "B-1",
-          "BudgetDescription": "For Expense",
-          "InitialAmount": 0
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 60000
         },
         {
-          "id": 3,
-          "BudgetCode": "B-3",
-          "BudgetDescription": "For Advertising",
-          "InitialAmount": 0
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 809999
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 9000
+        }
+      ]
+    },
+    {
+      "id": "13",
+      "Date": "2025-07-14T00:00:00.000",
+      "TripCode": "TRP_005",
+      "TripDescription": "trip test ",
+      "Source": "Yangon",
+      "Destination": "Mandalay",
+      "DepartureDate": "2025-07-14T00:00:00.000",
+      "ReturnDate": "2025-07-25T00:00:00.000",
+      "OtherPerson": true,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "Yuri",
+      "TotalAmount": 43600,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Operations",
+      "BudgetDetails": [
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 3000
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 400
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 3000
         }
       ]
     }

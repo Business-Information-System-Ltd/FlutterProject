@@ -99,7 +99,7 @@ class _BudgetAmountState extends State<BudgetAmount> {
           cells: {
             'code': PlutoCell(value: budget.budgetCode),
             'desc': PlutoCell(value: budget.budgetDescription),
-            'initial': PlutoCell(value: budget.initialAmount),
+            'initial': PlutoCell(value: budget.intialAmount),
             'action': PlutoCell(value: ''),
           },
         );
@@ -148,7 +148,7 @@ class _BudgetAmountState extends State<BudgetAmount> {
           id: newId,
           budgetCode: code,
           budgetDescription: desc,
-          initialAmount: initialValue,
+          intialAmount: initialValue,
         );
 
         if (_editingRow != null) {

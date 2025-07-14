@@ -105,7 +105,7 @@ class _BudgetFormState extends State<BudgetForm> {
               id: 0,
                budgetCode: '',
                 budgetDescription: '',
-                 initialAmount: 0),
+                 intialAmount: 0),
         );
 
         if (budgetToDelete.id != 0) {
@@ -169,41 +169,46 @@ class _BudgetFormState extends State<BudgetForm> {
   Future<int> generateBudgetID() async {
     List<Budgets> existingBudgets = await ApiService().fetchBudgets();
     if (existingBudgets.isEmpty) return 1;
-    int maxId =
-        existingBudgets.map((b) => b.id).reduce((a, b) => a > b ? a : b);
-    return maxId + 1;
+    List<int> ids = existingBudgets
+      .map((b) => int.tryParse(b.id.toString()) ?? 0)
+      .toList();
+
+  int maxId = ids.reduce((a, b) => a > b ? a : b);
+  return maxId + 1;
+
+    
   }
+  
 
   void _saveBudget() async {
     if (_formKey.currentState!.validate()) {
-      final newId = await generateBudgetID();
       String code = _codeController.text.trim();
       String desc = _descController.text.trim();
 
       try {
+        final newId = await generateBudgetID();
         final newBudget = Budgets(
           id: newId,
           budgetCode: code,
           budgetDescription: desc,
-          initialAmount: 0,
+          intialAmount: 0,
         );
-         await ApiService().postBudgets(newBudget);
-       _fetchBudgetTableRows();
+      
 
-        // if (_editingRow != null) {
-        //   // Update existing budget
-        //   final existingBudget = budget.firstWhere(
-        //     (b) => b.budgetCode == _editingRow!.cells['code']!.value,
-        //   );
+        if (_editingRow != null) {
+          final existingBudget = budget.firstWhere(
+            (b) => b.budgetCode == _editingRow!.cells['code']!.value,
+          );
 
-        //   await ApiService().updateBudgets(existingBudget.id, newBudget);
+          await ApiService().updateBudgets(existingBudget.id, newBudget);
 
-        //   _fetchBudgetTableRows(); // Refresh data
-        // } else {
-        //   // Add new budget
-        //   await ApiService().postBudgets(newBudget);
-        //   _fetchBudgetTableRows(); // Refresh data
-        // }
+          _fetchBudgetTableRows(); 
+
+        } 
+        else {
+          await ApiService().postBudgets(newBudget);
+          _fetchBudgetTableRows(); 
+        }
 
         _clearForm();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -218,12 +223,16 @@ class _BudgetFormState extends State<BudgetForm> {
     }
   }
 
+  
   void _clearForm() {
-    _codeController.clear();
-    _descController.clear();
+  _codeController.clear();
+  _descController.clear();
+  
     _formTitle = 'Add Budget';
     _editingRow = null;
-  }
+  
+}
+
 
   @override
   Widget build(BuildContext context) {
