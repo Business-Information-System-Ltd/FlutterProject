@@ -80,7 +80,7 @@ class BudgetAmount {
 
 //for project
 class Projects {
- final int id;
+  final int id;
   final DateTime date;
   final String Project_Code;
   final String description;
@@ -220,8 +220,7 @@ class Trip {
       'Department_Name': departmentName,
       'Status': status,
       'Approved_Amount': approveAmount,
-      'Budget_Details':
-          budgetDetails.map((detail) => detail.toJson()).toList(),
+      'Budget_Details': budgetDetails.map((detail) => detail.toJson()).toList(),
     };
   }
 }
@@ -327,70 +326,67 @@ class AdvanceRequest {
       required this.operationId,
       required this.budgetDetails});
 
-  
   factory AdvanceRequest.fromJson(Map<String, dynamic> json) {
-  return AdvanceRequest(
-    id: json['ID'],
-   // setupId: json['Setup_ID'] ?? 1,
-    requestNo: json['Request_No'],
-    requester: json['Requester'],
-    requestCode: json['Request_Code'] ?? '',
-    requestType: json['Request_Type'],
-    tripId: json['Trip_ID'] ?? null,
-    projectId: json['Project_ID'] ?? null,
-    operationId: json['Operation_ID'] ?? null,
-    requestAmount: json['Request_Amount'] != null
-        ? (json['Request_Amount'] is String 
-            ? double.tryParse(json['Request_Amount']) ?? 0.0
-            : json['Request_Amount'].toDouble())
-        : 0.0,
-    approveAmount: json['Approved_Amount'] != null
-        ? (json['Approved_Amount'] is String
-            ? double.tryParse(json['Approved_Amount']) ?? 0.0
-            : json['Approved_Amount'].toDouble())
-        : 0.0,
-    currency: json['Currency'],
-    purpose: json['Purpose_Of_Request'],
-    date: DateFormat('yyyy-MM-dd').parse(json['Requested_Date']),
-    status: json['Workflow_Status'],
-    budgetDetails: json['BudgetDetails'] != null
-        ? List<Budget>.from(
-            json['BudgetDetails'].map((detail) => Budget.fromJson(detail)),
-          )
-        : [],
-  );
-}
-
-  Map<String, dynamic> toJson() {
-  final data = {
-    'ID': id,
-    //'Setup_ID': setupId,
-    'Request_No': requestNo,
-    'Request_Code': requestCode,
-    'Requester': requester,
-    'Request_Type': requestType,
-    'Request_Amount': requestAmount,
-    'Approved_Amount': approveAmount,
-    'Currency': currency,
-    'Purpose_Of_Request': purpose,
-    'Requested_Date': DateFormat('yyyy-MM-dd').format(date),
-    'Workflow_Status': status,
-    'Budget_Details ':
-        budgetDetails.map((detail) => detail.toJson()).toList()
-  };
-
-  // Only include the valid one
-  if (tripId != null && requestType == "Trip") {
-    data['Trip_ID'] = int.tryParse(tripId.toString()) ?? 0;
-  } else if (projectId != null && requestType == "Project") {
-    data['Project_ID'] = int.tryParse(projectId.toString()) ?? 0;
-  } else if (operationId != null && requestType == "Operation") {
-    data['Operation_ID'] = int.tryParse(operationId.toString()) ?? 0;
+    return AdvanceRequest(
+      id: json['ID'],
+      // setupId: json['Setup_ID'] ?? 1,
+      requestNo: json['Request_No'],
+      requester: json['Requester'],
+      requestCode: json['Request_Code'] ?? '',
+      requestType: json['Request_Type'],
+      tripId: json['Trip_ID'] ?? null,
+      projectId: json['Project_ID'] ?? null,
+      operationId: json['Operation_ID'] ?? null,
+      requestAmount: json['Request_Amount'] != null
+          ? (json['Request_Amount'] is String
+              ? double.tryParse(json['Request_Amount']) ?? 0.0
+              : json['Request_Amount'].toDouble())
+          : 0.0,
+      approveAmount: json['Approved_Amount'] != null
+          ? (json['Approved_Amount'] is String
+              ? double.tryParse(json['Approved_Amount']) ?? 0.0
+              : json['Approved_Amount'].toDouble())
+          : 0.0,
+      currency: json['Currency'],
+      purpose: json['Purpose_Of_Request'],
+      date: DateFormat('yyyy-MM-dd').parse(json['Requested_Date']),
+      status: json['Workflow_Status'],
+      budgetDetails: json['BudgetDetails'] != null
+          ? List<Budget>.from(
+              json['BudgetDetails'].map((detail) => Budget.fromJson(detail)),
+            )
+          : [],
+    );
   }
 
-  return data;
-}
+  Map<String, dynamic> toJson() {
+    final data = {
+      'ID': id,
+      //'Setup_ID': setupId,
+      'Request_No': requestNo,
+      'Request_Code': requestCode,
+      'Requester': requester,
+      'Request_Type': requestType,
+      'Request_Amount': requestAmount,
+      'Approved_Amount': approveAmount,
+      'Currency': currency,
+      'Purpose_Of_Request': purpose,
+      'Requested_Date': DateFormat('yyyy-MM-dd').format(date),
+      'Workflow_Status': status,
+      'Budget_Details ': budgetDetails.map((detail) => detail.toJson()).toList()
+    };
 
+    // Only include the valid one
+    if (tripId != null && requestType == "Trip") {
+      data['Trip_ID'] = int.tryParse(tripId.toString()) ?? 0;
+    } else if (projectId != null && requestType == "Project") {
+      data['Project_ID'] = int.tryParse(projectId.toString()) ?? 0;
+    } else if (operationId != null && requestType == "Operation") {
+      data['Operation_ID'] = int.tryParse(operationId.toString()) ?? 0;
+    }
+
+    return data;
+  }
 }
 
 //for Cash Payment
@@ -465,9 +461,6 @@ class CashPayment {
     };
   }
 }
-
-
-
 
 //User
 class User {
@@ -694,18 +687,223 @@ class ApprovalStep {
 // }
 
 // data.dart
+class Budgets {
+  final String id;
+  final String budgetCode;
+  final String budgetDescription;
+  final double intialAmount;
+
+  Budgets(
+      {required this.id,
+      required this.budgetCode,
+      required this.budgetDescription,
+      required this.intialAmount});
+
+  factory Budgets.fromJson(Map<String, dynamic> json) {
+    return Budgets(
+        id: json['id'] ,
+            // ? json['id']
+            // : int.tryParse(json['id'].toString()) ?? 0,
+        budgetCode: json['BudgetCode'],
+        budgetDescription: json['BudgetDescription'],
+        intialAmount: json['InitialAmount']);
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'BudgetCode': budgetCode,
+      'BudgetDescription': budgetDescription,
+      'InitialAmount': intialAmount
+    };
+  }
+}
+
+class Project {
+  final int id;
+  final DateTime date;
+  final String projectCode;
+  final String projectDescription;
+  final double totalAmount;
+  final String currency;
+  final double approvedAmount;
+  final int departmentId;
+  final String departmentName;
+  final String requestable;
+  final List<Budgets>? budgets;
+
+  Project(
+      {required this.id,
+      required this.date,
+      required this.projectCode,
+      required this.projectDescription,
+      required this.totalAmount,
+      required this.currency,
+      required this.approvedAmount,
+      required this.departmentId,
+      required this.departmentName,
+      required this.requestable,
+      required this.budgets});
+
+  factory Project.fromJson(Map<String, dynamic> json) {
+    return Project(
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      date: DateTime.parse(json['Date']),
+      projectCode: json['ProjectCode'] ?? 'pp',
+      projectDescription: json['ProjectDescription'] ?? 'dd',
+      totalAmount: json['TotalAmount'] ?? 5,
+      currency: json['Currency'] ?? 'USD',
+      approvedAmount: json['ApprovedAmount'] ?? 9,
+      departmentId: json['DepartmentID'] ?? 1,
+      departmentName: json['DepartmentName'] ?? 'Engineering',
+      requestable: json['Requestable'] ?? 'Yes',
+      budgets: json['BudgetDetails'] != null
+          ? (json['BudgetDetails'] as List)
+              .map((item) => Budgets.fromJson(item))
+              .toList()
+          : null,
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'Date': date,
+      'ProjectCode': projectCode,
+      'ProjectDescription': projectDescription,
+      'TotalAmount': totalAmount,
+      'Currency': currency,
+      'ApprovedAmount': approvedAmount,
+      'DepartmentID': departmentId,
+      'DepartmentName': departmentName,
+      'Requestable': requestable,
+      'BudgetDetails': budgets?.map((item) => item.toJson()).toList(),
+    };
+  }
+}
+
+class Trips {
+  final int id;
+  final DateTime date;
+  final String tripCode;
+  final String tripDescription;
+  final String source;
+  final String destination;
+  final DateTime departureDate;
+  final DateTime returnDate;
+  final bool otherPerson;
+  final bool roundTrip;
+  final bool directAdvanceReq;
+  final int expenditureOption;
+  final String requesterName;
+  final double totalAmount;
+  final String currency;
+  final double approvedAmount;
+  final String status;
+  final int departmentId;
+  final String departmentName;
+  final List<Budgets>? budgets;
+
+  Trips(
+      {required this.id,
+      required this.date,
+      required this.tripCode,
+      required this.tripDescription,
+      required this.source,
+      required this.destination,
+      required this.departureDate,
+      required this.returnDate,
+      required this.otherPerson,
+      required this.roundTrip,
+      required this.directAdvanceReq,
+      required this.expenditureOption,
+      required this.requesterName,
+      required this.totalAmount,
+      required this.currency,
+      required this.approvedAmount,
+      required this.status,
+      required this.departmentId,
+      required this.departmentName,
+      required this.budgets});
+
+  factory Trips.fromJson(Map<String, dynamic> json) {
+    return Trips(
+      id: int.tryParse(json['id'].toString()) ?? 0,
+          // ? json['id']
+          // : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      date: DateTime.parse(
+          json['Date']?.toString() ?? DateTime.now().toIso8601String()),
+      tripCode: json['TripCode']?.toString() ?? '',
+      tripDescription: json['TripDescription']?.toString() ?? '',
+      source: json['Source']?.toString() ?? '',
+      destination: json['Destination']?.toString() ?? '',
+      departureDate: DateTime.parse(json['DepartureDate']?.toString() ??
+          DateTime.now().toIso8601String()),
+      returnDate: DateTime.parse(
+          json['ReturnDate']?.toString() ?? DateTime.now().toIso8601String()),
+      otherPerson: json['OtherPerson'] is bool ? json['OtherPerson'] : false,
+      roundTrip: json['RoundTrip'] is bool ? json['RoundTrip'] : false,
+      directAdvanceReq:
+          json['DirectAdvance'] is bool ? json['DirectAdvance'] : false,
+      expenditureOption:
+          json['ExpenditureOption'] is int ? json['ExpenditureOption'] : 0,
+      requesterName: json['RequesterName']?.toString() ?? '',
+      totalAmount: json['TotalAmount'] is double
+          ? json['TotalAmount']
+          : double.tryParse(json['TotalAmount']?.toString() ?? '0') ?? 0.0,
+      currency: json['Currency']?.toString() ?? 'USD',
+      approvedAmount: json['ApprovedAmount'] is double
+          ? json['ApprovedAmount']
+          : double.tryParse(json['ApprovedAmount']?.toString() ?? '0') ?? 0.0,
+      status: json['Status']?.toString() ?? 'Active',
+      departmentId: json['DepartmentID'] is int ? json['DepartmentID'] : 0,
+      departmentName: json['DepartmentName']?.toString() ?? '',
+      budgets: json['BudgetDetails'] != null
+          ? (json['BudgetDetails'] as List)
+              .map((item) => Budgets.fromJson(item))
+              .toList()
+          : null,
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'Date': date.toIso8601String(),
+      'TripCode': tripCode,
+      'TripDescription': tripDescription,
+      'Source': source,
+      'Destination': destination,
+      'DepartureDate': departureDate.toIso8601String(),
+      'ReturnDate': returnDate.toIso8601String(),
+      'OtherPerson': otherPerson,
+      'RoundTrip': roundTrip,
+      'DirectAdvance': directAdvanceReq,
+      'ExpenditureOption': expenditureOption,
+      'RequesterName': requesterName,
+      'TotalAmount': totalAmount,
+      'Currency': currency,
+      'ApprovedAmount': approvedAmount,
+      'Status': status,
+      'DepartmentID': departmentId,
+      'DepartmentName': departmentName,
+      'BudgetDetails': budgets?.map((item) => item.toJson()).toList(),
+    };
+  }
+}
 
 class Advance {
   final int id;
-  final String date;
+  final DateTime date;
   final String requestNo;
   final String requestCode;
+  final String requestDes;
   final String requestType;
-  final int requestAmount;
+  final double requestAmount;
   final String currency;
   final String requester;
-  final String department;
-  final int approvedAmount;
+  // final int departmentID;
+  final String departmentName;
+  final double approvedAmount;
   final String purpose;
   final String status;
 
@@ -714,11 +912,13 @@ class Advance {
     required this.date,
     required this.requestNo,
     required this.requestCode,
+    required this.requestDes,
     required this.requestType,
     required this.requestAmount,
     required this.currency,
     required this.requester,
-    required this.department,
+    // required this.departmentID,
+    required this.departmentName,
     required this.approvedAmount,
     required this.purpose,
     required this.status,
@@ -726,15 +926,19 @@ class Advance {
 
   factory Advance.fromJson(Map<String, dynamic> json) {
     return Advance(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
-      date: json['Date'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      date: DateTime.parse(json['Date']),
       requestNo: json['RequestNo'],
       requestCode: json['RequestCode'],
+      requestDes: json['RequestDescription'],
       requestType: json['RequestType'],
       requestAmount: json['RequestAmount'],
       currency: json['Currency'],
       requester: json['Requester'],
-      department: json['Department'],
+      // departmentID: json['DepartmentID'],
+      departmentName: json['DepartmentName'],
       approvedAmount: json['ApprovedAmount'],
       purpose: json['Purpose'],
       status: json['Status'],
@@ -747,23 +951,26 @@ class Advance {
       'Date': date,
       'RequestNo': requestNo,
       'RequestCode': requestCode,
+      'RequestDescription': requestDes,
       'RequestType': requestType,
       'RequestAmount': requestAmount,
       'Currency': currency,
       'Requester': requester,
-      'Department': department,
+      'DepartmentName': departmentName,
       'ApprovedAmount': approvedAmount,
       'Purpose': purpose,
-      'Status': status,
+      'Status': status
     };
   }
 }
 
 class Payment {
   final int id;
-  final String date;
+  final DateTime date;
   final String paymentNo;
-  final int paymentAmount;
+  final String requestNo;
+  final String requestType;
+  final double paymentAmount;
   final String currency;
   final String paymentMethod;
   final String paidPerson;
@@ -771,13 +978,14 @@ class Payment {
   final String paymentNote;
   final String status;
   final String settled;
-  final int requestId;
   final List<Advance>? request;
 
   Payment({
     required this.id,
     required this.date,
     required this.paymentNo,
+    required this.requestNo,
+    required this.requestType,
     required this.paymentAmount,
     required this.currency,
     required this.paymentMethod,
@@ -786,24 +994,26 @@ class Payment {
     required this.paymentNote,
     required this.status,
     required this.settled,
-    required this.requestId,
     this.request,
   });
 
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
-     id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
-      date: json['Date'],
-      paymentNo: json['PaymentNo'],
-      paymentAmount: json['PaymentAmount'],
-      currency: json['Currency'],
-      paymentMethod: json['PaymentMethod'],
-      paidPerson: json['PaidPerson'],
-      receivedPerson: json['ReceivedPerson'],
-      paymentNote: json['PaymentNote'],
-      status: json['Status'],
-      settled: json['Settled'],
-      requestId: json['RequestID'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      date: DateTime.parse(json['Date']),
+      paymentNo: json['PaymentNo'] ?? '',
+      requestNo: json['RequestNo'] ?? '',
+      requestType: json['RequestType'] ?? '',
+      paymentAmount: json['PaymentAmount'] ?? 0,
+      currency: json['Currency'] ?? '',
+      paymentMethod: json['PaymentMethod'] ?? '',
+      paidPerson: json['PaidPerson'] ?? '',
+      receivedPerson: json['ReceivedPerson'] ?? '',
+      paymentNote: json['PaymentNote'] ?? '',
+      status: json['Status'] ?? '',
+      settled: json['Settled'] ?? '',
       request: json['Requests'] != null
           ? (json['Requests'] as List)
               .map((item) => Advance.fromJson(item))
@@ -817,6 +1027,8 @@ class Payment {
       'id': id,
       'Date': date,
       'PaymentNo': paymentNo,
+      'RequestNo': requestNo,
+      'RequestType': requestType,
       'PaymentAmount': paymentAmount,
       'Currency': currency,
       'PaymentMethod': paymentMethod,
@@ -825,7 +1037,6 @@ class Payment {
       'PaymentNote': paymentNote,
       'Status': status,
       'Settled': settled,
-      'RequestID': requestId,
       'Requests': request?.map((item) => item.toJson()).toList(),
     };
   }
@@ -833,37 +1044,42 @@ class Payment {
 
 class Settlement {
   final int id;
-  final String settlementDate;
+  final DateTime settlementDate;
   final String paymentNo;
-  final int withdrawnAmount;
-  final int settleAmount;
-  final int refundAmount;
+  final DateTime paymentDate;
+  final double withdrawnAmount;
+  final double settleAmount;
+  final double refundAmount;
   final String settled;
-  final int paymentId;
+  // final int paymentId;
   final List<Payment>? payment;
 
   Settlement({
     required this.id,
     required this.settlementDate,
     required this.paymentNo,
+    required this.paymentDate,
     required this.withdrawnAmount,
     required this.settleAmount,
     required this.refundAmount,
     required this.settled,
-    required this.paymentId,
+    // required this.paymentId,
     this.payment,
   });
 
   factory Settlement.fromJson(Map<String, dynamic> json) {
     return Settlement(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
-      settlementDate: json['SettlementDate'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      settlementDate: DateTime.parse(json['SettlementDate']),
       paymentNo: json['PaymentNo'],
+      paymentDate: DateTime.parse(json['PaymentDate']),
       withdrawnAmount: json['WithdrawnAmount'],
       settleAmount: json['SettleAmount'],
       refundAmount: json['RefundAmount'],
       settled: json['Settled'],
-      paymentId: json['PaymentID'],
+      // paymentId: json['PaymentID'],
       payment: json['Payments'] != null
           ? (json['Payments'] is List
               ? (json['Payments'] as List)
@@ -879,12 +1095,55 @@ class Settlement {
       'id': id,
       'SettlementDate': settlementDate,
       'PaymentNo': paymentNo,
+      'PaymentDate': paymentDate,
       'WithdrawnAmount': withdrawnAmount,
       'SettleAmount': settleAmount,
       'RefundAmount': refundAmount,
       'Settled': settled,
-      'PaymentID': paymentId,
+      // 'PaymentID': paymentId,
       'Payments': payment?.map((item) => item.toJson()).toList(),
+    };
+  }
+}
+
+class SettlementDetail {
+  final int id;
+  final String budgetCode;
+  final String description;
+  final double settledAmount;
+  final int settlementId;
+
+  SettlementDetail({
+    required this.id,
+    required this.budgetCode,
+    required this.description,
+    required this.settledAmount,
+    required this.settlementId,
+  });
+
+  factory SettlementDetail.fromJson(Map<String, dynamic> json) {
+    return SettlementDetail(
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      budgetCode: json['BudgetCode'] ?? '',
+      description: json['Description'] ?? '',
+      settledAmount: json['SettledAmount'] is double
+          ? json['SettledAmount']
+          : double.tryParse(json['SettledAmount'].toString()) ?? 0.0,
+      settlementId: json['SettlementID'] is int
+          ? json['SettlementID']
+          : int.tryParse(json['SettlementID'].toString()) ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'BudgetCode': budgetCode,
+      'Description': description,
+      'SettledAmount': settledAmount,
+      'SettlementID': settlementId,
     };
   }
 }

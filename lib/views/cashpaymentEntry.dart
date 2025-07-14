@@ -1,3 +1,5 @@
+import 'package:advance_budget_request_system/views/api_service.dart';
+import 'package:advance_budget_request_system/views/data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -248,27 +250,50 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
     _paymentNoController.text =
         'Pay_${lastPaymentNo.toString().padLeft(3, '0')}';
   }
+  final ApiService apiService = ApiService();
+   
+  Future<int> generateCashpaymentID() async {  
+    List<Payment> existingCash = await apiService.fetchPayments();
 
-  void _submitForm() {
+    if (existingCash.isEmpty) {
+      return 1; // Start from 1 if no budget exists
+    }
+
+    // Find the highest existing ID
+    int maxId =
+        existingCash.map((b) => b.id).reduce((a, b) => a > b ? a : b);
+    return maxId + 1;
+  }
+
+  void _submitForm() async{
     if (_formKey.currentState!.validate()) {
-      final paymentData = {
-        'paymentNo': _paymentNoController.text,
-        'requestNo': _requestNoController.text,
-        'paymentDate': _paymentDateController.text,
-        'requestType': _requestTypeController.text,
-        'paymentAmount': _paymentAmountController.text,
-        'currency': widget.currency,
-        'paymentMethod': _selectedPaymentMethod,
-        'paidPerson': _paidPersonController.text,
-        'receivePerson': _receivePersonController.text,
-        'paymentNote': _paymentNoteController.text,
-      };
+      int newId= await generateCashpaymentID();
+      try {
+        Payment newPayment= Payment(
+        id: newId, 
+        date: DateFormat('yyyy-MM-dd').parse(_paymentDateController.text), 
+        paymentNo: _paymentNoController.text, 
+        requestNo: _requestNoController.text, 
+        requestType: _requestTypeController.text, 
+        paymentAmount: double.tryParse(_paymentAmountController.text)??0, 
+        currency: widget.currency, 
+        paymentMethod: _selectedPaymentMethod!, 
+        paidPerson: _paidPersonController.text, 
+        receivedPerson: _receivePersonController.text, 
+        paymentNote: _paymentNoteController.text, 
+        status: 'Draft', 
+        settled: 'No'
+        );
+        await ApiService().postPayment(newPayment);
       print('Saving to database:');
-      print('Settlement Data: $paymentData');
+      print('Settlement Data: $newPayment');
       
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Cashpayment Data saved successfully!!")));
-      Navigator.pop(context);
+      // Navigator.pop(context);
+      } catch (e) {
+        print("Fail to load cash $e");
+      }
     }
   }
 
@@ -375,7 +400,7 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
                             return "Enter a valid amount";
                           }
                           if (amount <= 0) {
-                            return "Your Request Amount must be greater than 0";
+                            return "payment Amount must be greater than 0";
                           }
                           return null;
                         },

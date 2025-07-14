@@ -1,25 +1,17 @@
-import 'package:advance_budget_request_system/views/budgetUISample.dart';
-import 'package:advance_budget_request_system/views/cashpaymentEntry.dart';
-import 'package:advance_budget_request_system/views/cashpaymentsettlemententry.dart';
 
+// import 'package:advance_budget_request_system/views/tripForm.dart';
+import 'package:advance_budget_request_system/views/budgetamounts.dart';
+import 'package:advance_budget_request_system/views/budgetinformation.dart';
+// import 'package:advance_budget_request_system/views/data.dart';
+// import 'package:advance_budget_request_system/views/triptable.dart';
 import 'package:flutter/material.dart';
 
 
 void main(){
   runApp( 
-    // ChangeNotifierProvider(
-    //   create: (context) => UserProvider(),
-    //   child: const MaterialApp(
-    //   debugShowCheckedModeBanner: false,
-    // //  home: Dashboard(),
-    //  home: Login(),
-    // )
-    //)
     MaterialApp(
       
-      home: AdvancePage(),
-      //home:AdvanceRequestPage(),
-     // home: AdvanceRequestPage(),
+      home:BudgetAmount(),
       debugShowCheckedModeBanner: false,
     )
   );

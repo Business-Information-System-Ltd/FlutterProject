@@ -194,7 +194,6 @@ class AdvanceRequest(models.Model):
         ('Trip', 'Trip'),
         ('Operation', 'Operation')
     ])
-    # Keep the separate foreign keys but make them nullable
     Trip_ID = models.ForeignKey(
         Trip, 
         on_delete=models.CASCADE, 

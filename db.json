@@ -1,201 +1,756 @@
 {
-  "budgets":[
+  "budgets": [
     {
-      "id": 1,
+      "id": "1",
       "BudgetCode": "B-1",
-      "BudgetDescription": "For Expense",
-      "InitialAmount": 0
+      "BudgetDescription": "For Expenses",
+      "InitialAmount": 70000
     },
     {
-      "id": 2,
+      "id": "2",
       "BudgetCode": "B-2",
       "BudgetDescription": "For Marketing",
-      "InitialAmount": 0
+      "InitialAmount": 400
     },
     {
-      "id": 3,
+      "id": "3",
       "BudgetCode": "B-3",
       "BudgetDescription": "For Advertising",
       "InitialAmount": 0
     },
     {
-      "id": 4,
+      "id": "4",
       "BudgetCode": "B-4",
-      "BudgetDescription": "For Repair and Maintenance",
+      "BudgetDescription": "For Repair and Maintenancee",
+      "InitialAmount": 0
+    },
+    {
+      "id": "7",
+      "BudgetCode": "B6",
+      "BudgetDescription": "for test",
+      "InitialAmount": 0
+    },
+    {
+      "id": "8",
+      "BudgetCode": "B8",
+      "BudgetDescription": "stringId",
+      "InitialAmount": 0
+    },
+    {
+      "id": "9",
+      "BudgetCode": "B10",
+      "BudgetDescription": "Budget for edits",
       "InitialAmount": 0
     }
   ],
   "projects": [
     {
-      
+      "id": "1",
+      "Date": "2025-06-27",
+      "ProjectCode": "PRJ_000_001",
+      "ProjectDescription": "Project-1",
+      "TotalAmount": 20000,
+      "Currency": "MMK",
+      "ApprovedAmount": 20000,
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "Requestable": "Yes",
+      "BudgetDetails": [
+        {
+          "id": 1,
+          "BudgetCode": "B-1",
+          "BudgetDescription": "For Expense",
+          "InitialAmount": 0
+        },
+        {
+          "id": 3,
+          "BudgetCode": "B-3",
+          "BudgetDescription": "For Advertising",
+          "InitialAmount": 0
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "Date": "2025-06-27",
+      "ProjectCode": "PRJ_000_002",
+      "ProjectDescription": "Project-2",
+      "TotalAmount": 30000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "Requestable": "Pending",
+      "BudgetDetails": [
+        {
+          "id": 1,
+          "BudgetCode": "B-1",
+          "BudgetDescription": "For Expense",
+          "InitialAmount": 0
+        },
+        {
+          "id": 3,
+          "BudgetCode": "B-3",
+          "BudgetDescription": "For Advertising",
+          "InitialAmount": 0
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "Date": "2025-06-27",
+      "ProjectCode": "PRJ_000_003",
+      "ProjectDescription": "Project-3",
+      "TotalAmount": 2000,
+      "Currency": "USD",
+      "ApprovedAmount": 2000,
+      "DepartmentID": 2,
+      "DepartmentName": "Marketing",
+      "Requestable": "Yes",
+      "BudgetDetails": [
+        {
+          "id": 1,
+          "BudgetCode": "B-1",
+          "BudgetDescription": "For Expense",
+          "InitialAmount": 0
+        },
+        {
+          "id": 3,
+          "BudgetCode": "B-3",
+          "BudgetDescription": "For Advertising",
+          "InitialAmount": 0
+        }
+      ]
+    }
+  ],
+  "trips": [
+    {
+      "id": "1",
+      "Date": "2025-06-27",
+      "TripCode": "TRP_000_001",
+      "TripDescription": "Trip 1",
+      "TotalAmount": 20000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "Yes",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": 1,
+          "BudgetCode": "B-1",
+          "BudgetDescription": "For Expense",
+          "InitialAmount": 0
+        },
+        {
+          "id": 3,
+          "BudgetCode": "B-3",
+          "BudgetDescription": "For Advertising",
+          "InitialAmount": 0
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "Date": "2025-06-27",
+      "TripCode": "TRP_000_002",
+      "TripDescription": "Trip 2",
+      "TotalAmount": 30000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "Yes",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": 1,
+          "BudgetCode": "B-1",
+          "BudgetDescription": "For Expense",
+          "InitialAmount": 0
+        },
+        {
+          "id": 3,
+          "BudgetCode": "B-3",
+          "BudgetDescription": "For Advertising",
+          "InitialAmount": 0
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "Date": "2025-06-27",
+      "TripCode": "TRP_000_003",
+      "TripDescription": "Trip 3",
+      "TotalAmount": 2000,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "Status": "Yes",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": 1,
+          "BudgetCode": "B-1",
+          "BudgetDescription": "For Expense",
+          "InitialAmount": 0
+        },
+        {
+          "id": 3,
+          "BudgetCode": "B-3",
+          "BudgetDescription": "For Advertising",
+          "InitialAmount": 0
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "Date": "2025-07-24T00:00:00.000",
+      "TripCode": "TRP_001",
+      "TripDescription": "jjj",
+      "TotalAmount": 798,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 300
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 44
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 22
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "Date": "2025-07-10T00:00:00.000",
+      "TripCode": "r",
+      "TripDescription": "kkkk",
+      "Source": "fff",
+      "Destination": "rrr",
+      "DepartureDate": "2025-07-10T00:00:00.000",
+      "ReturnDate": "2025-07-25T00:00:00.000",
+      "OtherPerson": true,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "ff",
+      "TotalAmount": 821,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Engineering",
+      "BudgetDetails": [
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 400
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 4
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 5
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "Date": "2025-07-10T00:00:00.000",
+      "TripCode": "hh",
+      "TripDescription": "nn",
+      "Source": "nm",
+      "Destination": "jp",
+      "DepartureDate": "2025-07-10T00:00:00.000",
+      "ReturnDate": "2025-07-30T00:00:00.000",
+      "OtherPerson": true,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "Ni",
+      "TotalAmount": 1260,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Finance",
+      "BudgetDetails": [
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 30
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 90
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 40
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "Date": "2025-07-11T00:00:00.000",
+      "TripCode": "TRP_0012",
+      "TripDescription": "nn",
+      "Source": "hh",
+      "Destination": "kk",
+      "DepartureDate": "2025-07-11T00:00:00.000",
+      "ReturnDate": "2025-07-19T00:00:00.000",
+      "OtherPerson": true,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "May",
+      "TotalAmount": 1130,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Finance",
+      "BudgetDetails": [
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 90
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 80
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 70
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "Date": "2025-07-11T00:00:00.000",
+      "TripCode": "TRP_0012",
+      "TripDescription": "nn",
+      "Source": "hh",
+      "Destination": "ko",
+      "DepartureDate": "2025-07-11T00:00:00.000",
+      "ReturnDate": "2025-07-19T00:00:00.000",
+      "OtherPerson": true,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "May",
+      "TotalAmount": 1130,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Finance",
+      "BudgetDetails": [
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 90
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 80
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 70
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "Date": "2025-07-11T00:00:00.000",
+      "TripCode": "TRP_0023",
+      "TripDescription": "test",
+      "Source": "mdy",
+      "Destination": "Ygn",
+      "DepartureDate": "2025-07-11T00:00:00.000",
+      "ReturnDate": "2025-07-17T00:00:00.000",
+      "OtherPerson": false,
+      "RoundTrip": true,
+      "DirectAdvance": true,
+      "ExpenditureOption": 0,
+      "RequesterName": "John Doe",
+      "TotalAmount": 10900,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 700
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 800
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 900
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "Date": "2025-07-11T00:00:00.000",
+      "TripCode": "k",
+      "TripDescription": "k",
+      "Source": "l",
+      "Destination": "n",
+      "DepartureDate": "2025-07-11T12:09:47.928",
+      "ReturnDate": "2025-07-11T12:09:47.928",
+      "OtherPerson": false,
+      "RoundTrip": false,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "John Doe",
+      "TotalAmount": 0,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 0
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 0
+        },
+        {
+          "id": 0,
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 0
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "id": "1",
+      "Date": "2025-06-27",
+      "OperationCode": "OPR_000_001",
+      "OperationDescription": "Trip 2",
+      "TotalAmount": 30000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "Yes",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin"
     }
   ],
   "advanceRequests": [
     {
-      "id": 1,
-      "requestNo": "AR001",
-      "requestAmount": 1000,
-      "currency": "USD",
-      "status": "Approved"
+      "id": "1",
+      "Date": "2025-06-11",
+      "RequestNo": "Req_001",
+      "RequestCode": "PRJ_000_001",
+      "RequestDescription": "Project 1",
+      "RequestType": "USD",
+      "RequestAmount": 30000,
+      "Currency": "MMK",
+      "Requester": "May",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "ApprovedAmount": 2000,
+      "Purpose": "for MMK",
+      "Status": "Approve"
     },
     {
-      "id": 2,
-      "requestNo": "AR002",
-      "requestAmount": 2000,
-      "currency": "MMK",
-      "status": "Pending"
+      "id": "2",
+      "Date": "2025-06-11",
+      "RequestNo": "Req_001",
+      "RequestCode": "PRJ_000_001",
+      "RequestDescription": "Project 1",
+      "RequestType": "USD",
+      "RequestAmount": 30000,
+      "Currency": "MMK",
+      "Requester": "May",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "ApprovedAmount": 2000,
+      "Purpose": "for MMK",
+      "Status": "Approve"
+    },
+    {
+      "id": "3",
+      "Date": "2025-07-01",
+      "RequestNo": "Req_000_001",
+      "RequestCode": "PRJ_000_003",
+      "RequestDescription": "Project-3",
+      "RequestType": "Project",
+      "RequestAmount": 4000,
+      "Currency": "USD",
+      "Requester": "yy",
+      "DepartmentName": "Admin",
+      "ApprovedAmount": 0,
+      "Purpose": "for test",
+      "Status": "Pending"
+    },
+    {
+      "id": "4",
+      "Date": "2025-07-01",
+      "RequestNo": "Req_000_001",
+      "RequestCode": "TRP_000_002",
+      "RequestDescription": "Trip 2",
+      "RequestType": "Trip",
+      "RequestAmount": 7000,
+      "Currency": "MMK",
+      "Requester": "uu",
+      "DepartmentName": "Admin",
+      "ApprovedAmount": 0,
+      "Purpose": "for test 2",
+      "Status": "Pending"
+    },
+    {
+      "id": "5",
+      "Date": "2025-07-01",
+      "RequestNo": "Req_000_001",
+      "RequestCode": "PRJ_000_001",
+      "RequestDescription": "Project-1",
+      "RequestType": "Project",
+      "RequestAmount": 100,
+      "Currency": "MMK",
+      "Requester": "Riel",
+      "DepartmentName": "Admin",
+      "ApprovedAmount": 0,
+      "Purpose": "for cash",
+      "Status": "Pending"
     }
   ],
   "payments": [
     {
-      "id": 1,
-      "paymentNo": "P001",
-      "date": "2025-06-10",
-      "paymentAmount": 500,
-      "currency": "USD",
-      "status": "Completed",
-      "paymentMethod": "Cash",
-      "advanceRequestId": 1
+      "id": "1",
+      "Date": "2025-06-27",
+      "PaymentNo": "Pay001",
+      "RequestNo": "Req_000_001",
+      "RequestType": "Project",
+      "PaymentAmount": 20000,
+      "Currency": "MMK",
+      "PaymentMethod": "Cash",
+      "PaidPerson": "Kelvin",
+      "ReceivedPerson": "Alice",
+      "PaymentNote": "for cash",
+      "Status": "Draft",
+      "Settled": "No"
     },
     {
-      "id": 2,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "2",
+      "Date": "2025-06-28",
+      "PaymentNo": "Pay002",
+      "RequestNo": "Req_000_002",
+      "RequestType": "Trip",
+      "PaymentAmount": 2000,
+      "Currency": "USD",
+      "PaymentMethod": "Cash",
+      "PaidPerson": "Riel",
+      "ReceivedPerson": "William",
+      "PaymentNote": "for Trip",
+      "Status": "Posted",
+      "Settled": "No"
     },
     {
-      "id": 3,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "3",
+      "Date": "2025-06-28",
+      "PaymentNo": "Pay003",
+      "RequestNo": "Req_000_003",
+      "RequestType": "Project",
+      "PaymentAmount": 200,
+      "Currency": "USD",
+      "PaymentMethod": "Cash",
+      "PaidPerson": "Julia",
+      "ReceivedPerson": "Yuri",
+      "PaymentNote": "for Project",
+      "Status": "Posted",
+      "Settled": "No"
     },
     {
-      "id": 4,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "4",
+      "Date": "2025-06-29",
+      "PaymentNo": "Pay004",
+      "RequestNo": "Req_000_004",
+      "RequestType": "Project",
+      "PaymentAmount": 200000,
+      "Currency": "MMK",
+      "PaymentMethod": "Cash",
+      "PaidPerson": "Emily",
+      "ReceivedPerson": "O",
+      "PaymentNote": "for Project",
+      "Status": "Posted",
+      "Settled": "No"
     },
     {
-      "id": 5,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "16",
+      "Date": "2025-07-02",
+      "PaymentNo": "Pay_001",
+      "RequestNo": "Req_000_001",
+      "RequestType": "Project",
+      "PaymentAmount": 900,
+      "Currency": "MMK",
+      "PaymentMethod": "Bank",
+      "PaidPerson": "JJ",
+      "ReceivedPerson": "oo",
+      "PaymentNote": "cc",
+      "Status": "Draft",
+      "Settled": "No",
+      "Requests": null
     },
     {
-      "id": 6,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "17",
+      "Date": "2025-07-02",
+      "PaymentNo": "Pay_001",
+      "RequestNo": "Req_000_001",
+      "RequestType": "Project",
+      "PaymentAmount": 800,
+      "Currency": "USD",
+      "PaymentMethod": "Cheque",
+      "PaidPerson": "yuri",
+      "ReceivedPerson": "daisy",
+      "PaymentNote": "jojo",
+      "Status": "Draft",
+      "Settled": "No",
+      "Requests": null
+    }
+  ],
+  "settlements": [
+    {
+      "id": "1",
+      "SettlementDate": "2025-06-23",
+      "PaymentNo": "Pay_004",
+      "PaymentDate": "2025-06-20",
+      "WithdrawnAmount": 20000,
+      "SettleAmount": 15000,
+      "RefundAmount": 5000,
+      "Settled": "Yes",
+      "Payments": [
+        {
+          "id": 4,
+          "Date": "2025-06-29",
+          "PaymentNo": "Pay004",
+          "RequestNo": "Req_000_004",
+          "RequestType": "Project",
+          "PaymentAmount": 200000,
+          "Currency": "MMK",
+          "PaymentMethod": "Cash",
+          "PaidPerson": "Emily",
+          "ReceivedPerson": "O",
+          "PaymentNote": "for Project",
+          "Status": "Posted",
+          "Settled": "No"
+        }
+      ]
     },
     {
-      "id": 7,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "2",
+      "SettlementDate": "2025-06-23",
+      "PaymentNo": "Pay_002",
+      "PaymentDate": "2025-06-20",
+      "WithdrawnAmount": 10000,
+      "SettleAmount": 1000,
+      "RefundAmount": 9000,
+      "Settled": "Yes",
+      "Payments": []
     },
     {
-      "id": 8,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "3",
+      "SettlementDate": "2025-06-23",
+      "PaymentNo": "Pay_003",
+      "PaymentDate": "2025-06-20",
+      "WithdrawnAmount": 5000,
+      "SettleAmount": 1000,
+      "RefundAmount": 4000,
+      "Settled": "Yes",
+      "Payments": []
     },
     {
-      "id": 9,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "4",
+      "SettlementDate": "2025-06-23",
+      "PaymentNo": "Pay_004",
+      "PaymentDate": "2025-06-20",
+      "WithdrawnAmount": 100000,
+      "SettleAmount": 50000,
+      "RefundAmount": 50000,
+      "Settled": "Yes",
+      "Payments": []
+    }
+  ],
+  "settlementDetails": [
+    {
+      "id": "1",
+      "BudgetCode": "B-1",
+      "Description": "For expense",
+      "SettledAmount": 5000,
+      "SettlementID": 1
     },
     {
-      "id": 10,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "2",
+      "BudgetCode": "B-3",
+      "Description": "For Advertising",
+      "SettledAmount": 5000,
+      "SettlementID": 1
     },
     {
-      "id": 11,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
-    },
-    {
-      "id": 12,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
-    },
-    {
-      "id": 13,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
-    },
-    {
-      "id": 14,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 300,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
-    },
-    {
-      "id": 15,
-      "paymentNo": "P002",
-      "date": "2025-06-11",
-      "paymentAmount": 7000000,
-      "currency": "MMK",
-      "status": "Completed",
-      "paymentMethod": "Bank Transfer",
-      "advanceRequestId": 1
+      "id": "3",
+      "BudgetCode": "B-2",
+      "Description": "For Marketing",
+      "SettledAmount": 5000,
+      "SettlementID": 1
     }
   ]
 }

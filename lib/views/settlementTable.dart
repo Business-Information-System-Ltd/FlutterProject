@@ -92,7 +92,7 @@ class _SettlementTableState extends State<SettlementTable> {
   void fetchData() async {
     List<Settlement> settled = await ApiService().fetchSettlements();
       final formatter = NumberFormat('#,##0');
-    setState(() {
+    setState(() {   
       settles = settled;
       rows = settles.map((settled) {
         return PlutoRow(cells: {
