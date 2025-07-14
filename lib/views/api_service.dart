@@ -1,11 +1,15 @@
 import 'dart:convert';
+import 'dart:core';
 import 'package:advance_budget_request_system/views/data.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
   static String url = "http://127.0.0.1:8000/api/budget/";
+  
   static const String baseUrl =
-      'http://bizsoft.southeastasia.cloudapp.azure.com:3000';
+      'http://localhost:3000';
+      //  static const String baseUrl =
+      // 'http://bizsoft.southeastasia.cloudapp.azure.com:3000';
   static String projectEndPoint = "http://127.0.0.1:8000/api/project/";
   final String projectBudgetEndPoint =
       "http://127.0.0.1:8000/api/projectbudget/";
@@ -311,32 +315,32 @@ class ApiService {
   }
 
 // advance request
-  Future<List<AdvanceRequest>> fetchAdvanceRequestData() async {
-    final response = await http.get(Uri.parse(advanceRequestEndPoint));
-    if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
-      return body.map((dynamic item) => AdvanceRequest.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load Advance Requests');
-    }
-  }
+  // Future<List<AdvanceRequest>> fetchAdvanceRequestData() async {
+  //   final response = await http.get(Uri.parse(advanceRequestEndPoint));
+  //   if (response.statusCode == 200) {
+  //     List<dynamic> body = json.decode(response.body);
+  //     return body.map((dynamic item) => AdvanceRequest.fromJson(item)).toList();
+  //   } else {
+  //     throw Exception('Failed to load Advance Requests');
+  //   }
+  // }
 
-  Future<void> postAdvanceRequest(AdvanceRequest newAdvance) async {
-    print("Posting advance request: ${newAdvance.toJson()}");
-    final response = await http.post(Uri.parse(advanceRequestEndPoint),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(newAdvance.toJson()));
-    print(response.statusCode);
-    print(response.body);
-    if (response.statusCode != 201) {
-      throw Exception(
-          'Failed to insert Advance Request ${response.statusCode} + ${response.body}');
+  // Future<void> postAdvanceRequest(AdvanceRequest newAdvance) async {
+  //   print("Posting advance request: ${newAdvance.toJson()}");
+  //   final response = await http.post(Uri.parse(advanceRequestEndPoint),
+  //       headers: <String, String>{
+  //         'Content-Type': 'application/json; charset=UTF-8',
+  //       },
+  //       body: jsonEncode(newAdvance.toJson()));
+  //   print(response.statusCode);
+  //   print(response.body);
+  //   if (response.statusCode != 201) {
+  //     throw Exception(
+  //         'Failed to insert Advance Request ${response.statusCode} + ${response.body}');
 
-      // print('Request can create successfully!');
-    }
-  }
+  //     // print('Request can create successfully!');
+  //   }
+  // }
 
   Future<String> fetchNextAdvanceCode() async {
     final response =
@@ -576,25 +580,218 @@ class ApiService {
     }
   }
 
+  
+
   //testing
 
+  //Budgets
+  Future<List<Budgets>> fetchBudgets() async {
+    final response = await http.get(Uri.parse('$baseUrl/budgets'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((e) => Budgets.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load budgets');
+    }
+  }
+
+  Future<void> postBudgets(Budgets budget) async {
+    final response=await http.post(
+      Uri.parse('$baseUrl/budgets'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(budget.toJson()),
+    );
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode!=201) {
+      throw Exception('Fail to insert budget');
+    }
+  }
+
+   Future<bool> updateBudgets(Budgets budget) async {
+  final response = await http.put(
+    Uri.parse('$baseUrl/budgets/${budget.id}'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: json.encode(budget.toJson()),
+  );
+
+  print("Response Status Code: ${response.statusCode}");
+  print("Response Body: ${response.body}");
+
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    throw Exception('Failed to update budget: ${response.statusCode} - ${response.body}');
+  }
+}
+
+
+
+  Future<void> deleteBudgets(String budgetId) async {
+    final response = await http.delete(Uri.parse('$baseUrl/budgets/$budgetId'));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+          'Failed to delete budget. Status code: ${response.statusCode}- ${response.body}');
+    }
+  }
+
+  //Projects
+  Future<List<Project>> fetchProjects() async {
+    final response = await http.get(Uri.parse('$baseUrl/projects'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((e) => Project.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load projects');
+    }
+  }
+
+  Future<void> postProjects(Project project) async {
+    final response=await http.post(
+      Uri.parse('$baseUrl/projects'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(project.toJson()),
+    );
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode!=201) {
+      throw Exception('Fail to insert Project');
+    }
+  }
+
+   //updateProject
+  Future<void> updateProject(Project updatedProject) async {
+    final jsonData = updatedProject.toJson();
+    print("Sending updated JSON data: $jsonData");
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/projects/${updatedProject.id}/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(jsonData), // Send the JSON data
+    );
+
+    print("API Response Status: ${response.statusCode}");
+    print("API Response Body: ${response.body}");
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update project: ${response.body}');
+    }
+  }
+
+
+  //GetProjectByID
+  Future<List<Project>> getProjectById(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/projects/$id'));
+    return jsonDecode(response.body);
+  }
+
+  Future<void> deleteProjects(String projectID) async {
+    final response = await http.delete(Uri.parse('$baseUrl/projects/$projectID/'));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+          'Failed to delete project. Status code: ${response.statusCode}');
+    }
+  }
+
+  //Trips
+  Future<List<Trips>> fetchTrips() async {
+    final response = await http.get(Uri.parse('$baseUrl/trips'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((e) => Trips.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load trips');
+    }
+  }
+
+  Future<void> postTrips(Trips trips) async {
+    final response=await http.post(
+      Uri.parse('$baseUrl/trips'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(trips.toJson()),
+    );
+    print(response.statusCode);
+    print(response.body);
+    if(response.statusCode!=201){
+      throw Exception('Fail to insert Trip');
+    }
+  }
+
+   //updateTrip
+
+   Future<void> updateTrip(Trips trip) async {
+    try {
+      // First verify the trip exists
+      final existingTrip = await getTripById(trip.id);
+      if (existingTrip == null) {
+        throw Exception('Trip with ID ${trip.id} does not exist');
+      }
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/trips/${trip.id}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode(trip.toJson()),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Failed to update trip ${trip.id}: ${response.statusCode}\n${response.body}'
+        );
+      }
+    } catch (e) {
+      print('Error updating trip ${trip.id}: $e');
+      rethrow;
+    }
+  }
+
+  //GetTripByID
+  Future<List<Trips>> getTripById(String id) async {
+    final response = await http.get(Uri.parse('$baseUrl/trips/$id'));
+    return jsonDecode(response.body);
+  }
+  
+  Future<void> deleteTrips(String tripID) async {
+    final response = await http.delete(Uri.parse('$baseUrl/trips/$tripID/'));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+          'Failed to delete trip. Status code: ${response.statusCode}');
+    }
+  }
+
+  //operation
+
+
+
   // Advance Requests
-  Future<List<AdvanceRequest>> fetchAdvanceRequests() async {
+  Future<List<Advance>> fetchAdvanceRequests() async {
     final response = await http.get(Uri.parse('$baseUrl/advanceRequests'));
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
-      return data.map((e) => AdvanceRequest.fromJson(e)).toList();
+      return data.map((e) => Advance.fromJson(e)).toList();
     } else {
       throw Exception('Failed to load Advance Requests');
     }
   }
 
-  Future<void> postAdvanceRequests(AdvanceRequest request) async {
-    await http.post(
+  Future<void> postAdvanceRequests(Advance request) async {
+    final response = await http.post(
       Uri.parse('$baseUrl/advanceRequests'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(request.toJson()),
     );
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode != 201) {
+      throw Exception('Failed to insert Advance');
+      // print('Request can create successfully!');
+    }
   }
 
   // Payments
@@ -602,6 +799,7 @@ class ApiService {
     final response = await http.get(Uri.parse('$baseUrl/payments'));
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
+      print('API Response: $data'); 
       return data.map((e) => Payment.fromJson(e)).toList();
     } else {
       throw Exception('Failed to load Payments');
@@ -609,11 +807,17 @@ class ApiService {
   }
 
   Future<void> postPayment(Payment payment) async {
-    await http.post(
+    final response=await http.post(
       Uri.parse('$baseUrl/payments'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(payment.toJson()),
     );
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode!=201) {
+      throw Exception('Failed to insert payment');
+    }
+
   }
 
   //updatePayment
@@ -653,11 +857,17 @@ class ApiService {
   }
 
   Future<void> postSettlement(Settlement settlement) async {
-    await http.post(
+    final response = await http.post(
       Uri.parse('$baseUrl/settlements'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(settlement.toJson()),
     );
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode != 201) {
+      throw Exception('Failed to insert Settlement');
+      // print('Request can create successfully!');
+    }
   }
 
   //getSettlementbyID
@@ -691,6 +901,31 @@ class ApiService {
     } else {
       throw Exception(
           'Failed to load paginated settlements: ${response.statusCode}');
+    }
+  }
+
+  //SettlementDetail
+  Future<List<SettlementDetail>> fetchSettlementDetail() async {
+    final response = await http.get(Uri.parse('$baseUrl/settlementDetails'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((e) => SettlementDetail.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load SettlementDetail');
+    }
+  }
+
+  Future<void> postSettlementDetail(SettlementDetail settlement) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/settlementDetails'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(settlement.toJson()),
+    );
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode != 201) {
+      throw Exception('Failed to insert Settlement');
+      // print('Request can create successfully!');
     }
   }
 }

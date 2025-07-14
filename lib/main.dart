@@ -1,22 +1,17 @@
 
-import 'package:advance_budget_request_system/views/login.dart';
+// import 'package:advance_budget_request_system/views/tripForm.dart';
+import 'package:advance_budget_request_system/views/budgetamounts.dart';
+// import 'package:advance_budget_request_system/views/data.dart';
+// import 'package:advance_budget_request_system/views/triptable.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:advance_budget_request_system/views/permission.dart'; 
+
 
 void main(){
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => UserProvider(),
-      child: const MaterialApp(
+  runApp( 
+    MaterialApp(
+      
+      home:BudgetAmount(),
       debugShowCheckedModeBanner: false,
-    //  home: Dashboard(),
-     home: Login(),
     )
-    )
-    // MaterialApp(
-    //   home: PaymentGridPage(),
-    //   debugShowCheckedModeBanner: false,
-    // )
   );
 }
