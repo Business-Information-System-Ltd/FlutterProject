@@ -57,13 +57,13 @@
       "Requestable": "Yes",
       "BudgetDetails": [
         {
-          "id": 1,
+          "id": "1",
           "BudgetCode": "B-1",
           "BudgetDescription": "For Expense",
           "InitialAmount": 0
         },
         {
-          "id": 3,
+          "id": "3",
           "BudgetCode": "B-3",
           "BudgetDescription": "For Advertising",
           "InitialAmount": 0
@@ -83,13 +83,13 @@
       "Requestable": "Pending",
       "BudgetDetails": [
         {
-          "id": 1,
+          "id": "1",
           "BudgetCode": "B-1",
           "BudgetDescription": "For Expense",
           "InitialAmount": 0
         },
         {
-          "id": 3,
+          "id": "3",
           "BudgetCode": "B-3",
           "BudgetDescription": "For Advertising",
           "InitialAmount": 0
@@ -109,13 +109,13 @@
       "Requestable": "Yes",
       "BudgetDetails": [
         {
-          "id": 1,
+          "id": "1",
           "BudgetCode": "B-1",
           "BudgetDescription": "For Expense",
           "InitialAmount": 0
         },
         {
-          "id": 3,
+          "id": "3",
           "BudgetCode": "B-3",
           "BudgetDescription": "For Advertising",
           "InitialAmount": 0
@@ -137,13 +137,13 @@
       "DepartmentName": "Admin",
       "BudgetDetails": [
         {
-          "id": 1,
+          "id": "1",
           "BudgetCode": "B-1",
           "BudgetDescription": "For Expense",
           "InitialAmount": 0
         },
         {
-          "id": 3,
+          "id": "3",
           "BudgetCode": "B-3",
           "BudgetDescription": "For Advertising",
           "InitialAmount": 0
@@ -163,13 +163,13 @@
       "DepartmentName": "Admin",
       "BudgetDetails": [
         {
-          "id": 1,
+          "id": "1",
           "BudgetCode": "B-1",
           "BudgetDescription": "For Expense",
           "InitialAmount": 0
         },
         {
-          "id": 3,
+          "id": "3",
           "BudgetCode": "B-3",
           "BudgetDescription": "For Advertising",
           "InitialAmount": 0
@@ -189,13 +189,13 @@
       "DepartmentName": "Admin",
       "BudgetDetails": [
         {
-          "id": 1,
+          "id": "1",
           "BudgetCode": "B-1",
           "BudgetDescription": "For Expense",
           "InitialAmount": 0
         },
         {
-          "id": 3,
+          "id": "3",
           "BudgetCode": "B-3",
           "BudgetDescription": "For Advertising",
           "InitialAmount": 0
@@ -203,7 +203,7 @@
       ]
     },
     {
-      "id": 4,
+      "id": "4",
       "Date": "2025-07-24T00:00:00.000",
       "TripCode": "TRP_001",
       "TripDescription": "jjj",
@@ -215,19 +215,19 @@
       "DepartmentName": "Admin",
       "BudgetDetails": [
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Ticket",
           "InitialAmount": 300
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Local Transport",
           "InitialAmount": 44
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Peridium",
           "InitialAmount": 22
@@ -235,7 +235,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": "5",
       "Date": "2025-07-10T00:00:00.000",
       "TripCode": "r",
       "TripDescription": "kkkk",
@@ -256,19 +256,19 @@
       "DepartmentName": "Engineering",
       "BudgetDetails": [
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Ticket",
           "InitialAmount": 400
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Local Transport",
           "InitialAmount": 4
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Peridium",
           "InitialAmount": 5
@@ -276,7 +276,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": "6",
       "Date": "2025-07-10T00:00:00.000",
       "TripCode": "hh",
       "TripDescription": "nn",
@@ -297,19 +297,19 @@
       "DepartmentName": "Finance",
       "BudgetDetails": [
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Ticket",
           "InitialAmount": 30
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Local Transport",
           "InitialAmount": 90
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Peridium",
           "InitialAmount": 40
@@ -317,7 +317,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": "6",
       "Date": "2025-07-11T00:00:00.000",
       "TripCode": "TRP_0012",
       "TripDescription": "nn",
@@ -338,19 +338,19 @@
       "DepartmentName": "Finance",
       "BudgetDetails": [
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Ticket",
           "InitialAmount": 90
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Local Transport",
           "InitialAmount": 80
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Peridium",
           "InitialAmount": 70
@@ -358,7 +358,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": "6",
       "Date": "2025-07-11T00:00:00.000",
       "TripCode": "TRP_0012",
       "TripDescription": "nn",
@@ -379,19 +379,19 @@
       "DepartmentName": "Finance",
       "BudgetDetails": [
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Ticket",
           "InitialAmount": 90
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Local Transport",
           "InitialAmount": 80
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Peridium",
           "InitialAmount": 70
@@ -399,7 +399,7 @@
       ]
     },
     {
-      "id": 7,
+      "id": "7",
       "Date": "2025-07-11T00:00:00.000",
       "TripCode": "TRP_0023",
       "TripDescription": "test",
@@ -420,19 +420,19 @@
       "DepartmentName": "Admin",
       "BudgetDetails": [
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Ticket",
           "InitialAmount": 700
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Local Transport",
           "InitialAmount": 800
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Peridium",
           "InitialAmount": 900
@@ -440,7 +440,7 @@
       ]
     },
     {
-      "id": 8,
+      "id": "8",
       "Date": "2025-07-11T00:00:00.000",
       "TripCode": "k",
       "TripDescription": "k",
@@ -461,19 +461,19 @@
       "DepartmentName": "Admin",
       "BudgetDetails": [
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Ticket",
           "InitialAmount": 0
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Local Transport",
           "InitialAmount": 0
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Peridium",
           "InitialAmount": 0

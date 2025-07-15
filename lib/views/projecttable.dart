@@ -275,7 +275,29 @@ class _ProjectInformationState extends State<ProjectInformation> {
           } else {
             return IconButton(
               icon: Icon(Icons.more_horiz, color: Colors.black),
-              onPressed: () {},
+              onPressed: () {
+                final row = rendererContext.row;
+                    final nonEditableData = {
+                      'id': row.cells['id']?.value,
+                      'date': row.cells['date']?.value,
+                      'projectcode': row.cells['projectcode']?.value,
+                      'description': row.cells['description']?.value,
+                      'totalamount': row.cells['totalamount']?.value.toString(),
+                      'currency': row.cells['currency']?.value,
+                      'department': row.cells['department']?.value,
+                      'requestable': row.cells['requestable']?.value,
+                    };
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddProjectForm(
+                            initialData: nonEditableData,
+                            isEditMode: false,
+                            projectId: row.cells['id']?.value,
+                             readOnly: true),
+                      ),
+                    );
+              },
             );
           }
         },

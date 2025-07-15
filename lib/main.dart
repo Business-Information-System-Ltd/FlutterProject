@@ -1,16 +1,13 @@
 
-// import 'package:advance_budget_request_system/views/tripForm.dart';
-import 'package:advance_budget_request_system/views/budgetamounts.dart';
-// import 'package:advance_budget_request_system/views/data.dart';
-// import 'package:advance_budget_request_system/views/triptable.dart';
+import 'package:advance_budget_request_system/views/collection.dart';
 import 'package:flutter/material.dart';
 
 
 void main(){
   runApp( 
-    MaterialApp(
+    const MaterialApp(
       
-      home:BudgetAmount(),
+      home:Collection(),
       debugShowCheckedModeBanner: false,
     )
   );

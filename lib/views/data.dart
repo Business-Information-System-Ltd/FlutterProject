@@ -807,15 +807,17 @@ class Project {
       id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id'].toString()) ?? 0,
-      date: DateTime.parse(json['Date']),
-      projectCode: json['ProjectCode'] ?? 'pp',
-      projectDescription: json['ProjectDescription'] ?? 'dd',
-      totalAmount: json['TotalAmount'] ?? 5,
-      currency: json['Currency'] ?? 'USD',
-      approvedAmount: json['ApprovedAmount'] ?? 9,
-      departmentId: json['DepartmentID'] ?? 1,
-      departmentName: json['DepartmentName'] ?? 'Engineering',
-      requestable: json['Requestable'] ?? 'Yes',
+      date: json['Date'] != null
+          ? DateFormat('yyyy-MM-dd').parse(json['Date'])
+          : DateTime.now(),
+      projectCode: json['ProjectCode'],
+      projectDescription: json['ProjectDescription'],
+      totalAmount: json['TotalAmount'],
+      currency: json['Currency'],
+      approvedAmount: json['ApprovedAmount'],
+      departmentId: json['DepartmentID'],
+      departmentName: json['DepartmentName'],
+      requestable: json['Requestable'],
       budgets: json['BudgetDetails'] != null
           ? (json['BudgetDetails'] as List)
               .map((item) => Budgets.fromJson(item))
@@ -825,8 +827,8 @@ class Project {
   }
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'Date': date,
+      // 'id': id,
+      'Date': DateFormat('yyyy-MM-dd').format(date),
       'ProjectCode': projectCode,
       'ProjectDescription': projectDescription,
       'TotalAmount': totalAmount,
@@ -839,7 +841,6 @@ class Project {
     };
   }
 }
-
 class Trips {
   final String id;
   final DateTime date;
@@ -886,7 +887,7 @@ class Trips {
 
   factory Trips.fromJson(Map<String, dynamic> json) {
     return Trips(
-      id: json['id'],
+      id: json['id'].toString(),
           // ? json['id']
           // : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       date: DateTime.parse(
@@ -948,6 +949,7 @@ class Trips {
     };
   }
 }
+
 
 class Advance {
   final int id;

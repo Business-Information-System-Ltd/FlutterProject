@@ -6,10 +6,10 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static String url = "http://127.0.0.1:8000/api/budget/";
   
-  static const String baseUrl =
-      'http://localhost:3000';
-      //  static const String baseUrl =
-      // 'http://bizsoft.southeastasia.cloudapp.azure.com:3000';
+  // static const String baseUrl =
+  //     'http://localhost:3000';
+       static const String baseUrl =
+      'http://bizsoft.southeastasia.cloudapp.azure.com:3000';
   static String projectEndPoint = "http://127.0.0.1:8000/api/project/";
   final String projectBudgetEndPoint =
       "http://127.0.0.1:8000/api/projectbudget/";
@@ -649,19 +649,20 @@ class ApiService {
   }
 
   Future<void> postProjects(Project project) async {
-    final response=await http.post(
+    final response = await http.post(
       Uri.parse('$baseUrl/projects'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(project.toJson()),
     );
     print(response.statusCode);
     print(response.body);
-    if (response.statusCode!=201) {
+    if (response.statusCode != 201) {
       throw Exception('Fail to insert Project');
     }
   }
 
-   //updateProject
+  //updateProject
+
   Future<void> updateProject(Project updatedProject) async {
     final jsonData = updatedProject.toJson();
     print("Sending updated JSON data: $jsonData");
@@ -682,21 +683,28 @@ class ApiService {
     }
   }
 
+  
 
-  //GetProjectByID
+
+//  GetProjectByID
   Future<List<Project>> getProjectById(int id) async {
     final response = await http.get(Uri.parse('$baseUrl/projects/$id'));
     return jsonDecode(response.body);
+    
   }
+ 
 
-  Future<void> deleteProjects(String projectID) async {
-    final response = await http.delete(Uri.parse('$baseUrl/projects/$projectID/'));
-    if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception(
-          'Failed to delete project. Status code: ${response.statusCode}');
+
+ Future<void> deleteProjects(int id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/projects/$id'),
+       headers: {'Content-Type': 'application/json'},
+      );
+
+    if (response.statusCode != 200 && response.statusCode!=204) {
+      throw Exception('Failed to delete budget:${response.body}');
     }
   }
-
   //Trips
   Future<List<Trips>> fetchTrips() async {
     final response = await http.get(Uri.parse('$baseUrl/trips'));
@@ -708,21 +716,22 @@ class ApiService {
     }
   }
 
+
   Future<void> postTrips(Trips trips) async {
-    final response=await http.post(
-      Uri.parse('$baseUrl/trips'),
+final response= await http.post( Uri.parse('$baseUrl/trips'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(trips.toJson()),
     );
-    print(response.statusCode);
+     print(response.statusCode);
     print(response.body);
     if(response.statusCode!=201){
       throw Exception('Fail to insert Trip');
     }
+
   }
 
-   //updateTrip
 
+  //updateTrip
    Future<void> updateTrip(Trips trip) async {
     try {
       // First verify the trip exists
@@ -751,19 +760,48 @@ class ApiService {
     }
   }
 
+  // Future<List<Trip>> updateTrip(
+  //     int id, Map<String, dynamic> updatedData) async {
+  //   final response = await http.put(
+  //     Uri.parse('$baseUrl/trips/$id'),
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: jsonEncode(updatedData),
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     print('Trip updated successfully');
+  //     return jsonDecode(response.body); // Return the full response
+  //   } else {
+  //     throw Exception('Failed to update trips: ${response.statusCode}');
+  //   }
+  // }
+
+
   //GetTripByID
-  Future<List<Trips>> getTripById(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/trips/$id'));
-    return jsonDecode(response.body);
+  // Future<List<Trips>> getTripById(int id) async {
+  //   final response = await http.get(Uri.parse('$baseUrl/trips/$id'));
+  //   return jsonDecode(response.body);
+  // }
+  Future<Trips?> getTripById(String id) async {
+  final response = await http.get(Uri.parse('$baseUrl/trips/$id'));
+  if (response.statusCode == 200) {
+    return Trips.fromJson(json.decode(response.body));
   }
-  
-  Future<void> deleteTrips(String tripID) async {
-    final response = await http.delete(Uri.parse('$baseUrl/trips/$tripID/'));
+  return null;
+}
+
+
+ Future<void> deleteTrips(String id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/trips/$id'));
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception(
           'Failed to delete trip. Status code: ${response.statusCode}');
     }
   }
+
+
 
   //operation
 
