@@ -9,7 +9,7 @@ class ApiService {
   // static const String baseUrl =
   //     'http://localhost:3000';
        static const String baseUrl =
-      'http://bizsoft.southeastasia.cloudapp.azure.com:3000';
+      'https://cozy-haupia-be6a32.netlify.app/data.json';
   static String projectEndPoint = "http://127.0.0.1:8000/api/project/";
   final String projectBudgetEndPoint =
       "http://127.0.0.1:8000/api/projectbudget/";

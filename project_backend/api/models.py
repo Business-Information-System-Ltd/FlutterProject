@@ -97,6 +97,15 @@ class Trip(models.Model):
     Department_ID = models.ForeignKey(Department, on_delete=models.CASCADE,db_column='Department_ID') 
     Created_Date = models.DateTimeField(auto_now_add=True)
     Modified_Date = models.DateTimeField(auto_now=True)
+    Source= models.CharField(max_length=50)
+    Destination=models.CharField(max_length=50)
+    DepartureDate=models.DateTimeField()
+    ReturnDate=models.DateTimeField()
+    Other_Person=models.BooleanField(default=False)
+    Round_Trip=models.BooleanField(default=True)
+    Direct_AdvanceRequest=models.BooleanField(default=False)
+    ExpenditureOption=models.BooleanField(default=False)
+    Requester_Name=models.CharField(max_length=100)
 
     class Meta:
         managed = False
