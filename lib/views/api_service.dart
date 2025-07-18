@@ -597,7 +597,7 @@ class ApiService {
 
   Future<void> postBudgets(Budgets budget) async {
     final response=await http.post(
-      Uri.parse('$baseUrl/budgets'),
+      Uri.parse('https://whimsical-ganache-0e1299.netlify.app/budgets.json'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(budget.toJson()),
     );
@@ -610,7 +610,7 @@ class ApiService {
 
    Future<bool> updateBudgets(Budgets budget) async {
   final response = await http.put(
-    Uri.parse('$baseUrl/budgets/${budget.id}'),
+    Uri.parse('https://whimsical-ganache-0e1299.netlify.app/budgets.json/${budget.id}'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -630,7 +630,7 @@ class ApiService {
 
 
   Future<void> deleteBudgets(String budgetId) async {
-    final response = await http.delete(Uri.parse('$baseUrl/budgets/$budgetId'));
+    final response = await http.delete(Uri.parse('https://whimsical-ganache-0e1299.netlify.app/budgets.json/$budgetId'));
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception(
           'Failed to delete budget. Status code: ${response.statusCode}- ${response.body}');
@@ -639,7 +639,7 @@ class ApiService {
 
   //Projects
   Future<List<Project>> fetchProjects() async {
-    final response = await http.get(Uri.parse('$baseUrl/projects'));
+    final response = await http.get(Uri.parse('https://whimsical-ganache-0e1299.netlify.app/projects.json'));
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((e) => Project.fromJson(e)).toList();
@@ -650,7 +650,7 @@ class ApiService {
 
   Future<void> postProjects(Project project) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/projects'),
+      Uri.parse('https://whimsical-ganache-0e1299.netlify.app/projects.json'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(project.toJson()),
     );
@@ -668,7 +668,7 @@ class ApiService {
     print("Sending updated JSON data: $jsonData");
 
     final response = await http.put(
-      Uri.parse('$baseUrl/projects/${updatedProject.id}/'),
+      Uri.parse('https://whimsical-ganache-0e1299.netlify.app/projects.json/${updatedProject.id}/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -688,7 +688,7 @@ class ApiService {
 
 //  GetProjectByID
   Future<List<Project>> getProjectById(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/projects/$id'));
+    final response = await http.get(Uri.parse('https://whimsical-ganache-0e1299.netlify.app/projects.json/$id'));
     return jsonDecode(response.body);
     
   }
@@ -697,7 +697,7 @@ class ApiService {
 
  Future<void> deleteProjects(int id) async {
     final response = await http.delete(
-      Uri.parse('$baseUrl/projects/$id'),
+      Uri.parse('https://whimsical-ganache-0e1299.netlify.app/projects.json/$id'),
        headers: {'Content-Type': 'application/json'},
       );
 
@@ -707,7 +707,7 @@ class ApiService {
   }
   //Trips
   Future<List<Trips>> fetchTrips() async {
-    final response = await http.get(Uri.parse('$baseUrl/trips'));
+    final response = await http.get(Uri.parse('https://whimsical-ganache-0e1299.netlify.app/trips.json'));
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((e) => Trips.fromJson(e)).toList();
@@ -718,7 +718,7 @@ class ApiService {
 
 
   Future<void> postTrips(Trips trips) async {
-final response= await http.post( Uri.parse('$baseUrl/trips'),
+final response= await http.post( Uri.parse('https://whimsical-ganache-0e1299.netlify.app/trips.json'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(trips.toJson()),
     );
@@ -741,7 +741,7 @@ final response= await http.post( Uri.parse('$baseUrl/trips'),
       }
 
       final response = await http.put(
-        Uri.parse('$baseUrl/trips/${trip.id}'),
+        Uri.parse('https://whimsical-ganache-0e1299.netlify.app/trips.json/${trip.id}'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -785,7 +785,7 @@ final response= await http.post( Uri.parse('$baseUrl/trips'),
   //   return jsonDecode(response.body);
   // }
   Future<Trips?> getTripById(String id) async {
-  final response = await http.get(Uri.parse('$baseUrl/trips/$id'));
+  final response = await http.get(Uri.parse('https://whimsical-ganache-0e1299.netlify.app/trips.json/$id'));
   if (response.statusCode == 200) {
     return Trips.fromJson(json.decode(response.body));
   }
@@ -794,7 +794,7 @@ final response= await http.post( Uri.parse('$baseUrl/trips'),
 
 
  Future<void> deleteTrips(String id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/trips/$id'));
+    final response = await http.delete(Uri.parse('https://whimsical-ganache-0e1299.netlify.app/trips.json/$id'));
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception(
           'Failed to delete trip. Status code: ${response.statusCode}');

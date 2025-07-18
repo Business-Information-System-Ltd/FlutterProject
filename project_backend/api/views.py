@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from decimal import Decimal
 from django.db.models.query_utils import Q
 from rest_framework import filters, viewsets
 from django_filters.rest_framework import DjangoFilterBackend
@@ -365,8 +366,8 @@ def filter_advances(request):
         Q(Currency__icontains=search_term) |
         Q(Purpose_Of_Request__icontains=search_term) |
         Q(Project_ID__Project_Code__icontains=search_term) | 
-            Q(Trip_ID__Trip_Code__icontains=search_term) |  
-            Q(Operation_ID__Operation_Code__icontains=search_term)  
+        Q(Trip_ID__Trip_Code__icontains=search_term) |  
+        Q(Operation_ID__Operation_Code__icontains=search_term)  
     ).distinct()
 
     if not advances.exists():
@@ -403,6 +404,61 @@ def get_next_payment_code(request):
     next_id = 1 if not last_request else last_request.ID + 1
     next_code = f"Pay-000-{str(next_id).zfill(3)}"
     return Response({'next_payment_code': next_code})
+
+#search cashpayment by keyword
+@api_view(['GET'])
+def filter_cashpayments(request):
+    search_term = request.query_params.get('search', '').strip()
+
+    if not search_term:
+        return Response(
+            {"error": "Please provide a search term using the 'search' parameter"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        payments = CashPayment.objects.filter(
+            Q(Payment_No__icontains=search_term) |
+            Q(Currency__icontains=search_term) |
+            Q(Payment_Method__icontains=search_term) |
+            Q(Payment_Note__icontains=search_term) |
+            Q(Received_Person__icontains=search_term) |
+            Q(Paid_Person__icontains=search_term) |
+            Q(Payment_Amount__exact=try_parse_decimal(search_term))  # Handle decimal parsing
+        ).distinct()
+
+        if not payments.exists():
+            return Response(
+                {"message": "No payments found matching your search criteria"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = CashPaymentSerializer(payments, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+def try_parse_decimal(value):
+    try:
+        return Decimal(value)
+    except:
+        return None
+    
+#pagination for payments
+class PaymentPagination(PageNumberPagination):
+    page_size=10
+    page_size_query_param="_limit"
+    page_query_param= "_page"
+
+@api_view(['GET'])
+def get_paginated_payments(request):
+    payments= CashPayment.objects.all()
+    paginator=PaymentPagination()
+    paginated_payments=paginator.paginate_queryset(payments,request)
+    serializer=CashPaymentSerializer(paginated_payments,many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 class SettlementViewSet(viewsets.ModelViewSet):
     queryset = Settlement.objects.all().select_related('Payment_ID')
