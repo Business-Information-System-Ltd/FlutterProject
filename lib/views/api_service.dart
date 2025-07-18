@@ -586,7 +586,7 @@ class ApiService {
 
   //Budgets
   Future<List<Budgets>> fetchBudgets() async {
-    final response = await http.get(Uri.parse('$baseUrl/budgets'));
+    final response = await http.get(Uri.parse('https://whimsical-ganache-0e1299.netlify.app/budgets.json'));
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return data.map((e) => Budgets.fromJson(e)).toList();
