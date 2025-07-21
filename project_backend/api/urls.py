@@ -11,7 +11,7 @@
 
 from django.urls import path, include  # Changed import
 from rest_framework.routers import DefaultRouter
-from .views import BudgetViewSet,DepartmentViewSet,UserViewSet, ProjectViewSet, ProjectBudgetViewSet, TripViewSet, TripBudgetViewSet,OperationViewSet,OperationBudgetViewSet,AdvanceRequestViewSet, CashPaymentViewSet,RequestSetUpViewSet,ApproverSetupStepViewSet,SettlementViewSet,SettlementDetailViewSet
+from .views import BudgetViewSet,DepartmentViewSet, RequestSetupFacadeViewSet,UserViewSet, ProjectViewSet, ProjectBudgetViewSet, TripViewSet, TripBudgetViewSet,OperationViewSet,OperationBudgetViewSet,AdvanceRequestViewSet, CashPaymentViewSet,RequestSetUpViewSet,ApproverSetupStepViewSet,SettlementViewSet
 
 router = DefaultRouter()
 router.register(r'budget', BudgetViewSet)
@@ -27,8 +27,10 @@ router.register(r'advancerequest', AdvanceRequestViewSet)
 router.register(r'cashpayment', CashPaymentViewSet)
 router.register(r'requestsetup', RequestSetUpViewSet)
 router.register(r'approversetupstep', ApproverSetupStepViewSet)
-router.register(r'settlement', SettlementViewSet)
-router.register(r'settlementdetail', SettlementDetailViewSet)
+router.register(r'settlement', SettlementViewSet,basename='settlement')
+router.register(r'request-setup-facade', RequestSetupFacadeViewSet, basename='request-setup-facade')
+# router.register(r'settlementdetail', SettlementDetailViewSet)
+
 
 
 urlpatterns = [

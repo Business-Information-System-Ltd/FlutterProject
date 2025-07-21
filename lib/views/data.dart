@@ -1207,3 +1207,84 @@ class SettlementDetail {
     };
   }
 }
+
+class Departments {
+  final String id;
+  final String departmentCode;
+  final String departmentName;
+
+  Departments({
+    required this.id,
+    required this.departmentCode,
+    required this.departmentName
+  });
+
+  factory Departments.fromJson(Map<String, dynamic> json) {
+    return Departments(
+      id: json['id'], 
+      // is int
+      //     ? json['id']
+      //     : int.tryParse(json['id'].toString()) ?? 0,
+      departmentCode: json['DepartmentCode'] ?? '',
+      departmentName: json['DepartmentName'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'DepartmentCode': departmentCode,
+      'DepartmentName': departmentName,
+    };
+  }
+}
+
+class Users{
+  final String id;
+  final String userName;
+  final String userEmail;
+  final String role;
+  final String password;
+  final String departmentID;
+  final String departmentName;
+
+Users({
+  required this.id,
+  required this.userName,
+  required this.userEmail,
+  required this.role,
+  required this.password,
+  required this.departmentID,
+  required this.departmentName
+});
+
+factory Users.fromJson(Map<String, dynamic> json) {
+    return Users(
+      id: json['id'], 
+      // is int
+      //     ? json['id']
+      //     : int.tryParse(json['id'].toString()) ?? 0,
+      userName: json['UserName'] ?? '',
+      userEmail: json['UserEmail']??'',
+      role: json['Role']??'',
+      password: json['Password'],
+      departmentID: json['DepartmentID'],
+      departmentName: json['DepartmentName'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'UserName': userName,
+      'UserEmail': userEmail,
+      'Role': role,
+      'Password':password,
+      'DepartmentID': departmentID,
+      'DepartmentName':departmentName
+    };
+  }
+}
+
+
+

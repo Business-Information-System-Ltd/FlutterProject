@@ -187,12 +187,19 @@ class ApproverSetupStep(models.Model):
     Setup_ID=models.ForeignKey(RequestSetUp, on_delete=models.CASCADE,db_column='Setup_ID',  related_name='approval_steps')
     Step_No=models.IntegerField()
     Maximum_Approval_Amount=models.DecimalField(max_digits=12,decimal_places=2)
-    Approver_Email=models.CharField(max_length=100)  
+    Is_All_Approver= models.CharField(max_length=10, choices=[('One','One'),('All','All')])
+    Limited_Time= models.DateTimeField()
+    Request_Status= models.BooleanField()
+
     class Meta:
         managed = False
         db_table='approver_setup_step'
     def __str__(self):
         return str(self.ID)
+
+
+
+
 
 class AdvanceRequest(models.Model):
     ID = models.AutoField(primary_key=True) 
@@ -289,6 +296,33 @@ class AdvanceRequest(models.Model):
             self.Trip= None
         else:
             raise ValueError("Invalid object type for related_object")
+        
+class ApprovalStatus(models.Model):
+    ID=models.AutoField(primary_key=True)
+    Step_ID=models.ForeignKey(ApproverSetupStep, on_delete=models.CASCADE,db_column='Step_ID',  related_name='approval_status')
+    Step_No=models.IntegerField()
+    Request_ID=models.ForeignKey(AdvanceRequest,on_delete=models.CASCADE, db_column="Request_ID",related_name="approval_status")
+    Is_All_Approver= models.CharField(max_length=10, choices=[('One','One'),('All','All')])
+    Comment= models.TextField()
+    Response_Date= models.DateTimeField()
+    Status=models.CharField(max_length=10, choices=[("Pending","Pending"), ("Progress","Progress"),("Approved","Approved"),("Reject","Reject")])
+
+    class Meta:
+        managed = False
+        db_table='approval_status'
+    def __str__(self):
+        return str(self.ID) 
+
+class UserApproval(models.Model):
+    ID=models.AutoField(primary_key=True)
+    User_ID=models.ForeignKey(User, on_delete=models.CASCADE,db_column='User_ID',  related_name='user_approval')
+    Setup_Step_ID= models.ForeignKey(ApproverSetupStep,on_delete=models.CASCADE,db_column="Setup_Step_ID", related_name="user_approval")
+    class Meta:
+        managed = False
+        db_table='user_approval'
+    def __str__(self):
+        return str(self.ID) 
+
 
 class CashPayment(models.Model):
     ID = models.AutoField(primary_key=True) 

@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from decimal import Decimal
 from django.db.models.query_utils import Q
+from .services import SettlementService
 from rest_framework import filters, viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
-from .models import Budget,Department,User,Project,ProjectBudget,Trip,TripBudget,Operation,OperationBudget, AdvanceRequest, CashPayment, RequestSetUp, ApproverSetupStep, Settlement,SettlementDetail
-from .serializers import BudgetSerializer,DepartmentSerializer, UserLoginSerializer,UserSerializer, ProjectSerializer, ProjectBudgetSerializer,TripSerializer,TripBudgetSerializer,OperationSerializer,OperationBudgetSerializer,AdvanceRequestSerializer, CashPaymentSerializer,RequestSetUpSerializer, ApproverSetupStepSerializer,SettlementSerializer,SettlementDetailSerializer
+from .models import ApprovalStatus, Budget,Department,User,Project,ProjectBudget,Trip,TripBudget,Operation,OperationBudget, AdvanceRequest, CashPayment, RequestSetUp, ApproverSetupStep, Settlement,SettlementDetail, UserApproval
+from .serializers import ApprovalStatusSerializer, BudgetSerializer,DepartmentSerializer, UserApprovalSerializer, UserLoginSerializer,UserSerializer, ProjectSerializer, ProjectBudgetSerializer,TripSerializer,TripBudgetSerializer,OperationSerializer,OperationBudgetSerializer,AdvanceRequestSerializer, CashPaymentSerializer,RequestSetUpSerializer, ApproverSetupStepSerializer,SettlementSerializer,SettlementDetailSerializer
 
 class BudgetViewSet(viewsets.ModelViewSet):
     queryset = Budget.objects.all()
@@ -393,6 +394,13 @@ def get_paginated_advances(request):
     serializer=AdvanceRequestSerializer(paginated_advances,many=True)
     return paginator.get_paginated_response(serializer.data)
 
+class ApprovalStatusViewSet(viewsets.ModelViewSet):
+    queryset=ApprovalStatus.objects.all()
+    serializer_class=ApprovalStatusSerializer
+
+class UserApprovalViewSet(viewsets.ModelViewSet):
+    queryset=UserApproval.objects.all()
+    serializer_class=UserApprovalSerializer
 
 
 class CashPaymentViewSet(viewsets.ModelViewSet):
@@ -460,42 +468,94 @@ def get_paginated_payments(request):
     serializer=CashPaymentSerializer(paginated_payments,many=True)
     return paginator.get_paginated_response(serializer.data)
 
-class SettlementViewSet(viewsets.ModelViewSet):
-    queryset = Settlement.objects.all().select_related('Payment_ID')
-    serializer_class = SettlementSerializer
-    filter_backends = [
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter
-    ]
-    filterset_fields = {
-        'Payment_ID': ['exact'],
-        'Settlement_Date': ['exact', 'gte', 'lte'],
-        'Currency': ['exact'],
-    }
-    search_fields = ['Payment_ID__some_field']  
-    ordering_fields = ['Settlement_Date', 'Settlement_Amount']
-    ordering = ['-Settlement_Date']
+# class SettlementViewSet(viewsets.ModelViewSet):
+#     queryset = Settlement.objects.all().select_related('Payment_ID')
+#     serializer_class = SettlementSerializer
+#     filter_backends = [
+#         DjangoFilterBackend,
+#         filters.SearchFilter,
+#         filters.OrderingFilter
+#     ]
+#     filterset_fields = {
+#         'Payment_ID': ['exact'],
+#         'Settlement_Date': ['exact', 'gte', 'lte'],
+#         'Currency': ['exact'],
+#     }
+#     search_fields = ['Payment_ID__some_field']  
+#     ordering_fields = ['Settlement_Date', 'Settlement_Amount']
+#     ordering = ['-Settlement_Date']
     
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        # Add any additional filtering logic here
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#         # Add any additional filtering logic here
+#         return queryset.prefetch_related('settlement_details')
+
+# class SettlementDetailViewSet(viewsets.ModelViewSet):
+#     queryset = SettlementDetail.objects.all().select_related(
+#         'Settlement_ID', 
+#         'Budget_ID'
+#     )
+#     serializer_class = SettlementDetailSerializer
+#     filter_backends = [
+#         DjangoFilterBackend,
+#         filters.OrderingFilter
+#     ]
+#     filterset_fields = {
+#         'Settlement_ID': ['exact'],
+#         'Budget_ID': ['exact'],
+#     }
+#     ordering_fields = ['Budget_Amount']
+#     ordering = ['Budget_ID']
+
+class SettlementViewSet(viewsets.ModelViewSet):
+    queryset=Settlement.objects.all().select_related('Payment_ID')
+    serializer_class=SettlementSerializer
+    service=SettlementService()
+
+    def get_queryset(set):
+        queryset=super().get_queryset()
         return queryset.prefetch_related('settlement_details')
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            settlement= self.service.create_settlement(request.data)
+            serializer=self.get_serializer(settlement)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-class SettlementDetailViewSet(viewsets.ModelViewSet):
-    queryset = SettlementDetail.objects.all().select_related(
-        'Settlement_ID', 
-        'Budget_ID'
-    )
-    serializer_class = SettlementDetailSerializer
-    filter_backends = [
-        DjangoFilterBackend,
-        filters.OrderingFilter
-    ]
-    filterset_fields = {
-        'Settlement_ID': ['exact'],
-        'Budget_ID': ['exact'],
-    }
-    ordering_fields = ['Budget_Amount']
-    ordering = ['Budget_ID']
-
+class RequestSetupFacadeViewSet(viewsets.ModelViewSet):
+    queryset = RequestSetUp.objects.all()
+    serializer_class = RequestSetUpSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        
+        # Return the full created object
+        instance = RequestSetUp.objects.get(pk=serializer.data['ID'])
+        response_serializer = RequestSetUpCreateSerializer(instance)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        
+        # Return the full updated object
+        instance = RequestSetUp.objects.get(pk=serializer.data['ID'])
+        response_serializer = RequestSetUpCreateSerializer(instance)
+        return Response(response_serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def full_details(self, request, pk=None):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
