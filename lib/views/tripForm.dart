@@ -181,7 +181,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
     final budget = _budgets.firstWhere(
       (b) => b.budgetDescription == expense,
       orElse: () => Budgets(
-        id: 0,
+        id: "0",
         budgetCode: '',
         budgetDescription: expense,
         intialAmount: 0,
@@ -393,7 +393,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
   List<Budgets> _getBudgetDetails() {
     return _rows.map((row) {
       return Budgets(
-        id: 0,
+        id: "0",
         budgetCode: '',
         budgetDescription: row.cells['expense']?.value.toString() ?? '',
         intialAmount: row.cells['rate']?.value ?? 0,

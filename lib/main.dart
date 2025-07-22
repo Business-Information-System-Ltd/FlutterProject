@@ -14,6 +14,9 @@ import 'package:advance_budget_request_system/views/projecttable.dart';
 import 'package:advance_budget_request_system/views/triptable.dart';
 import 'package:advance_budget_request_system/views/projectentryform.dart';
 import 'package:advance_budget_request_system/views/tripentryform.dart';
+import 'package:advance_budget_request_system/views/advanceRequestFormOperation.dart';
+import 'package:advance_budget_request_system/views/advanceRequestProjectTripTable.dart.dart';
+import 'package:advance_budget_request_system/views/addAdvanceRequestForm.dart';
 
 void main() {
   runApp(
@@ -25,22 +28,40 @@ void main() {
       //  home: Dashboard(),
       //  home: Login(),
       // )
-      //)
+      //)`
       MaterialApp(
     //home:SettlementPage(),
-    // home:PaymentPage(),
+
+    //home:PaymentPage(),
+
     //home:CashPaymentPage(),
-    //home: AdvanceRequestPage(),
-    // home: BudgetForm(),
-   //home:BudgetAmount(),
-   //home: ProjectInformation(),
-    // home: AddProjectForm(),
-    home:TripInformation(currentUser: UserModel(name: 'MM', department: 'Admin'),tripId: "0"),
+
+   home: AdvanceRequestPage(),
+
+    // home: TripInformation(),
+
+    //  home:BudgetAmount(),
+
+     // home: ProjectInformation(),
+
+    //home: AddProjectForm(),
+
+    // home:TripInformation(currentUser: UserModel(name: 'MM', department: 'Admin'),tripId: "0"),
+
     // home:TripEntryForm(),
+
     //home:AdvancePage(),
-   // home: TripRequestForm(currentUser: UserModel(name: 'MM', department: 'Admin'), tripId: 0),
-   
- 
+
+    // home: TripRequestForm(currentUser: UserModel(name: 'MM', department: 'Admin'), tripId: 0),
+
+    //home:  AdvanceRequestForm(),
+
+    //home: BudgetForm(),
+
+    //home: AdvanceProjectTripTable(),
+
+    //home:AddAdvanceRequestForm(),
+
     debugShowCheckedModeBanner: false,
   ));
 }

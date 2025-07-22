@@ -7,18 +7,27 @@ import 'package:advance_budget_request_system/views/api_service.dart';
 import 'package:advance_budget_request_system/views/tripForm.dart';
 
 class TripInformation extends StatefulWidget {
-    final UserModel currentUser;
-    final String tripId;
-    const TripInformation({Key?key,
-    required this.currentUser,
+  final bool readOnly;
+   final UserModel currentUser;
+  final String tripId;
+  final Map<String, dynamic>? initialRequestData;
+
+ const TripInformation({
+    required this.readOnly,
     required this.tripId,
-    }):super(key: key);
+    required this.currentUser,
+    required this.initialRequestData,
+    Key? key,
+  }) : super(key: key);
   
+ 
+
   @override
   _TripInformationState createState() => _TripInformationState();
 }
 
 class _TripInformationState extends State<TripInformation> {
+   
   List<PlutoColumn> _columns = [];
   List<PlutoRow> _rows = [];
   PlutoGridStateManager? _stateManager;
@@ -26,14 +35,23 @@ class _TripInformationState extends State<TripInformation> {
   @override
   void initState() {
     super.initState();
+   
     _columns = _buildColumns();
     _fetchTableRows();
   }
- 
 
   void _fetchTableRows() async {
     try {
+      print('Fetching trips...');
       List<Trips> trips = await ApiService().fetchTrips();
+      print('Fetched ${trips.length} trips');
+
+      // Debug: print first trip's ID and type
+      if (trips.isNotEmpty) {
+        print(
+            'First trip ID: ${trips[0].id}, type: ${trips[0].id.runtimeType}');
+      }
+
       List<PlutoRow> newRows = _buildRows(trips);
       setState(() {
         _rows = newRows;
@@ -45,15 +63,17 @@ class _TripInformationState extends State<TripInformation> {
       print("Rows loaded: ${newRows.length}");
     } catch (e) {
       print('Failed to fetch trips: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load trips: ${e.toString()}')),
+      );
     }
   }
-  
 
-void _editTrip(PlutoRow row) async {
+  void _editTrip(PlutoRow row) async {
     try {
       final tripId = row.cells['id']!.value;
       final trip = await ApiService().getTripById(tripId);
-      
+
       if (trip != null) {
         final success = await Navigator.push(
           context,
@@ -61,7 +81,7 @@ void _editTrip(PlutoRow row) async {
             builder: (context) => TripRequestForm(
               trip: trip,
               isEditMode: true,
-             currentUser: widget.currentUser,
+              currentUser: widget.currentUser,
               tripId: tripId,
             ),
           ),
@@ -77,7 +97,38 @@ void _editTrip(PlutoRow row) async {
       );
     }
   }
-void _deleteTrip(PlutoRow row) async {
+
+  void _detailTrip(PlutoRow row) async {
+    try {
+      final tripId = row.cells['id']!.value;
+      final trip = await ApiService().getTripById(tripId);
+
+      if (trip != null) {
+        final success = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TripRequestForm(
+              trip: trip,
+              isEditMode: false,
+              isViewMode: true,
+              currentUser: widget.currentUser,
+              tripId: tripId,
+            ),
+          ),
+        );
+
+        if (success == true) {
+          _fetchTableRows();
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to edit trip: $e')),
+      );
+    }
+  }
+
+  void _deleteTrip(PlutoRow row) async {
     final tripId = row.cells['id']!.value;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -111,7 +162,6 @@ void _deleteTrip(PlutoRow row) async {
       }
     }
   }
-
 
   List<PlutoColumn> _buildColumns() {
     return [
@@ -180,97 +230,15 @@ void _deleteTrip(PlutoRow row) async {
               IconButton(
                 icon: Icon(Icons.edit, color: Colors.blue),
                 //onPressed: () => _editTrip(context.row),
-                 onPressed: () => _editTrip(rendererContext.row),
-
+                onPressed: () => _editTrip(rendererContext.row),
               ),
               IconButton(
                 icon: Icon(Icons.delete, color: Colors.red),
                 onPressed: () => _deleteTrip(rendererContext.row),
               ),
-
-
-
-
-              // In TripInformation class, update the edit button action:
-              // IconButton(
-              //   icon: Icon(Icons.edit, color: Colors.blue),
-              //   onPressed: () {
-              //     final row = rendererContext.row;
-              //     // Create a Trips object from the row data
-              //     final trip = Trips(
-              //       id: int.tryParse( row.cells['id']?.value.toString() ?? '0') ?? 0,
-              //       date: DateFormat('yyyy-MM-dd').parse( row.cells['date']?.value.toString() ??DateTime.now().toString()),
-              //       tripCode: row.cells['tripcode']?.value.toString() ?? '',
-              //       tripDescription: row.cells['description']?.value.toString() ?? '',
-              //       totalAmount: double.tryParse( row.cells['totalamount']?.value.toString() ??'0') ??0,
-              //       currency: row.cells['currency']?.value.toString() ?? 'MMK',
-              //       departmentName: row.cells['department']?.value.toString() ?? '',
-              //       // Add other required fields with defaults
-              //       source: '',
-              //       destination: '',
-              //       departureDate: '',
-              //       returnDate: '',
-              //       otherPerson: 'false',
-              //       roundTrip: 'false',
-              //       directAdvanceReq: 'false',
-              //       expenditureOption: '0',
-              //       requesterName: '',
-              //       approvedAmount: 0,
-              //       status: 'pending',
-              //       departmentId: 0,
-              //       budgets: [],
-              //     );
-
-              //     Navigator.push(
-              //       context,
-              //       MaterialPageRoute(
-              //         builder: (context) => TripRequestForm(
-              //           trip: trip,
-              //           isEditMode: true,
-              //           currentUser: UserModel(
-              //             name: "Current User", // Replace with actual user
-              //             department:row.cells['department']?.value.toString() ?? '',
-              //           ),
-              //           tripId: int.tryParse( row.cells['id']?.value.toString() ?? '0') ?? 0,
-              //         ),
-              //       ),
-              //     ).then((_) {
-              //       // Refresh the table after returning from edit
-              //       _fetchTableRows();
-              //     });
-              //   },
-              // ),
-
-              //OLD
-              // IconButton(
-              //   icon: Icon(Icons.edit, color: Colors.blue),
-              //   onPressed: () {
-              //     final row = rendererContext.row;
-              //     final rowData = {
-              //       'date': row.cells['date']?.value,
-              //       'tripcode': row.cells['tripcode']?.value,
-              //       'description': row.cells['description']?.value,
-              //       'totalamount': row.cells['totalamount']?.value.toString(),
-              //       'currency': row.cells['currency']?.value,
-              //       'department': row.cells['department']?.value,
-
-              //     };
-              //     Navigator.push( context,MaterialPageRoute(builder: (context) => TripEntryForm(initialData: rowData),
-              //       ),
-              //     );
-              //   },
-              // ),
-              // IconButton(
-              //   icon: Icon(Icons.delete, color: Colors.red),
-              //   onPressed: () {
-              //     final row = rendererContext.row;
-              //     setState(() {
-              //       _rows.remove(row);
-              //       //_stateManager?.removeRows([row]);
-              //     });
-              //     print('Delete row: ${rendererContext.rowIdx}');
-              //   },
-              // ),
+              IconButton(
+                  icon: Icon(Icons.more_horiz_outlined, color: Colors.black),
+                  onPressed: () => _detailTrip(rendererContext.row)),
             ],
           );
         },
@@ -278,70 +246,6 @@ void _deleteTrip(PlutoRow row) async {
     ];
   }
 
-  // List<PlutoRow> _buildRows() {
-  //   final data = [
-  //     {
-  //       'date': '2025-06-01',
-  //       'tripcode': 'TRJ-001',
-  //       'description': 'Project1',
-  //       'totalamount': 150000,
-  //       'currency': 'MMK',
-  //       'department': 'Admin',
-  //       'action': '',
-  //     },
-  //     {
-  //       'date': '2025-06-01',
-  //       'tripcode': 'TRJ-002',
-  //       'description': 'Project2',
-  //       'totalamount': 3000000,
-  //       'currency': 'USD',
-  //       'department': 'Admin',
-  //       'action': '',
-  //     },
-  //     {
-  //       'date': '2025-06-01',
-  //       'tripcode': 'TRJ-001',
-  //       'description': 'Project3',
-  //       'totalamount': 2000000,
-  //       'currency': 'USD',
-  //       'department': 'Admin',
-  //       'action': '',
-  //     },
-  //     {
-  //       'date': '2025-06-01',
-  //       'tripcode': 'TRJ-001',
-  //       'description': 'Project4',
-  //       'totalamount': 2000000,
-  //       'currency': 'MMK',
-  //       'department': 'Admin',
-  //       'action': '',
-  //     },
-  //     {
-  //       'date': '2025-06-01',
-  //       'tripcode': 'TRJ-001',
-  //       'description': 'Project5',
-  //       'totalamount': 3400000,
-  //       'currency': 'USD',
-  //       'department': 'Admin',
-  //       'action': '',
-  //     },
-  //   ];
-
-  //   return data.map((s) {
-  //     return PlutoRow(cells: {
-  //       'date': PlutoCell(value: s['date']),
-  //       'tripcode': PlutoCell(value: s['tripcode']),
-  //       'description': PlutoCell(value: s['description']),
-  //       'totalamount': PlutoCell(value: s['totalamount']),
-  //       'currency': PlutoCell(value: s['currency']),
-  //       'department': PlutoCell(value: s['department']),
-  //       //'requestable': PlutoCell(value: s['requestable']),
-  //       'action': PlutoCell(),
-  //     });
-  //   }).toList();
-  // }
-
-//Old
   List<PlutoRow> _buildRows(List<Trips> trips) {
     return trips.map((trip) {
       return PlutoRow(cells: {
@@ -356,10 +260,6 @@ void _deleteTrip(PlutoRow row) async {
       });
     }).toList();
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -392,11 +292,6 @@ void _deleteTrip(PlutoRow row) async {
                       final success = await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => TripRequestForm(
-                            // currentUser: UserModel(
-                            //   name: "Current User", // Replace with actual user
-                            //   department:
-                            //       "Default Department", // Replace with actual department
-                            // ),
                             currentUser: widget.currentUser,
                             tripId: "0", // Will generate new ID
                           ),
@@ -408,47 +303,6 @@ void _deleteTrip(PlutoRow row) async {
                       }
                     },
                   ),
-                  /*  ElevatedButton.icon(
-                    icon: Icon(Icons.add),
-                    label: Text('New'),
-                    onPressed: () async {
-                      final newProject = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => TripEntryForm()),
-                      );
-                      if (newProject != null &&
-                          newProject is Map<String, dynamic>) {
-                        setState(() {
-                          final newRow = PlutoRow(cells: {
-                            'date': PlutoCell(value: newProject['date']),
-                            'tripcode':
-                                PlutoCell(value: newProject['tripcode']),
-                            'description':
-                                PlutoCell(value: newProject['description']),
-                            'totalamount':
-                                PlutoCell(value: newProject['totalamount']),
-                            'currency':
-                                PlutoCell(value: newProject['currency']),
-                            'department':
-                                PlutoCell(value: newProject['department']),
-                            'requestable':
-                                PlutoCell(value: newProject['requestable']),
-                            'action': PlutoCell(),
-                          });
-
-                          _rows.add(newRow);
-                          //_stateManager?.appendRows([newRow]);
-                        });
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade300,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),*/
                   Row(
                     children: [
                       Container(
@@ -475,7 +329,7 @@ void _deleteTrip(PlutoRow row) async {
               ),
               SizedBox(height: 2),
               Expanded(
-               child: PlutoGrid(
+                child: PlutoGrid(
                   columns: _columns,
                   rows: _rows,
                   configuration: PlutoGridConfiguration(
@@ -486,9 +340,8 @@ void _deleteTrip(PlutoRow row) async {
                     ),
                   ),
                   onLoaded: (event) {
-                     _stateManager = event.stateManager;
-                    
-                     },
+                    _stateManager = event.stateManager;
+                  },
                 ),
               ),
             ],

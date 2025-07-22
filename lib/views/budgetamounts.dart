@@ -18,16 +18,19 @@ class _BudgetAmountState extends State<BudgetAmount> {
 
   late List<PlutoColumn> columns;
   List<PlutoRow> rows = [];
-  List<Budgets> budget = [];
+  List<Budgets> budgets = []; // Store the actual budget data
   PlutoRow? _editingRow;
   PlutoGridStateManager? _stateManager;
-
-  late PlutoGridStateManager stateManager;
+  bool _isEditing = false;
 
   @override
   void initState() {
     super.initState();
     _fetchBudgetAmount();
+    _initializeColumns();
+  }
+
+  void _initializeColumns() {
     columns = [
       PlutoColumn(
         title: 'Budget Code',
@@ -72,13 +75,7 @@ class _BudgetAmountState extends State<BudgetAmount> {
                 IconButton(
                   icon: Icon(Icons.edit, size: 18, color: Colors.blue),
                   onPressed: () {
-                    final row = rendererContext.row;
-                    setState(() {
-                      _codeController.text = row.cells['code']!.value;
-                      _descController.text = row.cells['desc']!.value;
-                      _initialAmount.text = row.cells['initial']!.value;
-                      _editingRow = row;
-                    });
+                    _editBudget(rendererContext.row);
                   },
                 ),
               ],
@@ -89,31 +86,37 @@ class _BudgetAmountState extends State<BudgetAmount> {
     ];
   }
 
+  void _editBudget(PlutoRow row) {
+    setState(() {
+      _codeController.text = row.cells['code']!.value.toString();
+      _descController.text = row.cells['desc']!.value.toString();
+      _initialAmount.text = row.cells['initial']!.value.toString();
+      _editingRow = row;
+      _isEditing = true;
+    });
+  }
+
   void _fetchBudgetAmount() async {
     try {
       List<Budgets> fetchedBudgets = await ApiService().fetchBudgets();
-
-      //List<PlutoRow> newRows = fetchedBudgets.map((budget) {
-       rows = fetchedBudgets.map((budget) {
-        return PlutoRow(
-          cells: {
-            'code': PlutoCell(value: budget.budgetCode),
-            'desc': PlutoCell(value: budget.budgetDescription),
-            'initial': PlutoCell(value: budget.intialAmount),
-            'action': PlutoCell(value: ''),
-          },
-        );
-      }).toList();
-
+      
       setState(() {
-        // rows = newRows;
-        // budget = fetchedBudgets;
+        budgets = fetchedBudgets;
+        rows = fetchedBudgets.map((budget) {
+          return PlutoRow(
+            cells: {
+              'code': PlutoCell(value: budget.budgetCode),
+              'desc': PlutoCell(value: budget.budgetDescription),
+              'initial': PlutoCell(value: budget.intialAmount),
+              'action': PlutoCell(value: ''),
+            },
+          );
+        }).toList();
       });
 
       if (_stateManager != null) {
         _stateManager!.removeAllRows();
-       // _stateManager!.appendRows(newRows);
-       _stateManager!.appendRows(rows);
+        _stateManager!.appendRows(rows);
       }
 
       print("Rows loaded: ${rows.length}");
@@ -125,89 +128,54 @@ class _BudgetAmountState extends State<BudgetAmount> {
     }
   }
 
-   Future<int> generateBudgetID() async {
-    List<Budgets> existingBudgets = await ApiService().fetchBudgets();
-    if (existingBudgets.isEmpty) return 1;
-    int maxId =
-        existingBudgets.map((b) => b.id).reduce((a, b) => a > b ? a : b);
-    return maxId + 1;
-  }
-
-
   void _saveBudget() async {
     if (_formKey.currentState!.validate()) {
-      final newId = await generateBudgetID();
-      String code = _codeController.text.trim();
-      String desc = _descController.text.trim();
-     String initial =_initialAmount.text.trim();
-     double initialValue = double.tryParse(initial) ?? 0.0;
-
-
       try {
-        final newBudget = Budgets(
-          id: newId,
-          budgetCode: code,
-          budgetDescription: desc,
-          intialAmount: initialValue,
-        );
+        String code = _codeController.text.trim();
+        String desc = _descController.text.trim();
+        double initialValue = double.tryParse(_initialAmount.text.trim()) ?? 0.0;
 
-        if (_editingRow != null) {
-          // Update existing budget
-          final existingBudget = budget.firstWhere(
+        if (_isEditing && _editingRow != null) {
+          final existingBudget = budgets.firstWhere(
             (b) => b.budgetCode == _editingRow!.cells['code']!.value,
           );
+          
+          final updatedBudget = Budgets(
+            id: existingBudget.id,
+            budgetCode: code,
+            budgetDescription: desc,
+            intialAmount: initialValue,
+          );
 
-          await ApiService().updateBudgets(existingBudget.id, newBudget);
-          _fetchBudgetAmount(); // Refresh data
+          await ApiService().updateBudgets(updatedBudget);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Initial amount added successfully')),
+          );
         } else {
-          // Add new budget
-          await ApiService().postBudgets(newBudget);
-          _fetchBudgetAmount(); // Refresh data
+             ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('There is no data in budget!!')),
+          );
         }
 
+        _fetchBudgetAmount(); // Refresh data
         _clearForm();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Budget saved successfully')),
-        );
       } catch (e) {
         print('Error saving budget: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save budget')),
+          SnackBar(content: Text('Failed to save budget: ${e.toString()}')),
         );
       }
     }
   }
 
-
-
-  // void _saveBudget() {
-  //   if (_formKey.currentState!.validate()) {
-  //     if (_editingRow != null) {
-  //       setState(() {
-  //         _editingRow!.cells['code']!.value = _codeController.text;
-  //         _editingRow!.cells['desc']!.value = _descController.text;
-  //         _editingRow!.cells['initial']!.value = _initialAmount.text;
-  //         _editingRow = null;
-  //       });
-  //     } else {
-  //       final newRow = PlutoRow(cells: {
-  //         'code': PlutoCell(value: _codeController.text),
-  //         'desc': PlutoCell(value: _descController.text),
-  //         'initial': PlutoCell(value: _initialAmount.text),
-  //         'action': PlutoCell(value: ''),
-  //       });
-
-  //       setState(() {
-  //         rows.add(newRow);
-  //       });
-  //     }
-  //   }
-  // }
-
   void _clearForm() {
     _codeController.clear();
     _descController.clear();
     _initialAmount.clear();
+    setState(() {
+      _editingRow = null;
+      _isEditing = false;
+    });
   }
 
   @override
@@ -223,119 +191,114 @@ class _BudgetAmountState extends State<BudgetAmount> {
                 height: 400,
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                 color: Colors.grey.shade300,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Add Budget Amount',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 16),
-                      SizedBox(
-                        width: 250,
-                        child: TextFormField(
-                          controller: _codeController,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.green.shade100,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                  12), // ✅ rounded corners
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter budget code';
-                            }
-                            return null;
-                          },
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Add Budget Amount',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      SizedBox(height: 12),
-                      SizedBox(
-                        width: 250,
-                        child: TextFormField(
-                          controller: _descController,
-                          decoration: InputDecoration(
-                            // labelText: 'Budget Description',
-                            //hintText: 'Enter Budget Description',
-                            filled: true,
-                            fillColor: Colors.green.shade100,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                  12), // ✅ rounded corners
-                              borderSide: BorderSide.none,
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: 250,
+                          child: TextFormField(
+                            controller: _codeController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.green.shade100,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter budget code';
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter description';
-                            }
-                            return null;
-                          },
                         ),
-                      ),
-                      SizedBox(height: 12),
-                      SizedBox(
-                        width: 250,
-                        child: TextFormField(
-                          controller: _initialAmount,
-                          decoration: InputDecoration(
-                            //labelText: 'Initial Amount',
-                            //hintText: 'Enter initial amount',
-                            filled: true,
-                            fillColor: Colors.green.shade100,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                        SizedBox(height: 12),
+                        SizedBox(
+                          width: 250,
+                          child: TextFormField(
+                            controller: _descController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.green.shade100,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter description';
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter initial';
-                            }
-                            return null;
-                          },
                         ),
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: _saveBudget,
-                            child: Text('Save'),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.black, // ✅ text color
-                              backgroundColor:
-                                  Colors.white, // button background
+                        SizedBox(height: 12),
+                        SizedBox(
+                          width: 250,
+                          child: TextFormField(
+                            controller: _initialAmount,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.green.shade100,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter initial amount';
+                              }
+                              if (double.tryParse(value) == null) {
+                                return 'Please enter a valid number';
+                              }
+                              return null;
+                            },
                           ),
-                          SizedBox(width: 10),
-                          ElevatedButton(
-                            onPressed: _clearForm,
-                            child: Text('Clear'),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.black,
-                              backgroundColor:
-                                  Colors.white, // changed from primary
+                        ),
+                        SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: _saveBudget,
+                              child: Text(_isEditing ? 'Update' : 'Save'),
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.black, 
+                                backgroundColor: Colors.white,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: _clearForm,
+                              child: Text('Clear'),
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.black,
+                                backgroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-
             SizedBox(width: 24),
-
-            // PlutoGrid Section
             Expanded(
               flex: 2,
               child: Column(
@@ -346,7 +309,7 @@ class _BudgetAmountState extends State<BudgetAmount> {
                     children: [
                       IconButton(
                         icon: Icon(Icons.refresh),
-                        onPressed: () {},
+                        onPressed: _fetchBudgetAmount,
                       ),
                       ElevatedButton.icon(
                         icon: Icon(Icons.download),

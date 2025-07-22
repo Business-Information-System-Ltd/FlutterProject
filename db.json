@@ -79,32 +79,38 @@
       "InitialAmount": 0
     },
     {
-      "id": 12,
+      "id": "12",
       "BudgetCode": "B-14",
       "BudgetDescription": "ERP",
+      "InitialAmount": 0
+    },
+    {
+      "id": "13",
+      "BudgetCode": "B-15",
+      "BudgetDescription": "HH",
       "InitialAmount": 0
     }
   ],
   "projects": [
     {
-      "id": "1",
-      "Date": "2025-07-10",
+      "Date": "2025-07-21",
       "ProjectCode": "PRJ_000_001",
       "ProjectDescription": "project 1",
-      "TotalAmount": 2500000000,
-      "Currency": "USD",
+      "TotalAmount": 250000000,
+      "Currency": "MMK",
       "ApprovedAmount": 0,
       "DepartmentID": 0,
       "DepartmentName": "Admin",
       "Requestable": "Pending",
-      "BudgetDetails": []
+      "BudgetDetails": [],
+      "id": "1"
     },
     {
-      "Date": "2025-07-10",
+      "Date": "2025-07-19",
       "ProjectCode": "PRJ_000_002",
       "ProjectDescription": "project 2",
-      "TotalAmount": 200000000,
-      "Currency": "MMK",
+      "TotalAmount": 20000000,
+      "Currency": "USD",
       "ApprovedAmount": 0,
       "DepartmentID": 0,
       "DepartmentName": "Admin",
@@ -178,74 +184,9 @@
       "BudgetDetails": []
     },
     {
-      "id": "4161",
-      "Date": "2025-07-10",
-      "ProjectCode": "PRJ-000-009",
-      "ProjectDescription": "project9",
-      "TotalAmount": 15000,
-      "Currency": "MMK",
-      "ApprovedAmount": 0,
-      "DepartmentID": 0,
-      "DepartmentName": "Admin",
-      "Requestable": "Pending",
-      "BudgetDetails": []
-    },
-    {
-      "id": "8eba",
-      "Date": "2025-07-10",
-      "ProjectCode": "PRJ-000-009",
-      "ProjectDescription": "project9",
-      "TotalAmount": 150000,
-      "Currency": "MMK",
-      "ApprovedAmount": 0,
-      "DepartmentID": 0,
-      "DepartmentName": "Admin",
-      "Requestable": "Pending",
-      "BudgetDetails": []
-    },
-    {
-      "id": "341e",
-      "Date": "2025-07-10",
-      "ProjectCode": "PRJ_000_002",
-      "ProjectDescription": "project 2",
-      "TotalAmount": 200,
-      "Currency": "USD",
-      "ApprovedAmount": 0,
-      "DepartmentID": 0,
-      "DepartmentName": "Admin",
-      "Requestable": "Pending",
-      "BudgetDetails": []
-    },
-    {
-      "id": "85bc",
-      "Date": "2025-07-10",
-      "ProjectCode": "P_002",
-      "ProjectDescription": "new project",
-      "TotalAmount": 80000,
-      "Currency": "MMK",
-      "ApprovedAmount": 0,
-      "DepartmentID": 0,
-      "DepartmentName": "Marketing",
-      "Requestable": "Pending",
-      "BudgetDetails": []
-    },
-    {
-      "id": "81a5",
-      "Date": "2025-07-10",
-      "ProjectCode": "Pj2",
-      "ProjectDescription": "new",
-      "TotalAmount": 200,
-      "Currency": "MMK",
-      "ApprovedAmount": 0,
-      "DepartmentID": 0,
-      "DepartmentName": "Engineering",
-      "Requestable": "Pending",
-      "BudgetDetails": []
-    },
-    {
-      "Date": "2025-07-10",
+      "Date": "2025-07-14",
       "ProjectCode": "p002",
-      "ProjectDescription": "test p002",
+      "ProjectDescription": "test ",
       "TotalAmount": 200,
       "Currency": "USD",
       "ApprovedAmount": 0,
@@ -259,35 +200,41 @@
   "trips": [
     {
       "id": "1",
-      "Date": "2025-06-27",
+      "Date": "2025-07-15T00:00:00.000",
       "TripCode": "TRP_000_001",
-      "TripDescription": "Trip 1",
-      "TotalAmount": 20000,
+      "TripDescription": "Trip 2",
+      "Source": "rr",
+      "Destination": "ee",
+      "DepartureDate": "2025-07-14T00:00:00.000",
+      "ReturnDate": "2025-07-14T00:00:00.000",
+      "OtherPerson": true,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "",
+      "TotalAmount": 0,
       "Currency": "MMK",
       "ApprovedAmount": 0,
-      "Status": "Yes",
+      "Status": "pending",
       "DepartmentID": 1,
-      "DepartmentName": "Admin",
-      "source": "",
-      "destination": "",
-      "departureDate": "",
-      "returnDate": "",
-      "otherPerson": "false",
-      "roundTrip": "true",
-      "directAdvanceReq": "true",
-      "expenditureOption": "0",
-      "requesterName": "",
+      "DepartmentName": "Finance",
       "BudgetDetails": [
         {
-          "id": 1,
-          "BudgetCode": "B-1",
-          "BudgetDescription": "For Expense",
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
           "InitialAmount": 0
         },
         {
-          "id": 3,
-          "BudgetCode": "B-3",
-          "BudgetDescription": "For Advertising",
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 0
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
           "InitialAmount": 0
         }
       ]
@@ -305,13 +252,13 @@
       "DepartmentName": "Admin",
       "BudgetDetails": [
         {
-          "id": 1,
+          "id": "1",
           "BudgetCode": "B-1",
           "BudgetDescription": "For Expense",
           "InitialAmount": 0
         },
         {
-          "id": 3,
+          "id": "3",
           "BudgetCode": "B-3",
           "BudgetDescription": "For Advertising",
           "InitialAmount": 0
@@ -340,19 +287,19 @@
       "DepartmentName": "Admin",
       "BudgetDetails": [
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Ticket",
           "InitialAmount": 60000
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Local Transport",
           "InitialAmount": 809999
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Peridium",
           "InitialAmount": 9000
@@ -363,7 +310,7 @@
       "id": "13",
       "Date": "2025-07-14T00:00:00.000",
       "TripCode": "TRP_005",
-      "TripDescription": "trip test ",
+      "TripDescription": "trip tests ",
       "Source": "Yangon",
       "Destination": "Mandalay",
       "DepartureDate": "2025-07-14T00:00:00.000",
@@ -373,7 +320,7 @@
       "DirectAdvance": false,
       "ExpenditureOption": 0,
       "RequesterName": "Yuri",
-      "TotalAmount": 43600,
+      "TotalAmount": 10600,
       "Currency": "USD",
       "ApprovedAmount": 0,
       "Status": "pending",
@@ -381,31 +328,124 @@
       "DepartmentName": "Operations",
       "BudgetDetails": [
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Ticket",
           "InitialAmount": 3000
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Local Transport",
           "InitialAmount": 400
         },
         {
-          "id": 0,
+          "id": "0",
           "BudgetCode": "",
           "BudgetDescription": "Peridium",
           "InitialAmount": 3000
         }
       ]
+    },
+    {
+      "id": "14",
+      "Date": "2025-07-21T00:00:00.000",
+      "TripCode": "TRB-006",
+      "TripDescription": "Trip 6",
+      "Source": "Mudon",
+      "Destination": "Thaton",
+      "DepartureDate": "2025-07-21T00:00:00.000",
+      "ReturnDate": "2025-07-22T00:00:00.000",
+      "OtherPerson": true,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "Doe Doe",
+      "TotalAmount": 0,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "HR",
+      "BudgetDetails": [
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 0
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 0
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 0
+        }
+      ]
+    },
+    {
+      "id": "14",
+      "Date": "2025-07-21T00:00:00.000",
+      "TripCode": "TRB-007",
+      "TripDescription": "Trip -7",
+      "Source": "Yangon",
+      "Destination": "PyinooLwin",
+      "DepartureDate": "2025-07-22T00:00:00.000",
+      "ReturnDate": "2025-07-23T00:00:00.000",
+      "OtherPerson": true,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "Kaung Kaung",
+      "TotalAmount": 32,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Engineering",
+      "BudgetDetails": [
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 0
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 5
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 6
+        }
+      ]
     }
   ],
+
   "operations": [
     {
-      "id": "b86b"
+      "id": "1",
+      "Date": "2025-06-27",
+      "OperationCode": "OPR_000_001",
+      "OperationDescription": "Trip 2",
+      "TotalAmount": 30000,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "Yes",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin"
     }
   ],
+
   "advanceRequests": [
     {
       "id": "1",
@@ -413,6 +453,8 @@
       "requestAmount": 1000,
       "currency": "USD",
       "status": "Approved"
+      
+
     },
     {
       "id": "2",
@@ -422,6 +464,32 @@
       "status": "Pending"
     }
   ],
+
+
+ "advancerequested":[
+  {
+    "requestNo":"",
+    "requestType":"",
+    "requestDate":"",
+    "tripCode":"",
+    "requestedDate":"",
+    "description":"",
+    "roundTrip":"",
+    "source":"",
+    "destination":"",
+    "deptName":"",
+    "depature":"",
+    "return":"",
+    "totalAmount":"",
+    "currency":"",
+    "expenditure":""
+  }
+  
+  
+
+ ],
+
+
   "payments": [
     {
       "id": "1",

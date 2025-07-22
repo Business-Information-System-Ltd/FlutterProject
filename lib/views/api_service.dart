@@ -581,107 +581,56 @@ class ApiService {
 
   //testing
   //budget
-    Future<List<Budgets>> fetchBudgets() async {
+  //Budgets
+  Future<List<Budgets>> fetchBudgets() async {
     final response = await http.get(Uri.parse('$baseUrl/budgets'));
     if (response.statusCode == 200) {
-      return (json.decode(response.body) as List)
-          .map((e) => Budgets.fromJson(e))
-          .toList();
+      List<dynamic> data = json.decode(response.body);
+      return data.map((e) => Budgets.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load budgets');
     }
-    throw Exception('Failed to load budgets');
   }
 
   Future<void> postBudgets(Budgets budget) async {
-    
-    final response = await http.post(
+    final response=await http.post(
       Uri.parse('$baseUrl/budgets'),
-      headers: {'Content-Type': 'application/json'},
-     body: json.encode(budget.toJson()),
-    
-    );
-    if (response.statusCode != 201) {
-      throw Exception('Failed to create budget');
-    }
-  }
-
-  Future<void> updateBudgets(int id, Budgets budget) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/budgets/$id'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(budget.toJson()),
     );
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update budget');
-    }
-  }
-   
-// Future<void> updateBudgets(Budgets budget) async {
-//   final url = Uri.parse('$baseUrl/budgets/${budget.id}');
-//   final response = await http.put(
-//     url,
-//     headers: {'Content-Type': 'application/json'},
-//     body: jsonEncode(budget.toJson()),
-
-//   );
-
-//   if (response.statusCode != 200) {
-//     throw Exception('Failed to update budget');
-//   }
-// }
-
-  
-
-
-  Future<void> deleteBudgets(int id) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/budgets/$id'),
-       headers: {'Content-Type': 'application/json'},
-      );
-
-    if (response.statusCode != 200 && response.statusCode!=204) {
-      throw Exception('Failed to delete budget:${response.body}');
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode!=201) {
+      throw Exception('Fail to insert budget');
     }
   }
 
-  //budget
-  // Future<List<Budgets>> fetchBudget() async {
-  //   final response = await http.get(Uri.parse('$baseUrl/budgets'));
-  //   if (response.statusCode == 200) {
-  //     final List<dynamic> data = json.decode(response.body);
-     
-  //     print("budget: $data");
+   Future<bool> updateBudgets(Budgets budget) async {
+  final response = await http.put(
+    Uri.parse('$baseUrl/budgets/${budget.id}'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: json.encode(budget.toJson()),
+  );
 
-  //     return data.map((e) => Budgets.fromJson(e)).toList();
-  //   } else {
-  //     throw Exception('Failed to load budgets');
-  //   }
-  // }
+  print("Response Status Code: ${response.statusCode}");
+  print("Response Body: ${response.body}");
 
-  // Future<void> postBudget(Budgets budget) async {
-  //   final response = await http.post(
-  //     Uri.parse('$baseUrl/budgets'), // make sure baseUrl is defined
-  //     headers: {'Content-Type': 'application/json'},
-  //     body: json.encode(budget.toJson()),
-  //   );
-  //  // print(response.statusCode);
-  //   //print(response.body);
-
-  //   if (response.statusCode != 201 && response.statusCode != 200) {
-  //     throw Exception('Failed to create budget');
-  //   }
-  // }
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    throw Exception('Failed to update budget: ${response.statusCode} - ${response.body}');
+  }
+}
 
 
-  Future<void> deleteBudgetById(int id) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/budgets/$id'),
-      headers: {'Content-Type': 'application/json'},
-    );
 
-    if (response.statusCode == 404) {
-      throw Exception('Budget not found');
-    } else if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception('Delete failed with status ${response.statusCode}');
+  Future<void> deleteBudgets(String budgetId) async {
+    final response = await http.delete(Uri.parse('$baseUrl/budgets/$budgetId'));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+          'Failed to delete budget. Status code: ${response.statusCode}- ${response.body}');
     }
   }
 
@@ -875,6 +824,44 @@ final response= await http.post( Uri.parse('$baseUrl/trips'),
       body: json.encode(request.toJson()),
     );
   }
+
+Future<List<AdvanceRequest>> fetchAdvanceRequest() async {
+  final response = await http.get(Uri.parse('$baseUrl/advanceRequests'));
+
+  if (response.statusCode == 200) {
+    List<dynamic> data = json.decode(response.body);
+    return data.map((e) => AdvanceRequest.fromJson(e)).toList();
+  } else {
+    throw Exception('Failed to load Advance Requests');
+  }
+}
+
+
+
+
+
+//AdvanceRequested
+ Future<bool> postAdvanceRequested(AdvanceRequested request) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/advanceRequested'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(request.toJson()),
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return true;
+    } else {
+      print('Failed with status: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    print('Error posting advance request: $e');
+    return false;
+  }
+}
+
+
 
   // Payments
   Future<List<Payment>> fetchPayments() async {
