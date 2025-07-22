@@ -306,14 +306,14 @@ void initState() {
         final department =  userData['Department_Name'];
         Provider.of<UserProvider>(context, listen: false).setDepartment(department);
          
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                hasFullAccess ? Dashboard(userData: userData,)
-                               : LimitedDashboard(userData: userData,),
-          ),
-        );
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) =>
+        //         hasFullAccess ? Dashboard(userData: userData,)
+        //                        : LimitedDashboard(userData: userData,),
+        //   ),
+        // );
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Login Successfully!!")));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

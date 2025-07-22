@@ -98,10 +98,14 @@ WSGI_APPLICATION = 'project_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bizsoft_advance_request',
-        'USER': 'may',
-        'PASSWORD': 'May@B12S0ft!',
-        'HOST': 'bizsoft.southeastasia.cloudapp.azure.com',  # e.g., '127.0.0.1' or remote host
+        # 'NAME': 'bizsoft_advance_request',
+        'NAME': 'mydatabase',
+        # 'USER': 'may',
+        'USER': 'root',
+        # 'PASSWORD': 'May@B12S0ft!',
+        'PASSWORD': 'root',
+        # 'HOST': 'bizsoft.southeastasia.cloudapp.azure.com',  # e.g., '127.0.0.1' or remote host
+        'HOST': '172.16.0.9',  # e.g., '127.0.0.1' or remote host
         'PORT': '3306',  # default MySQL port
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",

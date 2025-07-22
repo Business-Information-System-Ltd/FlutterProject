@@ -3,6 +3,7 @@ import 'package:advance_budget_request_system/views/budgetinformation.dart';
 import 'package:advance_budget_request_system/views/projecttable.dart';
 import 'package:advance_budget_request_system/views/tripForm.dart';
 import 'package:advance_budget_request_system/views/triptable.dart';
+// import 'package:advance_budget_request_system/views/triptable.dart';
 import 'package:flutter/material.dart';
 
 class Collection extends StatefulWidget {
@@ -50,7 +51,7 @@ class _CollectionState extends State<Collection> {
         
           ElevatedButton(
               onPressed: (){
-                Navigator.of(context).push(MaterialPageRoute(builder: (context)=> TripInformation(currentUser: UserModel(name: "David", department: "Admin"),tripId: "0", ) ));
+                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>TripInformation(currentUser: UserModel(name: "David", department: "Admin"),tripId: "0",) ));
               }, 
               child: const Text("Trip Request")
               
@@ -64,3 +65,4 @@ class _CollectionState extends State<Collection> {
     );
   }
 }
+

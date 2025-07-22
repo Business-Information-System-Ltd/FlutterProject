@@ -2,21 +2,21 @@
   "budgets": [
     {
       "id": "1",
-      "BudgetCode": "B-1",
-      "BudgetDescription": "For Expenses",
-      "InitialAmount": 70000
+      "BudgetCode": "B001",
+      "BudgetDescription": "Ticket",
+      "InitialAmount": 200000
     },
     {
       "id": "2",
-      "BudgetCode": "B-2",
-      "BudgetDescription": "For Marketing",
-      "InitialAmount": 400
+      "BudgetCode": "B002",
+      "BudgetDescription": "Local Transport",
+      "InitialAmount": 50000
     },
     {
       "id": "3",
-      "BudgetCode": "B-3",
-      "BudgetDescription": "For Advertising",
-      "InitialAmount": 200
+      "BudgetCode": "B003",
+      "BudgetDescription": "Peridium",
+      "InitialAmount": 100000
     },
     {
       "id": "4",
@@ -40,6 +40,12 @@
       "id": "9",
       "BudgetCode": "B10",
       "BudgetDescription": "Budget for edits",
+      "InitialAmount": 0
+    },
+    {
+      "id": "10",
+      "BudgetCode": "B004",
+      "BudgetDescription": "for db test",
       "InitialAmount": 0
     }
   ],
@@ -479,6 +485,170 @@
           "InitialAmount": 0
         }
       ]
+    },
+    {
+      "id": "11",
+      "Date": "2025-07-22T00:00:00.000",
+      "TripCode": "T003",
+      "TripDescription": "for testing trip",
+      "Source": "YGN",
+      "Destination": "MDY",
+      "DepartureDate": "2025-07-22T00:00:00.000",
+      "ReturnDate": "2025-07-31T00:00:00.000",
+      "OtherPerson": false,
+      "RoundTrip": true,
+      "DirectAdvance": false,
+      "ExpenditureOption": 0,
+      "RequesterName": "David",
+      "TotalAmount": 14308,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 3000
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 77
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 800
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "Date": "2025-07-22T00:00:00.000",
+      "TripCode": "TRP_0098",
+      "TripDescription": "for test advance request directly",
+      "Source": "POL",
+      "Destination": "YGN",
+      "DepartureDate": "2025-07-22T00:00:00.000",
+      "ReturnDate": "2025-07-31T00:00:00.000",
+      "OtherPerson": false,
+      "RoundTrip": true,
+      "DirectAdvance": true,
+      "ExpenditureOption": 0,
+      "RequesterName": "David",
+      "TotalAmount": 95600,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 2000
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 400
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 9000
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "Date": "2025-07-22T00:00:00.000",
+      "TripCode": "ii",
+      "TripDescription": "kk",
+      "Source": "ii",
+      "Destination": "ll",
+      "DepartureDate": "2025-07-22T11:42:48.355",
+      "ReturnDate": "2025-07-22T11:42:48.355",
+      "OtherPerson": false,
+      "RoundTrip": false,
+      "DirectAdvance": true,
+      "ExpenditureOption": 0,
+      "RequesterName": "David",
+      "TotalAmount": 16,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 3
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 4
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 5
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "Date": "2025-07-22T00:00:00.000",
+      "TripCode": "jj",
+      "TripDescription": "kk",
+      "Source": "ll",
+      "Destination": "mm",
+      "DepartureDate": "2025-07-22T00:00:00.000",
+      "ReturnDate": "2025-07-22T11:44:35.737",
+      "OtherPerson": false,
+      "RoundTrip": false,
+      "DirectAdvance": true,
+      "ExpenditureOption": 0,
+      "RequesterName": "David",
+      "TotalAmount": 8,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Admin",
+      "BudgetDetails": [
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 1
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 2
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 3
+        }
+      ]
     }
   ],
   "operations": [
@@ -572,6 +742,21 @@
       "ApprovedAmount": 0,
       "Purpose": "for cash",
       "Status": "Pending"
+    },
+    {
+      "id": 0,
+      "Date": "2025-07-22T00:00:00.000",
+      "RequestNo": "ADV-1753161275820",
+      "RequestCode": "jj",
+      "RequestDescription": "kk",
+      "RequestType": "Trip",
+      "RequestAmount": 8,
+      "Currency": "MMK",
+      "Requester": "David",
+      "DepartmentName": "Admin",
+      "ApprovedAmount": 0,
+      "Purpose": "kk",
+      "Status": "pending"
     }
   ],
   "payments": [

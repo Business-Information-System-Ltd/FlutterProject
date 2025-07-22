@@ -989,7 +989,8 @@ class Advance {
       id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id'].toString()) ?? 0,
-      date: DateTime.parse(json['Date']),
+      date: DateTime.parse(
+          json['Date']?.toString() ?? DateTime.now().toIso8601String()),
       requestNo: json['RequestNo'],
       requestCode: json['RequestCode'],
       requestDes: json['RequestDescription'],
@@ -1008,7 +1009,7 @@ class Advance {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'Date': date,
+      'Date': date.toIso8601String(),
       'RequestNo': requestNo,
       'RequestCode': requestCode,
       'RequestDescription': requestDes,
@@ -1209,7 +1210,7 @@ class SettlementDetail {
 }
 
 class Departments {
-  final String id;
+  final int id;
   final String departmentCode;
   final String departmentName;
 
@@ -1221,10 +1222,10 @@ class Departments {
 
   factory Departments.fromJson(Map<String, dynamic> json) {
     return Departments(
-      id: json['id'], 
-      // is int
-      //     ? json['id']
-      //     : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id']
+      is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       departmentCode: json['DepartmentCode'] ?? '',
       departmentName: json['DepartmentName'] ?? '',
     );
@@ -1240,12 +1241,12 @@ class Departments {
 }
 
 class Users{
-  final String id;
+  final int id;
   final String userName;
   final String userEmail;
   final String role;
   final String password;
-  final String departmentID;
+  final int departmentID;
   final String departmentName;
 
 Users({
@@ -1260,10 +1261,10 @@ Users({
 
 factory Users.fromJson(Map<String, dynamic> json) {
     return Users(
-      id: json['id'], 
-      // is int
-      //     ? json['id']
-      //     : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id']
+      is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       userName: json['UserName'] ?? '',
       userEmail: json['UserEmail']??'',
       role: json['Role']??'',
@@ -1285,6 +1286,55 @@ factory Users.fromJson(Map<String, dynamic> json) {
     };
   }
 }
+ 
+class RequestSetup{
+  final String id;
+  final String departmentID;
+  final String currency;
+  final String flowType;
+  final String description;
+  final int noOfSteps;
+  final int managementApprover;
+
+  RequestSetup({
+    required this.id,
+    required this.departmentID,
+    required this.currency,
+    required this.flowType,
+    required this.description,
+    required this.noOfSteps,
+    required this.managementApprover
+  });
+
+  factory RequestSetup.fromJson(Map<String, dynamic> json) {
+    return RequestSetup(
+      id: json['id'] 
+      is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      departmentID: json['DepartmentID'] ?? '',
+      currency: json['Currency']??'',
+      flowType: json['FlowType']??'',
+      description: json['Description'],
+      noOfSteps: json['NoOfStep'],
+      managementApprover: json['ManagementApprover'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'UserName': departmentID,
+      'UserEmail': currency,
+      'Role': flowType,
+      'Password':description,
+      'DepartmentID': noOfSteps,
+      'DepartmentName':managementApprover
+    };
+  }
+}
+
+
 
 
 
