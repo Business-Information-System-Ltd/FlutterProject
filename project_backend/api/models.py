@@ -182,18 +182,36 @@ class RequestSetUp(models.Model):
     def str(self):
         return str(self.ID)
 
+# class ApproverSetupStep(models.Model):
+#     ID=models.AutoField(primary_key=True)
+#     Setup_ID=models.ForeignKey(RequestSetUp, on_delete=models.CASCADE,db_column='Setup_ID',  related_name='approval_steps')
+#     Step_No=models.IntegerField()
+#     Maximum_Approval_Amount=models.DecimalField(max_digits=12,decimal_places=2)
+#     Is_All_Approver= models.CharField(max_length=10, choices=[('One','One'),('All','All')])
+#     Limited_Time= models.DateTimeField()
+#     Request_Status= models.BooleanField()
+
+#     class Meta:
+#         managed = False
+#         db_table='approver_setup_step'
+#     def __str__(self):
+#         return str(self.ID)
 class ApproverSetupStep(models.Model):
-    ID=models.AutoField(primary_key=True)
-    Setup_ID=models.ForeignKey(RequestSetUp, on_delete=models.CASCADE,db_column='Setup_ID',  related_name='approval_steps')
-    Step_No=models.IntegerField()
-    Maximum_Approval_Amount=models.DecimalField(max_digits=12,decimal_places=2)
-    Is_All_Approver= models.CharField(max_length=10, choices=[('One','One'),('All','All')])
-    Limited_Time= models.DateTimeField()
-    Request_Status= models.BooleanField()
+    ID = models.AutoField(primary_key=True)
+    Setup_ID = models.ForeignKey(RequestSetUp, on_delete=models.CASCADE, db_column='Setup_ID', related_name='approval_steps')
+    Step_No = models.IntegerField()
+    Maximum_Approval_Amount = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    # Change this field name to match your database column
+    Is_All_Approver = models.CharField(max_length=10, choices=[('One','One'),('All','All')], db_column='is_all_approver')  # or whatever your actual column name is
+    
+    Limited_Time = models.DateTimeField()
+    Request_Status = models.BooleanField()
 
     class Meta:
-        managed = False
-        db_table='approver_setup_step'
+        managed = False  # Since you're using an existing database
+        db_table = 'approver_setup_step'
+    
     def __str__(self):
         return str(self.ID)
 

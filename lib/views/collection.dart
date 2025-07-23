@@ -1,5 +1,7 @@
+import 'package:advance_budget_request_system/views/advancerequestlist.dart';
 import 'package:advance_budget_request_system/views/budgetamounts.dart';
 import 'package:advance_budget_request_system/views/budgetinformation.dart';
+import 'package:advance_budget_request_system/views/cashpaymentEntry.dart';
 import 'package:advance_budget_request_system/views/projecttable.dart';
 import 'package:advance_budget_request_system/views/tripForm.dart';
 import 'package:advance_budget_request_system/views/triptable.dart';
@@ -54,6 +56,15 @@ class _CollectionState extends State<Collection> {
                 Navigator.of(context).push(MaterialPageRoute(builder: (context)=>TripInformation(currentUser: UserModel(name: "David", department: "Admin"),tripId: "0",) ));
               }, 
               child: const Text("Trip Request")
+              
+              ),
+              const SizedBox(height: 20,),
+
+           ElevatedButton(
+              onPressed: (){
+                Navigator.of(context).push(MaterialPageRoute(builder: (context)=> AdvanceRequestPage() ));
+              }, 
+              child: const Text("Advance Request")
               
               ),
               const SizedBox(height: 20,),

@@ -226,6 +226,14 @@ class _AddProjectFormState extends State<AddProjectForm> {
   }
 
  Future<void> _submitForm() async {
+  if (_totalAmountController.text.isEmpty || 
+      double.tryParse(_totalAmountController.text) == null ||
+      double.parse(_totalAmountController.text) <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Please enter a valid amount greater than zero')),
+    );
+    return;
+  }
     try {
       int newId = await getProjectById();
       final project = Project(
@@ -334,6 +342,7 @@ class _AddProjectFormState extends State<AddProjectForm> {
                           controller: _totalAmountController,
                           labelText: 'Enter total Amount',
                           keyboardType: TextInputType.number,
+                          
                           padding:
                               EdgeInsets.symmetric(horizontal: 1, vertical: 3),
                         ),
@@ -374,7 +383,7 @@ class _AddProjectFormState extends State<AddProjectForm> {
                             ),
                             padding: EdgeInsets.symmetric(horizontal: 10),
                           ), //Text remove
-                          child: Row(
+                          child: const Row(
                               mainAxisAlignment: MainAxisAlignment
                                   .start, // Text left, Icon right
                               children: [

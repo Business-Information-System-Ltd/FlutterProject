@@ -181,6 +181,18 @@ class _BudgetAmountState extends State<BudgetAmount> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Budget Amounts'),
+        // backgroundColor: Colors.green,
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.home),
+        //     onPressed: () {
+        //       Navigator.of(context).pop();
+        //     },
+        //   ),
+        // ],
+      ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(50, 20, 110, 250),
         child: Row(

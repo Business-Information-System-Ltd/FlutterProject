@@ -47,6 +47,12 @@
       "BudgetCode": "B004",
       "BudgetDescription": "for db test",
       "InitialAmount": 0
+    },
+    {
+      "id": "11",
+      "BudgetCode": "B11",
+      "BudgetDescription": "for expense",
+      "InitialAmount": 0
     }
   ],
   "projects": [
@@ -127,6 +133,19 @@
           "InitialAmount": 0
         }
       ]
+    },
+    {
+      "id": "d8ba",
+      "Date": "2025-07-22",
+      "ProjectCode": "kjj",
+      "ProjectDescription": "kkk",
+      "TotalAmount": -9,
+      "Currency": "MMK",
+      "ApprovedAmount": 0,
+      "DepartmentID": 0,
+      "DepartmentName": "mmm",
+      "Requestable": "Pending",
+      "BudgetDetails": []
     }
   ],
   "trips": [
@@ -501,7 +520,7 @@
       "ExpenditureOption": 0,
       "RequesterName": "David",
       "TotalAmount": 14308,
-      "Currency": "MMK",
+      "Currency": "USD",
       "ApprovedAmount": 0,
       "Status": "pending",
       "DepartmentID": 1,
@@ -649,6 +668,47 @@
           "InitialAmount": 3
         }
       ]
+    },
+    {
+      "id": "12",
+      "Date": "2025-07-23T00:00:00.000",
+      "TripCode": "TRP_0025",
+      "TripDescription": "Trip 25",
+      "Source": "YGN",
+      "Destination": "POL",
+      "DepartureDate": "2025-07-23T00:00:00.000",
+      "ReturnDate": "2025-07-31T00:00:00.000",
+      "OtherPerson": true,
+      "RoundTrip": true,
+      "DirectAdvance": true,
+      "ExpenditureOption": 0,
+      "RequesterName": "May",
+      "TotalAmount": 6500,
+      "Currency": "USD",
+      "ApprovedAmount": 0,
+      "Status": "pending",
+      "DepartmentID": 1,
+      "DepartmentName": "Finance",
+      "BudgetDetails": [
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Ticket",
+          "InitialAmount": 200
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Local Transport",
+          "InitialAmount": 400
+        },
+        {
+          "id": "0",
+          "BudgetCode": "",
+          "BudgetDescription": "Peridium",
+          "InitialAmount": 500
+        }
+      ]
     }
   ],
   "operations": [
@@ -756,6 +816,21 @@
       "DepartmentName": "Admin",
       "ApprovedAmount": 0,
       "Purpose": "kk",
+      "Status": "pending"
+    },
+    {
+      "id": 0,
+      "Date": "2025-07-23T00:00:00.000",
+      "RequestNo": "ADV-1753242100855",
+      "RequestCode": "TRP_0025",
+      "RequestDescription": "Trip 25",
+      "RequestType": "Trip",
+      "RequestAmount": 6500,
+      "Currency": "USD",
+      "Requester": "May",
+      "DepartmentName": "Finance",
+      "ApprovedAmount": 0,
+      "Purpose": "Trip 25",
       "Status": "pending"
     }
   ],

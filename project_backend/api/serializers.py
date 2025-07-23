@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from rest_framework import serializers
 from .models import ApprovalStatus, Budget,Department,User,Project,ProjectBudget,Trip,TripBudget,Operation,OperationBudget,AdvanceRequest,CashPayment,RequestSetUp, ApproverSetupStep,Settlement,SettlementDetail, UserApproval
 from django.contrib.contenttypes.models import ContentType
-
+from django.db import transaction
 
 class BudgetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -238,19 +238,151 @@ class OperationBudgetSerializer(serializers.ModelSerializer):
             )
         return data
 
-class ApproverSetupStepSerializer(serializers.ModelSerializer):
-    ID = serializers.IntegerField()  
-    Step_No = serializers.IntegerField()  
-    Maximum_Approval_Amount = serializers.FloatField() 
-    Approver_Email = serializers.CharField()
+# class ApproverSetupStepSerializer(serializers.ModelSerializer):
+#     ID = serializers.IntegerField(required=False)  
+#     Step_No = serializers.IntegerField()  
+#     Maximum_Approval_Amount = serializers.FloatField() 
+#     Approver_Email = serializers.CharField()
 
+#     class Meta:
+#         model = ApproverSetupStep
+#         fields = ['ID', 'Setup_ID', 'Step_No', 'Maximum_Approval_Amount', 'Approver_Email']
+#         extra_kwargs = {
+#             'Setup_ID': {'required': False}  
+#         }
+
+
+class UserApprovalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserApproval
+        fields = '__all__'
+        extra_kwargs = {
+            'ID': {'read_only': True},
+            'Setup_Step_ID': {'required': False}
+        }
+
+class ApproverSetupStepSerializer(serializers.ModelSerializer):
+    Approvers = UserApprovalSerializer(many=True, required=False, source='user_approval')
+    
     class Meta:
         model = ApproverSetupStep
-        fields = ['ID', 'Setup_ID', 'Step_No', 'Maximum_Approval_Amount', 'Approver_Email']
-
+        fields = ['ID', 'Setup_ID', 'Step_No', 'Maximum_Approval_Amount', 
+                 'Is_All_Approver', 'Limited_Time', 'Request_Status', 'Approvers']
+        extra_kwargs = {
+            'ID': {'read_only': True},
+            'Setup_ID': {'required': False}
+        }
 
 class RequestSetUpSerializer(serializers.ModelSerializer):
-    ID = serializers.IntegerField() 
+    Department_Name = serializers.CharField(source='Department_ID.Department_Name', read_only=True)
+    ApprovalSteps = ApproverSetupStepSerializer(many=True, source='approval_steps', required=False)
+    Management_Approver_Bool = serializers.SerializerMethodField()
+    Flow_Type_Display = serializers.CharField(source='get_Flow_Type_display', read_only=True)
+
+    class Meta:
+        model = RequestSetUp
+        fields = [
+            'ID', 'Department_ID', 'Department_Name', 'Flow_Name', 'Flow_Type', 'Flow_Type_Display',
+            'Currency', 'Description', 'No_Of_Steps', 'Management_Approver',
+            'ApprovalSteps', 'Management_Approver_Bool'
+        ]
+        extra_kwargs = {
+            'ID': {'read_only': True}
+        }
+
+    def get_Management_Approver_Bool(self, obj):
+        return obj.Management_Approver == 'Yes'
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            approval_steps_data = validated_data.pop('approval_steps', [])
+            request_setup = RequestSetUp.objects.create(**validated_data)
+            
+            for step_data in approval_steps_data:
+                approvers_data = step_data.pop('user_approval', [])
+                step = ApproverSetupStep.objects.create(Setup_ID=request_setup, **step_data)
+                
+                for approver_data in approvers_data:
+                    UserApproval.objects.create(
+                        Setup_Step_ID=step,
+                        User_ID=approver_data['User_ID']
+                    )
+            
+            return request_setup
+
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            approval_steps_data = validated_data.pop('approval_steps', None)
+            
+            # Update main fields
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+            
+            if approval_steps_data is not None:
+                self._update_approval_steps(instance, approval_steps_data)
+            
+            return instance
+
+    def _update_approval_steps(self, instance, steps_data):
+        existing_step_ids = {step.ID for step in instance.approval_steps.all()}
+        received_step_ids = set()
+        
+        for step_data in steps_data:
+            approvers_data = step_data.pop('user_approval', [])
+            step_id = step_data.get('ID', None)
+            
+            if step_id and step_id in existing_step_ids:
+                # Update existing step
+                step = ApproverSetupStep.objects.get(ID=step_id, Setup_ID=instance)
+                for attr, value in step_data.items():
+                    setattr(step, attr, value)
+                step.save()
+                received_step_ids.add(step_id)
+                
+                # Update approvers for this step
+                self._update_approvers(step, approvers_data)
+            else:
+                # Create new step
+                step = ApproverSetupStep.objects.create(Setup_ID=instance, **step_data)
+                received_step_ids.add(step.ID)
+                
+                # Create approvers for new step
+                for approver_data in approvers_data:
+                    UserApproval.objects.create(
+                        Setup_Step_ID=step,
+                        User_ID=approver_data['User_ID']
+                    )
+        
+        # Delete steps that weren't included in the request
+        instance.approval_steps.exclude(ID__in=received_step_ids).delete()
+
+    def _update_approvers(self, step, approvers_data):
+        existing_approver_ids = {approver.ID for approver in step.user_approval.all()}
+        received_approver_ids = set()
+        
+        for approver_data in approvers_data:
+            approver_id = approver_data.get('ID', None)
+            
+            if approver_id and approver_id in existing_approver_ids:
+                # Update existing approver
+                approver = UserApproval.objects.get(ID=approver_id, Setup_Step_ID=step)
+                approver.User_ID = approver_data['User_ID']
+                approver.save()
+                received_approver_ids.add(approver_id)
+            else:
+                # Create new approver
+                approver = UserApproval.objects.create(
+                    Setup_Step_ID=step,
+                    User_ID=approver_data['User_ID']
+                )
+                received_approver_ids.add(approver.ID)
+        
+        # Delete approvers that weren't included in the request
+        step.user_approval.exclude(ID__in=received_approver_ids).delete()
+
+class RequestSetUpSerializer(serializers.ModelSerializer):
+    ID = serializers.IntegerField(required=False) 
 
     Department_ID = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all())
 
@@ -489,18 +621,14 @@ class AdvanceRequestSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class ApprovalStatusSerializer(serializers.ModelSerializer):
-    ID=serializers.IntegerField()
+    ID=serializers.IntegerField(required=False)
     Step_No=serializers.IntegerField(source='Step_ID.Step_No', read_only=True)
     Is_All_Approver=serializers.CharField(source='Step_ID.Is_All_Approver', read_only=True)
     class Meta:
         model=ApprovalStatus
         fields='__all__'
 
-class UserApprovalSerializer(serializers.ModelSerializer):
-    ID= serializers.IntegerField()
-    class Meta:
-        model=UserApproval
-        fields='__all__'
+
 
 
 class CashPaymentSerializer(serializers.ModelSerializer):
@@ -515,44 +643,104 @@ class CashPaymentSerializer(serializers.ModelSerializer):
             'Payment_No': {'required': False}
         }
 
-class SettlementDetailSerializer(serializers.ModelSerializer):
-    ID = serializers.IntegerField()  
-    Budget_Amount = serializers.FloatField() 
-    # Budget_Details=BudgetSerializer(many=False, source='Budget_ID', required=False, read_only=True)
-    Budget_Details=serializers.SerializerMethodField()
-    class Meta: 
-        model = SettlementDetail
-        fields = [
-            'ID', 'Budget_Amount', 'Budget_Details','Budget_ID','Settlement_ID'
-        ] 
-        extra_kwargs={
-            'Settlement_ID':{'write_only': True},
-            'Budget_ID':{'write_only': True}
-        }
-    def get_Budget_Details(self,obj):
-        return{"name": "Sample Budget"} if obj.Budget_ID else None
 
-class SettlementSerializer(serializers.ModelSerializer): 
-    Settlement_Amount = serializers.FloatField()
-    Withdrawn_Amount = serializers.FloatField() 
-    Refund_Amount = serializers.FloatField() 
+class SettlementDetailSerializer(serializers.ModelSerializer):
+    ID = serializers.IntegerField(required=False)
+    Budget_Amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    Budget_Details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SettlementDetail
+        fields = ['ID', 'Budget_Amount', 'Budget_Details', 'Budget_ID', 'Settlement_ID']
+        extra_kwargs = {
+            'Settlement_ID': {'write_only': True, 'required': False},
+            'Budget_ID': {'write_only': True}
+        }
+
+    def get_Budget_Details(self, obj):
+        if obj.Budget_ID:
+            return {
+                'ID':obj.ID,
+                'Budget_Description': obj.Budget_ID.Budget_Description, 
+                'Budget_Code': obj.Budget_ID.Budget_Code    
+            }
+        return None
+
+class SettlementSerializer(serializers.ModelSerializer):
+    Settlement_Amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    Withdrawn_Amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    Refund_Amount = serializers.DecimalField(max_digits=12, decimal_places=2)
     SettlementDetails = SettlementDetailSerializer(many=True, source='settlement_details', required=False)
-    class Meta: 
+
+    class Meta:
         model = Settlement
         fields = [
-            'ID', 'Payment_ID', 'Settlement_Date','Settlement_Amount', 'Withdrawn_Amount','Refund_Amount','Currency','SettlementDetails'
+            'ID', 'Payment_ID', 'Settlement_Date', 'Settlement_Amount',
+            'Withdrawn_Amount', 'Refund_Amount', 'Currency', 'SettlementDetails'
         ]
-        extra_kwargs={
-            'Payment_ID':{'write_only': True}
+        extra_kwargs = {
+            'Payment_ID': {'write_only': True}
         }
-        def validate(self,data): 
-            withdrawn = data.get('Withdrawn_Amount')
-            settlement = data.get('Settlement_Amount')
-            refund = data.get('Refund_Amount')
+
+    def validate(self, data):
+        withdrawn = data.get('Withdrawn_Amount')
+        settlement = data.get('Settlement_Amount')
+        refund = data.get('Refund_Amount')
         
-            if withdrawn and settlement and refund:
-                if abs(withdrawn - (settlement + refund)) > 0.01:  
-                    raise serializers.ValidationError(
+        if withdrawn and settlement and refund:
+            if abs(withdrawn - (settlement + refund)) > 0.01:
+                raise serializers.ValidationError(
                     "Withdrawn Amount must equal Settlement Amount plus Refund Amount"
                 )
-                return data
+        return data
+
+    def create(self, validated_data):
+        settlement_details_data = validated_data.pop('settlement_details', [])
+        settlement = Settlement.objects.create(**validated_data)
+        
+        # Create settlement details
+        for detail_data in settlement_details_data:
+            SettlementDetail.objects.create(
+                Settlement_ID=settlement,
+                Budget_ID=detail_data['Budget_ID'],
+                Budget_Amount=detail_data['Budget_Amount']
+            )
+        
+        return settlement
+
+    def update(self, instance, validated_data):
+        settlement_details_data = validated_data.pop('settlement_details', None)
+        
+        # Update settlement fields
+        instance.Payment_ID = validated_data.get('Payment_ID', instance.Payment_ID)
+        instance.Settlement_Amount = validated_data.get('Settlement_Amount', instance.Settlement_Amount)
+        instance.Currency = validated_data.get('Currency', instance.Currency)
+        instance.Withdrawn_Amount = validated_data.get('Withdrawn_Amount', instance.Withdrawn_Amount)
+        instance.Refund_Amount = validated_data.get('Refund_Amount', instance.Refund_Amount)
+        instance.save()
+        
+        # Handle settlement details update if provided
+        if settlement_details_data is not None:
+            # Delete existing details not in the update
+            existing_detail_ids = [detail['ID'] for detail in settlement_details_data if 'ID' in detail]
+            instance.settlement_details.exclude(ID__in=existing_detail_ids).delete()
+            
+            # Update or create details
+            for detail_data in settlement_details_data:
+                detail_id = detail_data.get('ID', None)
+                if detail_id:
+                    # Update existing detail
+                    detail = SettlementDetail.objects.get(ID=detail_id, Settlement_ID=instance)
+                    detail.Budget_ID = detail_data.get('Budget_ID', detail.Budget_ID)
+                    detail.Budget_Amount = detail_data.get('Budget_Amount', detail.Budget_Amount)
+                    detail.save()
+                else:
+                    # Create new detail
+                    SettlementDetail.objects.create(
+                        Settlement_ID=instance,
+                        Budget_ID=detail_data['Budget_ID'],
+                        Budget_Amount=detail_data['Budget_Amount']
+                    )
+        
+        return instance
+
