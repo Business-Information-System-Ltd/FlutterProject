@@ -325,7 +325,7 @@ class _AddProjectFormState extends State<AddProjectForm> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 0),
+                 // SizedBox(height: 0),
                   Row(
                     children: [
                       Expanded(
@@ -365,7 +365,7 @@ class _AddProjectFormState extends State<AddProjectForm> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 0),
+                 // SizedBox(height: 0),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: SizedBox(
@@ -398,7 +398,8 @@ class _AddProjectFormState extends State<AddProjectForm> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 0),
+                  //SizedBox(height: 0),
+
                   Center(
                     child: SizedBox(
                         width: 200,
@@ -443,7 +444,9 @@ class _AddProjectFormState extends State<AddProjectForm> {
                       mode: PlutoGridMode.readOnly,
                     ),
                   ),
+
                   SizedBox(height: 10),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

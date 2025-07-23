@@ -9,6 +9,17 @@ import 'package:advance_budget_request_system/views/api_service.dart';
 import 'package:http/http.dart' as http;
 
 class ProjectInformation extends StatefulWidget {
+  
+   final bool readOnly;
+  final Map<String, dynamic>? initialRequestData;
+
+  const ProjectInformation({
+    Key? key,
+    this.readOnly = false,
+    this.initialRequestData,
+  }) : super(key: key);
+
+  
   @override
   _ProjectInformationState createState() => _ProjectInformationState();
 }
