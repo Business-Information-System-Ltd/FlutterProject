@@ -6,10 +6,10 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static String url = "http://127.0.0.1:8000/api/budget/";
   
-  static const String baseUrl =
-      'http://localhost:3000';
-      //  static const String baseUrl =
-      // 'https://thriving-stardust-1b3337.netlify.app/data.json';
+  // static const String baseUrl =
+  //     'http://localhost:3000';
+       static const String baseUrl =
+      'http://172.16.0.9:3000';
   static String projectEndPoint = "http://127.0.0.1:8000/api/project/";
   final String projectBudgetEndPoint =
       "http://127.0.0.1:8000/api/projectbudget/";

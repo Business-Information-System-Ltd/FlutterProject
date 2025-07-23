@@ -140,7 +140,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
           final requestType = row.cells['requesttype']?.value.toString() ?? '';
 
           return IconButton(
-            icon: Icon(Icons.more_horiz, color: Colors.black),
+            icon: const Icon(Icons.more_horiz, color: Colors.black),
             onPressed: () {
               if (requestType.toLowerCase().contains('project') ||
                   requestType.toLowerCase().contains('trip')) {
@@ -156,7 +156,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AdvanceRequestForm(),
+                    builder: (context) => const AdvanceRequestForm(),
                   ),
                 );
               }
@@ -228,11 +228,11 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Advance Request List '), centerTitle: true),
+      appBar: AppBar(title: const Text('Advance Request List '), centerTitle: true),
      // body: _rows.isEmpty
          // ? Center(child: CircularProgressIndicator())
         body  : Padding(
-              padding: EdgeInsets.fromLTRB(50, 20, 50, 30),
+              padding: const EdgeInsets.fromLTRB(50, 20, 50, 30),
               child: Container(
                 height: 300,
                 child: Column(

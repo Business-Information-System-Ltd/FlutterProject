@@ -239,16 +239,16 @@ class _BudgetFormState extends State<BudgetForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Budget Information'),
-        // backgroundColor: Colors.green,
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(Icons.refresh),
-        //     onPressed: _fetchBudgetTableRows,
-        //   ),
-        // ],
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Budget Information'),
+      //   // backgroundColor: Colors.green,
+      //   // actions: [
+      //   //   IconButton(
+      //   //     icon: Icon(Icons.refresh),
+      //   //     onPressed: _fetchBudgetTableRows,
+      //   //   ),
+      //   // ],
+      // ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(50, 20, 250, 250),
         child: Row(
@@ -256,7 +256,7 @@ class _BudgetFormState extends State<BudgetForm> {
             Expanded(
               flex: 1,
               child: Container(
-                height: 300,
+                height: 470,
                 padding: const EdgeInsets.all(20),
                 color: Colors.grey.shade300,
                 child: Form(

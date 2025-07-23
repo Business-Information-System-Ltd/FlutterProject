@@ -181,176 +181,179 @@ class _BudgetAmountState extends State<BudgetAmount> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Budget Amounts'),
-        // backgroundColor: Colors.green,
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(Icons.home),
-        //     onPressed: () {
-        //       Navigator.of(context).pop();
-        //     },
-        //   ),
-        // ],
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Budget Amounts'),
+      //   // backgroundColor: Colors.green,
+      //   // actions: [
+      //   //   IconButton(
+      //   //     icon: Icon(Icons.home),
+      //   //     onPressed: () {
+      //   //       Navigator.of(context).pop();
+      //   //     },
+      //   //   ),
+      //   // ],
+      // ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(50, 20, 110, 250),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: Container(
-                height: 400,
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                color: Colors.grey.shade300,
-                child: SingleChildScrollView(
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Add Budget Amount',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: 250,
-                          child: TextFormField(
-                            controller: _codeController,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.green.shade100,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter budget code';
-                              }
-                              return null;
-                            },
+        child: Container(
+          height: 600,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Container(
+                  height: 600,
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  color: Colors.grey.shade300,
+                  child: SingleChildScrollView(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Add Budget Amount',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        SizedBox(height: 12),
-                        SizedBox(
-                          width: 250,
-                          child: TextFormField(
-                            controller: _descController,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.green.shade100,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: 250,
+                            child: TextFormField(
+                              controller: _codeController,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.green.shade100,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter budget code';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter description';
-                              }
-                              return null;
-                            },
                           ),
-                        ),
-                        SizedBox(height: 12),
-                        SizedBox(
-                          width: 250,
-                          child: TextFormField(
-                            controller: _initialAmount,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.green.shade100,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
+                          SizedBox(height: 12),
+                          SizedBox(
+                            width: 250,
+                            child: TextFormField(
+                              controller: _descController,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.green.shade100,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter description';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter initial amount';
-                              }
-                              if (double.tryParse(value) == null) {
-                                return 'Please enter a valid number';
-                              }
-                              return null;
-                            },
                           ),
-                        ),
-                        SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: _saveBudget,
-                              child: Text(_isEditing ? 'Update' : 'Save'),
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: Colors.black, 
-                                backgroundColor: Colors.white,
+                          SizedBox(height: 12),
+                          SizedBox(
+                            width: 250,
+                            child: TextFormField(
+                              controller: _initialAmount,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.green.shade100,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter initial amount';
+                                }
+                                if (double.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
                             ),
-                            SizedBox(width: 10),
-                            ElevatedButton(
-                              onPressed: _clearForm,
-                              child: Text('Clear'),
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: Colors.black,
-                                backgroundColor: Colors.white,
+                          ),
+                          SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: _saveBudget,
+                                child: Text(_isEditing ? 'Update' : 'Save'),
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.black, 
+                                  backgroundColor: Colors.white,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              SizedBox(width: 10),
+                              ElevatedButton(
+                                onPressed: _clearForm,
+                                child: Text('Clear'),
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.black,
+                                  backgroundColor: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(width: 24),
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.refresh),
-                        onPressed: _fetchBudgetAmount,
-                      ),
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.download),
-                        label: Text('Export'),
-                        onPressed: () {},
-                      )
-                    ],
-                  ),
-                  Expanded(
-                    child: PlutoGrid(
-                      columns: columns,
-                      rows: rows,
-                      onLoaded: (PlutoGridOnLoadedEvent event) {
-                        _stateManager = event.stateManager;
-                      },
-                      configuration: PlutoGridConfiguration(
-                        style: PlutoGridStyleConfig(
-                          gridBorderColor: Colors.black,
-                          oddRowColor: Colors.blue[50],
-                          rowHeight: 40,
-                          gridBackgroundColor: Colors.grey.shade300,
+              SizedBox(width: 24),
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.refresh),
+                          onPressed: _fetchBudgetAmount,
+                        ),
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.download),
+                          label: Text('Export'),
+                          onPressed: () {},
+                        )
+                      ],
+                    ),
+                    Expanded(
+                      child: PlutoGrid(
+                        columns: columns,
+                        rows: rows,
+                        onLoaded: (PlutoGridOnLoadedEvent event) {
+                          _stateManager = event.stateManager;
+                        },
+                        configuration: PlutoGridConfiguration(
+                          style: PlutoGridStyleConfig(
+                            gridBorderColor: Colors.black,
+                            oddRowColor: Colors.blue[50],
+                            rowHeight: 40,
+                            gridBackgroundColor: Colors.grey.shade300,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
