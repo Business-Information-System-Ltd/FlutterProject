@@ -142,7 +142,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
           final row = rendererContext.row;
           final requestType = row.cells['requesttype']?.value.toString() ?? '';
           return IconButton(
-            icon: Icon(Icons.more_horiz, color: Colors.black),
+            icon: const Icon(Icons.more_horiz, color: Colors.black),
             onPressed: () {
               final row = rendererContext.row;
               final requestType =
@@ -196,17 +196,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AdvanceRequestForm(
-                      initialRequestData: {
-                        'requestNo': requestNo,
-                        'requestDate': requestDate,
-                        'requestType': 'Operation',
-                        'requestCode': requestCode,
-                        'requestAmount': requestAmount,
-                        'currency': currency,
-                        'requester': requester,
-                      },
-                    ),
+                    builder: (context) => AdvanceRequestForm(),
                   ),
                 );
               }
@@ -278,50 +268,34 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Advance Request List'), centerTitle: true),
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(50, 20, 50, 30),
-        child: Container(
-          height: 300,
-          child: Column(
-            children: [
-              if (_isLoading)
-                Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (_errorMessage.isNotEmpty)
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      _errorMessage,
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                )
-              else
-                Expanded(
-                  child: PlutoGrid(
-                    columns: _columns,
-                    rows: _rows,
-                    configuration: PlutoGridConfiguration(
-                      style: PlutoGridStyleConfig(
-                        oddRowColor: Colors.blue[50],
-                        rowHeight: 50,
-                        activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+      appBar: AppBar(title: Text('Advance Request List '), centerTitle: true),
+     // body: _rows.isEmpty
+         // ? Center(child: CircularProgressIndicator())
+        body  : Padding(
+              padding: EdgeInsets.fromLTRB(50, 20, 50, 30),
+              child: Container(
+                height: 300,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: PlutoGrid(
+                        columns: _columns,
+                        rows: _rows,
+                        configuration: PlutoGridConfiguration(
+                          style: PlutoGridStyleConfig(
+                            oddRowColor: Colors.blue[50],
+                            rowHeight: 50,
+                            activatedColor:
+                                Colors.lightBlueAccent.withOpacity(0.2),
+                          ),
+                        ),
+                        onLoaded: (event) => _stateManager = event.stateManager,
                       ),
                     ),
-                    onChanged: (PlutoGridOnChangedEvent event) {
-                      // Handle changes if needed
-                    },
-                    onLoaded: (PlutoGridOnLoadedEvent event) {
-                      _stateManager = event.stateManager;
-                    },
-                  ),
+                  ],
                 ),
-            ],
-          ),
-        ),
-      ),
+              ),
+            ),
     );
   }
 }

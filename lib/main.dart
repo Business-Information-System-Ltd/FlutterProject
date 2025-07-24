@@ -1,7 +1,6 @@
-import 'package:advance_budget_request_system/views/cashpaymentEntry.dart';
-import 'package:advance_budget_request_system/views/login.dart';
-import 'package:advance_budget_request_system/views/settlement.dart';
-import 'package:advance_budget_request_system/views/tripForm.dart';
+
+import 'package:advance_budget_request_system/views/collection.dart';
+import 'package:advance_budget_request_system/views/dashoard.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:advance_budget_request_system/views/permission.dart';
@@ -36,7 +35,7 @@ void main() {
 
     //home:CashPaymentPage(),
 
-  // home: AdvanceRequestPage(),
+   home: AdvanceRequestPage(),
 
     // home: TripInformation(),
 
@@ -50,17 +49,17 @@ void main() {
 
     // home:TripEntryForm(),
 
-    home:AdvancePage(),
+    //home:AdvancePage(),
 
     // home: TripRequestForm(currentUser: UserModel(name: 'MM', department: 'Admin'), tripId: 0),
 
-    //home:  AdvanceRequestForm(),//Operation
+    //home:  AdvanceRequestForm(),
 
     //home: BudgetForm(),
 
-   // home: AdvanceProjectTripTable(),//
+    //home: AdvanceProjectTripTable(),
 
-    //home:AddAdvanceRequestForm(),//
+    //home:AddAdvanceRequestForm(),
 
     debugShowCheckedModeBanner: false,
   ));

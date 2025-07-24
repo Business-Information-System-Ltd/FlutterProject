@@ -1,3 +1,5 @@
+import 'package:advance_budget_request_system/views/datefilter.dart';
+import 'package:advance_budget_request_system/views/searchfunction.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
@@ -26,9 +28,12 @@ class _ProjectInformationState extends State<ProjectInformation> {
   List<PlutoColumn> _columns = [];
   List<PlutoRow> _rows = [];
   List<Project> projects = [];
+  DateTimeRange? _currentDateRange;
+  String? _currentFilterType;
   PlutoGridStateManager? _stateManager;
   final NumberFormat _formatter = NumberFormat('#,###');
-   bool isEditMode=false;
+  bool isEditMode = false;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -46,13 +51,72 @@ class _ProjectInformationState extends State<ProjectInformation> {
       setState(() {
         projects = projectList;
         _rows = _buildRows(projects);
+        _applyDateFilter();
       });
     } catch (e) {
       print('Error fetching projects: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load project data')),
+        const SnackBar(content: Text('Failed to load project data')),
       );
     }
+  }
+
+  void _applyDateFilter() {
+    List<Project> filteredProjects = projects;
+    if (_currentDateRange != null) {
+      final startDate = DateTime(
+        _currentDateRange!.start.year,
+        _currentDateRange!.start.month,
+        _currentDateRange!.start.day,
+      );
+      final endDate = DateTime(_currentDateRange!.end.year,
+              _currentDateRange!.end.month, _currentDateRange!.end.day)
+          .add(const Duration(days: 1));
+
+      filteredProjects = projects.where((project) {
+        final projectDate =
+            DateFormat('yyyy-MM-dd').parse(project.date.toString());
+        final normalizedProjectDate =
+            DateTime(projectDate.year, projectDate.month, projectDate.day);
+        return normalizedProjectDate.isAtSameMomentAs(startDate) ||
+            (normalizedProjectDate.isAfter(startDate) &&
+                normalizedProjectDate.isBefore(endDate));
+      }).toList();
+    }
+    if (_searchQuery.isNotEmpty) {
+      filteredProjects = filteredProjects
+          .where((project) =>
+              SearchUtils.matchesSearchProject(project, _searchQuery))
+          .toList();
+    }
+    
+
+    setState(() {
+      _rows = _buildRows(filteredProjects);
+    });
+    setState(() {
+      _rows = _buildRows(filteredProjects);
+    });
+
+    if (_stateManager != null) {
+      _stateManager!.removeAllRows();
+      _stateManager!.appendRows(_rows);
+    }
+  }
+
+  void _handleDateRangeChange(DateTimeRange range, String selectedValue) {
+    setState(() {
+      _currentDateRange = range;
+      _currentFilterType = selectedValue;
+    });
+    _applyDateFilter();
+  }
+
+  void _handleSearch(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+    _applyDateFilter();
   }
 
   void _refreshData() {}
@@ -82,11 +146,11 @@ class _ProjectInformationState extends State<ProjectInformation> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -111,12 +175,12 @@ class _ProjectInformationState extends State<ProjectInformation> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Project deleted successfully')),
+          const SnackBar(content: Text('Project deleted successfully')),
         );
       } catch (e) {
         print('Delete failed: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete project')),
+          const SnackBar(content: Text('Failed to delete project')),
         );
       }
     }
@@ -206,9 +270,8 @@ class _ProjectInformationState extends State<ProjectInformation> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-
                 IconButton(
-                  icon: Icon(Icons.edit, color: Colors.blue),
+                  icon: const Icon(Icons.edit, color: Colors.blue),
                   onPressed: () {
                     final row = rendererContext.row;
                     final rowData = {
@@ -221,42 +284,34 @@ class _ProjectInformationState extends State<ProjectInformation> {
                       'department': row.cells['department']?.value,
                       'requestable': row.cells['requestable']?.value,
                     };
-                    
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => AddProjectForm(
-                            initialData: rowData,
-                             readOnly: false,
-                             isEditMode: true,
-                            projectId: row.cells['id']?.value,
-                            //  projectId: row.cells['id']?.value,
-                             ),
+                          initialData: rowData,
+                          readOnly: false,
+                          isEditMode: true,
+                          projectId: row.cells['id']?.value,
+                          //  projectId: row.cells['id']?.value,
+                        ),
                       ),
-
-                    )
-                    .then((result){
-                      if (result==true){
+                    ).then((result) {
+                      if (result == true) {
                         _fetchProjects();
                       }
                     });
-                   
-                
                   },
                 ),
-
-               
-
-
                 IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
+                  icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () async {
                     await _deleteConfirmation(rendererContext.row);
                     _stateManager?.removeRows([rendererContext.row]);
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.more_horiz, color: Colors.black),
+                  icon: const Icon(Icons.more_horiz, color: Colors.black),
                   onPressed: () {
                     final row = rendererContext.row;
                     final nonEditableData = {
@@ -276,7 +331,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
                             initialData: nonEditableData,
                             isEditMode: false,
                             projectId: row.cells['id']?.value,
-                             readOnly: true),
+                            readOnly: true),
                       ),
                     );
                   },
@@ -285,8 +340,30 @@ class _ProjectInformationState extends State<ProjectInformation> {
             );
           } else {
             return IconButton(
-              icon: Icon(Icons.more_horiz, color: Colors.black),
-              onPressed: () {},
+              icon: const Icon(Icons.more_horiz, color: Colors.black),
+              onPressed: () {
+                final row = rendererContext.row;
+                final nonEditableData = {
+                  'id': row.cells['id']?.value,
+                  'date': row.cells['date']?.value,
+                  'projectcode': row.cells['projectcode']?.value,
+                  'description': row.cells['description']?.value,
+                  'totalamount': row.cells['totalamount']?.value.toString(),
+                  'currency': row.cells['currency']?.value,
+                  'department': row.cells['department']?.value,
+                  'requestable': row.cells['requestable']?.value,
+                };
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddProjectForm(
+                        initialData: nonEditableData,
+                        isEditMode: false,
+                        projectId: row.cells['id']?.value,
+                        readOnly: true),
+                  ),
+                );
+              },
             );
           }
         },
@@ -299,7 +376,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: const Text(
           'Project Information',
           style: TextStyle(
             fontSize: 20,
@@ -308,130 +385,132 @@ class _ProjectInformationState extends State<ProjectInformation> {
           ),
         ),
       ),
-      body: _rows.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: EdgeInsets.fromLTRB(80, 50, 80, 30),
-              child: Container(
-                height: 320,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton.icon(
-                          icon: Icon(Icons.add),
-                          label: Text('New'),
-
-                          onPressed: () async {
-                            final result =
-                                await Navigator.of(context).push<Project>(
-                              MaterialPageRoute(
-                                builder: (context) => AddProjectForm(projectId: 0)
-                              ),
-                            );
-
-                            // if (result != null) {
-                            //   setState(() {
-                            //     projects.add(result);
-
-                            //     final newRow = PlutoRow(cells: {
-                            //       'date': PlutoCell(
-                            //           value: DateFormat('yyyy-MM-dd')
-                            //               .format(result.date)),
-                            //       'projectcode':
-                            //           PlutoCell(value: result.projectCode),
-                            //       'description': PlutoCell(
-                            //           value: result.projectDescription),
-                            //       'totalamount':
-                            //           PlutoCell(value: result.totalAmount),
-                            //       'currency': PlutoCell(value: result.currency),
-                            //       'department':
-                            //           PlutoCell(value: result.departmentName),
-                            //       'requestable':
-                            //           PlutoCell(value: result.requestable),
-                            //       'action': PlutoCell(value: ''),
-                            //     });
-
-                            //     _rows.add(newRow);
-                            //     _stateManager?.appendRows([newRow]);
-                            //   });
-
-                            //   ScaffoldMessenger.of(context).showSnackBar(
-                            //     SnackBar(content: Text('New project added')),
-                            //   );
-                            // }
-                          },
-
-                          // onPressed: () async {
-                          //   final success =
-                          //       await Navigator.of(context).push<bool>(
-                          //     MaterialPageRoute(
-                          //         builder: (context) => AddProjectForm()),
-                          //   );
-
-                          //   if (success == true) {
-                          //     _fetchProjects();
-                          //   }
-                          // },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey.shade300,
-                            foregroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Container(
-                              child: IconButton(
-                                icon: Icon(Icons.refresh),
-                                onPressed: () {},
-                                color: Colors.black,
-                              ),
-                            ),
-                            ElevatedButton.icon(
-                              label: Text('Export'),
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey.shade300,
-                                foregroundColor: Colors.black,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(80, 20, 80, 20),
+        child: Container(
+          height: 470,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: DateFilterDropdown(
+                      onDateRangeChanged: _handleDateRangeChange,
+                      initialValue: _currentFilterType,
                     ),
-                    SizedBox(height: 2),
-                    Expanded(
-                      child: PlutoGrid(
-                        columns: _columns,
-                        rows: _rows,
-                        configuration: PlutoGridConfiguration(
-                          style: PlutoGridStyleConfig(
-                            oddRowColor: Colors.blue[50],
-                            rowHeight: 45,
-                            activatedColor:
-                                Colors.lightBlueAccent.withOpacity(0.2),
-                          ),
-                        ),
-                        onLoaded: (PlutoGridOnLoadedEvent event) {
-                          _stateManager = event.stateManager;
-                          if (_rows.isEmpty) {
-                            _fetchProjects();
-                          }
-                        },
+                  ),
+                  const SizedBox(width: 10),
+                  // Add filter indicator chip
+                  if (_currentFilterType != null)
+                    Chip(
+                      label: Text(
+                        'Filter: ${_currentFilterType!.replaceAll('_', ' ')}',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      onDeleted: () {
+                        setState(() {
+                          _currentDateRange = null;
+                          _currentFilterType = null;
+                        });
+                        _applyDateFilter();
+                      },
+                    ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  Flexible(
+                    flex: 3,
+                    child: CustomSearchBar(
+                      onSearch: _handleSearch,
+                      hintText: 'Search...',
+                      minWidth: 500,
+                      maxWidth: 800,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.add),
+                    label: const Text('New'),
+                    onPressed: () async {
+                      final result = await Navigator.of(context).push<Project>(
+                        MaterialPageRoute(
+                            builder: (context) => AddProjectForm(projectId: 0)),
+                      );
+
+                      if (result != null) {
+                        setState(() {
+                          projects.add(result);
+                          _rows = _buildRows(projects);
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade300,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ],
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        child: IconButton(
+                          icon: const Icon(Icons.refresh),
+                          onPressed: () {},
+                          color: Colors.black,
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        label: const Text('Export'),
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade300,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 7),
+              Expanded(
+                child:
+                    // _rows.isEmpty
+                    //     ? const Center(child: CircularProgressIndicator())
+                    //     :
+                    PlutoGrid(
+                  columns: _columns,
+                  rows: _rows,
+                  configuration: PlutoGridConfiguration(
+                    style: PlutoGridStyleConfig(
+                      oddRowColor: Colors.blue[50],
+                      // rowHeight: 45,
+                      activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+                    ),
+                  ),
+                  onLoaded: (PlutoGridOnLoadedEvent event) {
+                    _stateManager = event.stateManager;
+                    if (_rows.isEmpty) {
+                      _fetchProjects();
+                    }
+                  },
                 ),
               ),
-            ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

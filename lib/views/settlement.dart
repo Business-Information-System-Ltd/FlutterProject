@@ -130,7 +130,7 @@ class _SettlementPageState extends State<SettlementPage> {
      catch (e) {
       print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load settlements')),
+        const SnackBar(content: Text('Failed to load settlements')),
       );
     }
   }
@@ -153,11 +153,11 @@ class _SettlementPageState extends State<SettlementPage> {
   @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(title: Text('Settlement '),centerTitle: true,),
+    appBar: AppBar(title: const Text('Settlement '),centerTitle: true,),
 
     body: _rows.isEmpty
-        ? Center(child: CircularProgressIndicator())
-         : Padding( padding: EdgeInsets.only(left: 50, right: 50, top: 30, bottom: 50), 
+        ? const Center(child: CircularProgressIndicator())
+         : Padding( padding: const EdgeInsets.only(left: 50, right: 50, top: 30, bottom: 50), 
 
         
               child:SingleChildScrollView(

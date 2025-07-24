@@ -97,6 +97,15 @@ class Trip(models.Model):
     Department_ID = models.ForeignKey(Department, on_delete=models.CASCADE,db_column='Department_ID') 
     Created_Date = models.DateTimeField(auto_now_add=True)
     Modified_Date = models.DateTimeField(auto_now=True)
+    Source= models.CharField(max_length=50)
+    Destination=models.CharField(max_length=50)
+    DepartureDate=models.DateTimeField()
+    ReturnDate=models.DateTimeField()
+    Other_Person=models.BooleanField(default=False)
+    Round_Trip=models.BooleanField(default=True)
+    Direct_AdvanceRequest=models.BooleanField(default=False)
+    ExpenditureOption=models.BooleanField(default=False)
+    Requester_Name=models.CharField(max_length=100)
 
     class Meta:
         managed = False
@@ -173,17 +182,42 @@ class RequestSetUp(models.Model):
     def str(self):
         return str(self.ID)
 
+# class ApproverSetupStep(models.Model):
+#     ID=models.AutoField(primary_key=True)
+#     Setup_ID=models.ForeignKey(RequestSetUp, on_delete=models.CASCADE,db_column='Setup_ID',  related_name='approval_steps')
+#     Step_No=models.IntegerField()
+#     Maximum_Approval_Amount=models.DecimalField(max_digits=12,decimal_places=2)
+#     Is_All_Approver= models.CharField(max_length=10, choices=[('One','One'),('All','All')])
+#     Limited_Time= models.DateTimeField()
+#     Request_Status= models.BooleanField()
+
+#     class Meta:
+#         managed = False
+#         db_table='approver_setup_step'
+#     def __str__(self):
+#         return str(self.ID)
 class ApproverSetupStep(models.Model):
-    ID=models.AutoField(primary_key=True)
-    Setup_ID=models.ForeignKey(RequestSetUp, on_delete=models.CASCADE,db_column='Setup_ID',  related_name='approval_steps')
-    Step_No=models.IntegerField()
-    Maximum_Approval_Amount=models.DecimalField(max_digits=12,decimal_places=2)
-    Approver_Email=models.CharField(max_length=100)  
+    ID = models.AutoField(primary_key=True)
+    Setup_ID = models.ForeignKey(RequestSetUp, on_delete=models.CASCADE, db_column='Setup_ID', related_name='approval_steps')
+    Step_No = models.IntegerField()
+    Maximum_Approval_Amount = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    # Change this field name to match your database column
+    Is_All_Approver = models.CharField(max_length=10, choices=[('One','One'),('All','All')], db_column='is_all_approver')  # or whatever your actual column name is
+    
+    Limited_Time = models.DateTimeField()
+    Request_Status = models.BooleanField()
+
     class Meta:
-        managed = False
-        db_table='approver_setup_step'
+        managed = False  # Since you're using an existing database
+        db_table = 'approver_setup_step'
+    
     def __str__(self):
         return str(self.ID)
+
+
+
+
 
 class AdvanceRequest(models.Model):
     ID = models.AutoField(primary_key=True) 
@@ -194,7 +228,6 @@ class AdvanceRequest(models.Model):
         ('Trip', 'Trip'),
         ('Operation', 'Operation')
     ])
-    # Keep the separate foreign keys but make them nullable
     Trip_ID = models.ForeignKey(
         Trip, 
         on_delete=models.CASCADE, 
@@ -281,6 +314,33 @@ class AdvanceRequest(models.Model):
             self.Trip= None
         else:
             raise ValueError("Invalid object type for related_object")
+        
+class ApprovalStatus(models.Model):
+    ID=models.AutoField(primary_key=True)
+    Step_ID=models.ForeignKey(ApproverSetupStep, on_delete=models.CASCADE,db_column='Step_ID',  related_name='approval_status')
+    Step_No=models.IntegerField()
+    Request_ID=models.ForeignKey(AdvanceRequest,on_delete=models.CASCADE, db_column="Request_ID",related_name="approval_status")
+    Is_All_Approver= models.CharField(max_length=10, choices=[('One','One'),('All','All')])
+    Comment= models.TextField()
+    Response_Date= models.DateTimeField()
+    Status=models.CharField(max_length=10, choices=[("Pending","Pending"), ("Progress","Progress"),("Approved","Approved"),("Reject","Reject")])
+
+    class Meta:
+        managed = False
+        db_table='approval_status'
+    def __str__(self):
+        return str(self.ID) 
+
+class UserApproval(models.Model):
+    ID=models.AutoField(primary_key=True)
+    User_ID=models.ForeignKey(User, on_delete=models.CASCADE,db_column='User_ID',  related_name='user_approval')
+    Setup_Step_ID= models.ForeignKey(ApproverSetupStep,on_delete=models.CASCADE,db_column="Setup_Step_ID", related_name="user_approval")
+    class Meta:
+        managed = False
+        db_table='user_approval'
+    def __str__(self):
+        return str(self.ID) 
+
 
 class CashPayment(models.Model):
     ID = models.AutoField(primary_key=True) 

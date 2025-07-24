@@ -50,7 +50,7 @@ class _CashPaymentPageState extends State<CashPaymentPage>
         cells: {
           'paymentdate': PlutoCell(value: p.date),
           'paymentno': PlutoCell(value: p.paymentNo),
-          'requestno': PlutoCell(value: 'Req-${p.requestId}'),
+          'requestno': PlutoCell(value: p.requestNo),
           'paymentamount': PlutoCell(value: p.paymentAmount),
           'currency': PlutoCell(value: p.currency),
           'paymentmethod': PlutoCell(value: p.paymentMethod),

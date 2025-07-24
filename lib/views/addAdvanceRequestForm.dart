@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:advance_budget_request_system/views/api_service.dart';
-import 'package:advance_budget_request_system/views/data.dart';
 import 'package:intl/intl.dart';
-import 'package:advance_budget_request_system/views/projecttable.dart';
-import 'package:http/http.dart' as http;
 import 'package:advance_budget_request_system/views/advanceRequestProjectTripTable.dart.dart';
 
 class AddAdvanceRequestForm extends StatefulWidget {
@@ -197,51 +193,51 @@ void initState() {
   }
 
   try {
-    final newRequested = AdvanceRequested(
-      date: DateTime.now(), // Add current date
-      requestCode: _requestNo.text, // Use requestNo as requestCode or generate one
-      requestNo: _requestNo.text,
-      requestType: _requestType.text,
-      requestDate: _requestDate.text,
-      requestAmount: double.parse(_requestAmount.text)??0.0,
-      requester: _requester.text,
-      requestPurpose: _requestPurpose.text,
-      purpose: _requestPurpose.text, // Using same as requestPurpose
-      projectCode: _isProject ? _requestCode.text : null,
-      tripCode: !_isProject ? _requestCode.text : null,
-      description: _descriptionController.text,
-      totalAmount: _totalAmountController.text.isNotEmpty
-          ? double.tryParse(_totalAmountController.text)
-          : null,
-      currency: _selectedCurrency ?? 'MMK',
-      department: _department.text,
-      attachFiles: _attachFilesController.text,
-      roundTrip: _roundTripController.text.isNotEmpty 
-          ? int.tryParse(_roundTripController.text) 
-          : null,
-      source: _sourceTripController.text,
-      destination: _destinationTripController.text,
-      departureDate: _depatureTripController.text,
-      returnDate: _returnTripController.text,
-      expenditure: _expenditureTripController.text.isNotEmpty
-          ? int.tryParse(_expenditureTripController.text)
-          : null,
-    );
+    // final newRequested = Advance(
+    //   date: DateTime.now(), // Add current date
+    //   requestCode: _requestNo.text, // Use requestNo as requestCode or generate one
+    //   requestNo: _requestNo.text,
+    //   requestType: _requestType.text,
+    //   requestDate: _requestDate.text,
+    //   requestAmount: double.parse(_requestAmount.text)??0.0,
+    //   requester: _requester.text,
+    //   requestPurpose: _requestPurpose.text,
+    //   purpose: _requestPurpose.text, // Using same as requestPurpose
+    //   projectCode: _isProject ? _requestCode.text : null,
+    //   tripCode: !_isProject ? _requestCode.text : null,
+    //   description: _descriptionController.text,
+    //   totalAmount: _totalAmountController.text.isNotEmpty
+    //       ? double.tryParse(_totalAmountController.text)
+    //       : null,
+    //   currency: _selectedCurrency ?? 'MMK',
+    //   department: _department.text,
+    //   attachFiles: _attachFilesController.text,
+    //   roundTrip: _roundTripController.text.isNotEmpty 
+    //       ? int.tryParse(_roundTripController.text) 
+    //       : null,
+    //   source: _sourceTripController.text,
+    //   destination: _destinationTripController.text,
+    //   departureDate: _depatureTripController.text,
+    //   returnDate: _returnTripController.text,
+    //   expenditure: _expenditureTripController.text.isNotEmpty
+    //       ? int.tryParse(_expenditureTripController.text)
+    //       : null,
+    // );
     
 
-    final success = await ApiService().postAdvanceRequested(newRequested);
+    // final success = await ApiService().postAdvanceRequested(newRequested);
 
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Request submitted successfully!')),
-      );
-      _clearForm();
-    } else {
-      debugPrint('API returned failure for: ${newRequested.toJson()}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to submit request')),
-      );
-    }
+    // if (success) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('Request submitted successfully!')),
+    //   );
+    //   _clearForm();
+    // } else {
+    //   // debugPrint('API returned failure for: ${newRequested.toJson()}');
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('Failed to submit request')),
+    //   );
+    // }
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Error: ${e.toString()}')),
