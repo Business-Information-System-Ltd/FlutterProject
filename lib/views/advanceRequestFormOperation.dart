@@ -7,7 +7,7 @@ import 'package:advance_budget_request_system/views/projecttable.dart';
 import 'package:http/http.dart' as http;
 
 class AdvanceRequestForm extends StatefulWidget {
-   final bool readOnly;
+  final bool readOnly;
   final Map<String, dynamic>? initialRequestData;
 
   const AdvanceRequestForm({
@@ -15,7 +15,6 @@ class AdvanceRequestForm extends StatefulWidget {
     this.readOnly = false,
     this.initialRequestData,
   }) : super(key: key);
-  
 
   @override
   State<AdvanceRequestForm> createState() => _AdvanceRequestFormState();
@@ -40,10 +39,30 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
   PlutoGridStateManager? popupGridManager;
 
   String? _selectedCurrency = 'MMK';
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _requestDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  // }
   @override
   void initState() {
     super.initState();
-    _requestDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    if (widget.initialRequestData != null) {
+      _requestNo.text = widget.initialRequestData!['requestNo'] ?? '';
+      _requestType.text =
+          widget.initialRequestData!['requestType'] ?? 'Operation';
+      _requestDate.text = widget.initialRequestData!['requestDate'] ??
+          DateFormat('yyyy-MM-dd').format(DateTime.now());
+      _requestCode.text = widget.initialRequestData!['requestCode'] ?? '';
+      _requestAmount.text = widget.initialRequestData!['requestAmount'] ?? '';
+      _selectedCurrency = widget.initialRequestData!['currency'] ?? 'MMK';
+      _requester.text = widget.initialRequestData!['requester'] ?? '';
+    } else {
+      _requestDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      _requestType.text = 'Operation';
+    }
   }
 
   List<PlutoColumn> _columns = [
@@ -72,7 +91,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
       titleTextAlign: PlutoColumnTextAlign.center,
     ),
   ];
-  
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -195,7 +214,6 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                           ),
                         ),
                         const SizedBox(width: 15),
-                        
                         const Text(
                           'Currency',
                           style: TextStyle(fontSize: 16),
@@ -272,7 +290,6 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                       ],
                     ),
                     SizedBox(height: 20),
-
                     Container(
                       height: 150,
                       width: 550,
@@ -302,7 +319,6 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

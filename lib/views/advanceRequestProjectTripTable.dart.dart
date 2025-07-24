@@ -22,8 +22,6 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
   void initState() {
     super.initState();
     _updateTable();
-
-    
   }
 
   List<PlutoColumn> _columns() {
@@ -218,20 +216,20 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
-        backgroundColor: Colors.green.shade100,
-        title: Text('Advance Request Form'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_forward), // Custom icon
-          onPressed: () {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        AddAdvanceRequestForm ())); // Manually go back
-          },
-        ),
-      ),
+      //  appBar: AppBar(
+      //   backgroundColor: Colors.green.shade100,
+      //   title: Text('Advance Request Form'),
+      //   leading: IconButton(
+      //     icon: Icon(Icons.arrow_forward), // Custom icon
+      //     onPressed: () {
+      //       Navigator.pushReplacement(
+      //           context,
+      //           MaterialPageRoute(
+      //               builder: (context) =>
+      //                   AddAdvanceRequestForm ())); // Manually go back
+      //     },
+      //   ),
+      // ),
       backgroundColor: Color.fromRGBO(255, 255, 255, 1),
       body: Center(
         child: Container(

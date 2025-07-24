@@ -825,8 +825,10 @@ final response= await http.post( Uri.parse('$baseUrl/trips'),
     );
   }
 
+
+
 Future<List<AdvanceRequest>> fetchAdvanceRequest() async {
-  final response = await http.get(Uri.parse('$baseUrl/advanceRequests'));
+  final response = await http.get(Uri.parse('$baseUrl/advanceRequest'));
 
   if (response.statusCode == 200) {
     List<dynamic> data = json.decode(response.body);
@@ -966,5 +968,22 @@ Future<List<AdvanceRequest>> fetchAdvanceRequest() async {
   }
 }
 
+// Future<Project> fetchProjectByRequestNo(String requestNo) async {
+//   final response = await http.get(Uri.parse('$baseUrl/projects?requestNo=$requestNo'));
+//   if (response.statusCode == 200) {
+//     return Project.fromJson(json.decode(response.body));
+//   } else {
+//     throw Exception('Failed to load project');
+//   }
+// }
+
+// Future<Trip> fetchTripByRequestNo(String requestNo) async {
+//   final response = await http.get(Uri.parse('$baseUrl/trips?requestNo=$requestNo'));
+//   if (response.statusCode == 200) {
+//     return Trip.fromJson(json.decode(response.body));
+//   } else {
+//     throw Exception('Failed to load trip');
+//   }
+// }
  
  

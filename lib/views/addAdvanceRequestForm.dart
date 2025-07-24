@@ -17,6 +17,9 @@ class AddAdvanceRequestForm extends StatefulWidget {
   final String? department;
   final String? type;
   final String? requestType;
+  final String? requester;
+  final String? deptName;
+  final String? expenditure;
   final Map<String, dynamic>? tripData;
 
   const AddAdvanceRequestForm({
@@ -29,9 +32,12 @@ class AddAdvanceRequestForm extends StatefulWidget {
     this.totalAmount,
     this.currency,
     this.department,
+    this.expenditure,
     this.type,
     this.requestType,
+    this.deptName,
     this.tripData,
+    this.requester,
   }) : super(key: key);
 
   @override
@@ -64,53 +70,69 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
   String? _selectedCurrency = 'MMK';
   bool _isProject = true;
 
-  @override
-  void initState() {
-    super.initState();
+  // @override
+  // void initState() {
+  //   super.initState();
 
-    print('Received trip data: ${widget.tripData}');
-    _isProject = widget.projectCode != null ||
-        (widget.requestType ?? '').toLowerCase() == 'project';
-    _requestType.text =
-        widget.requestType ?? widget.type ?? (_isProject ? 'Project' : 'Trip');
-    _requestDate.text =
-        widget.requestDate ?? DateFormat('yyyy-MM-dd').format(DateTime.now());
-    _requestNo.text = widget.requestNo ?? '';
+  //   print('Received trip data: ${widget.tripData}');
+  //   _isProject = widget.projectCode != null ||
+  //       (widget.requestType ?? '').toLowerCase() == 'project';
+  //   _requestType.text =
+  //       widget.requestType ?? widget.type ?? (_isProject ? 'Project' : 'Trip');
+  //   _requestDate.text =
+  //       widget.requestDate ?? DateFormat('yyyy-MM-dd').format(DateTime.now());
+  //   _requestNo.text = widget.requestNo ?? '';
 
-    // Set the request code based on project or trip
-    _requestCode.text = widget.projectCode ?? widget.tripCode ?? '';
-    _descriptionController.text = widget.description ?? '';
-    _totalAmountController.text = widget.totalAmount ?? '';
+  //   // Set the request code based on project or trip
+  //   _requestCode.text = widget.projectCode ?? widget.tripCode ?? '';
+  //   _descriptionController.text = widget.description ?? '';
+  //   _totalAmountController.text = widget.totalAmount ?? '';
 
-    // Initialize currency properly
-    _selectedCurrency = widget.currency ?? 'MMK';
-    _currencyController.text = _selectedCurrency!;
+  //   // Initialize currency properly
+  //   _selectedCurrency = widget.currency ?? 'MMK';
+  //   _currencyController.text = _selectedCurrency!;
 
-    // Department should come from either project or trip data
-    _department.text = widget.department ?? '';
+  //   // Department should come from either project or trip data
+  //   _department.text = widget.department ?? '';
 
-    // Initialize trip-specific fields if trip data exists
-    if (widget.tripData != null && !_isProject) {
-      _roundTripController.text =
-          widget.tripData!['roundTrip']?.toString() ?? '';
-      _sourceTripController.text = widget.tripData!['source']?.toString() ?? '';
-      _destinationTripController.text =
-          widget.tripData!['destination']?.toString() ?? '';
-      _deptNameTripController.text =
-          widget.tripData!['deptName']?.toString() ?? '';
-      _depatureTripController.text =
-          widget.tripData!['departure']?.toString() ?? '';
-      _returnTripController.text = widget.tripData!['return']?.toString() ?? '';
-      _expenditureTripController.text =
-          widget.tripData!['expenditure']?.toString() ?? '';
+  //   // Initialize trip-specific fields if trip data exists
+  //   if (widget.tripData != null && !_isProject) {
+  //     _roundTripController.text =
+  //         widget.tripData!['roundTrip']?.toString() ?? '';
+  //     _sourceTripController.text = widget.tripData!['source']?.toString() ?? '';
+  //     _destinationTripController.text =
+  //         widget.tripData!['destination']?.toString() ?? '';
+  //     _deptNameTripController.text =
+  //         widget.tripData!['deptName']?.toString() ?? '';
+  //     _depatureTripController.text =
+  //         widget.tripData!['departure']?.toString() ?? '';
+  //     _returnTripController.text = widget.tripData!['return']?.toString() ?? '';
+  //     _expenditureTripController.text =
+  //         widget.tripData!['expenditure']?.toString() ?? '';
 
-      // Make sure department is set from trip data if not already set
-      if (_department.text.isEmpty) {
-        _department.text = widget.tripData!['deptName']?.toString() ?? '';
-      }
-    }
-  }
+  //     // Make sure department is set from trip data if not already set
+  //     if (_department.text.isEmpty) {
+  //       _department.text = widget.tripData!['deptName']?.toString() ?? '';
+  //     }
+  //   }
+  // }
+@override
+void initState() {
+  super.initState();
 
+  // Initialize form fields with passed data
+  _requestType.text = widget.requestType ?? '';
+  _requestNo.text = widget.requestNo ?? '';
+  _requestDate.text = widget.requestDate ?? DateFormat('yyyy-MM-dd').format(DateTime.now());
+  _requestCode.text = widget.projectCode ?? widget.tripCode ?? '';
+  _totalAmountController.text = widget.totalAmount ?? '';
+  _selectedCurrency = widget.currency ?? 'MMK';
+  _currencyController.text = _selectedCurrency!;
+  _requester.text = widget.requester ?? '';
+
+  // Set whether this is a project or trip form
+  _isProject = widget.requestType?.toLowerCase() == 'project';
+}
 
   // void _submitForm() async {
   //   // Validate required fields
@@ -289,20 +311,20 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green.shade100,
-        title: Text('Advance Request Form'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back), // Custom icon
-          onPressed: () {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        AdvanceProjectTripTable())); // Manually go back
-          },
-        ),
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.green.shade100,
+      //   title: Text('Advance Request Form'),
+      //   leading: IconButton(
+      //     icon: Icon(Icons.arrow_back), // Custom icon
+      //     onPressed: () {
+      //       Navigator.pushReplacement(
+      //           context,
+      //           MaterialPageRoute(
+      //               builder: (context) =>
+      //                   AdvanceProjectTripTable())); // Manually go back
+      //     },
+      //   ),
+      // ),
       body: Container(
         color: Color.fromRGBO(255, 255, 255, 1),
         padding: const EdgeInsets.fromLTRB(150, 20, 150, 20),

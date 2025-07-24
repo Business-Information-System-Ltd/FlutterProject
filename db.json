@@ -453,6 +453,8 @@
       "requestAmount": 1000,
       "currency": "USD",
       "status": "Approved"
+    
+      
       
 
     },
@@ -464,32 +466,75 @@
       "status": "Pending"
     }
   ],
-
-
- "advancerequested":[
+"advanceRequest":[
   {
-    "requestNo":"",
-    "requestType":"",
-    "requestDate":"",
-    "tripCode":"",
-    "requestedDate":"",
-    "description":"",
-    "roundTrip":"",
-    "source":"",
-    "destination":"",
-    "deptName":"",
-    "depature":"",
-    "return":"",
-    "totalAmount":"",
-    "currency":"",
-    "expenditure":""
+    
+    "requestdate": "2025-06-03",
+        "requestno": "Pay001",
+        "requesttype": "Trip",
+        "requestcode": "PRJ-01",
+        "requestamount": 3200000,
+        "currency": "MMK",
+        "requester": "Hnin",
+        "action": ""
+  },
+  {
+    
+    "requestdate": "2025-06-04",
+        "requestno": "Pay002",
+        "requesttype": "Operation",
+        "requestcode": "PRJ-02",
+        "requestamount": 3500000,
+        "currency": "USD",
+        "requester": "Hnin",
+        "action": ""
+  },
+   {
+    
+    "requestdate": "2025-06-05",
+        "requestno": "Pay003",
+        "requesttype": "Trip",
+        "requestcode": "PRJ-03",
+        "requestamount": 1200000,
+        "currency": "MMK",
+        "requester": "Nway",
+        "action": ""
+  },
+ {
+    
+    "requestdate": "2025-06-06",
+        "requestno": "Pay004",
+        "requesttype": "Operation",
+        "requestcode": "PRJ-04",
+        "requestamount": 2500000,
+        "currency": "USD",
+        "requester": "Doe Doe",
+        "action": ""
+  },
+ {
+    
+    "requestdate": "2025-06-07",
+        "requestno": "Pay005",
+        "requesttype": "Project",
+        "requestcode": "PRJ-05",
+        "requestamount": 3500000,
+        "currency": "MMK",
+        "requester": "Joe Joe",
+        "action": ""
+  },
+ {
+    
+    "requestdate": "2025-06-08",
+        "requestno": "Pay006",
+        "requesttype": "Operation",
+        "requestcode": "PRJ-06",
+        "requestamount": 4400000,
+        "currency": "USD",
+        "requester": "Hla",
+        "action": ""
   }
-  
-  
 
- ],
-
-
+],
   "payments": [
     {
       "id": "1",

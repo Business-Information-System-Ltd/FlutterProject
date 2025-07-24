@@ -55,6 +55,7 @@ class _AdvanceRequestEntryState extends State<AdvanceRequestEntry> {
     _initializeOperationCode();
     _requester.text=widget.username;
   }
+
   final ApiService apiService = ApiService();
 
   Future<int> generateBudgetCodeID() async {  
@@ -65,9 +66,14 @@ class _AdvanceRequestEntryState extends State<AdvanceRequestEntry> {
     }
 
     // Find the highest existing ID
-    int maxId =
-        existingAvance.map((b) => b.id).reduce((a, b) => a > b ? a : b);
-    return maxId + 1;
+  //   int maxId = existingAvance.map((b) => b.id).reduce((a, b) => a > b ? a : b);
+  //  return maxId + 1;
+   // Convert String ids to int and find the max
+  int maxId = existingAvance
+      .map((b) => int.tryParse(b.id.toString()) ?? 0)
+      .reduce((a, b) => a > b ? a : b);
+
+  return maxId + 1;
   }
 
   //fetch Data
@@ -295,10 +301,11 @@ class _AdvanceRequestEntryState extends State<AdvanceRequestEntry> {
       }
       
       AdvanceRequest newAdvance = AdvanceRequest(
-          id: newId,
+          id: newId.toString(),
           date: DateTime.now(),
           requestNo: _reqNoController.text,
           requestCode: requestCode, 
+           requestDate: _dateController.text,
           requestType: selectedType!, 
           requestAmount: double.tryParse(_totalAmtController.text) ?? 0.0,
           currency: _selectedCurrency,
