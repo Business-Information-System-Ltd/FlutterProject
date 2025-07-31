@@ -16,12 +16,38 @@ class _AdvancePageState extends State<AdvancePage> {
   List<PlutoRow> _rows = [];
   PlutoGridStateManager? stateManager;
   final NumberFormat _formatter = NumberFormat('#,###');
+  final dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
   void initState() {
     _columns = _buildColumns();
-    _rows = _buildRows();
+    // _rows = _buildRows();
     super.initState();
+    _fetchAdvanceRequests();
+  }
+
+  void _fetchAdvanceRequests() async {
+    try {
+      List<Advance> advanceList = await ApiService().fetchAdvanceRequests();
+      setState(() {
+        _rows = advanceList.map((advance) {
+          return PlutoRow(cells: {
+            'requestDate': PlutoCell(
+              value:
+                  advance.date != null ? dateFormat.format(advance.date) : "",
+            ),
+            'requestNo': PlutoCell(value: advance.requestNo ?? ""),
+            'requestType': PlutoCell(value: advance.requestType ?? ""),
+            'requestAmount':
+                PlutoCell(value: advance.requestAmount ?? 0.toString()),
+            'currency': PlutoCell(value: advance.currency ?? ""),
+            'requester': PlutoCell(value: advance.requester ?? ""),
+          });
+        }).toList();
+      });
+    } catch (e) {
+      print("Error fetching advance requests: $e");
+    }
   }
 
   List<PlutoColumn> _buildColumns() {
@@ -72,68 +98,68 @@ class _AdvancePageState extends State<AdvancePage> {
     ];
   }
 
-  List<PlutoRow> _buildRows() {
-    final data = [
-      {
-        'requestDate': '2025-05-25',
-        'requestNo': 'Req_000_001',
-        'requestType': 'Project',
-        'requestAmount': 200000,
-        'currency': 'USD',
-        'requester': 'Kelvin'
-      },
-      {
-        'requestDate': '2025-05-25',
-        'requestNo': 'Req_000_001',
-        'requestType': 'Project',
-        'requestAmount': 200000,
-        'currency': 'MMK',
-        'requester': 'Kelvin'
-      },
-      {
-        'requestDate': '2025-05-25',
-        'requestNo': 'Req_000_001',
-        'requestType': 'Project',
-        'requestAmount': 200000,
-        'currency': 'MMK',
-        'requester': 'Kelvin'
-      },
-      {
-        'requestDate': '2025-05-25',
-        'requestNo': 'Req_000_001',
-        'requestType': 'Project',
-        'requestAmount': 200000,
-        'currency': 'MMK',
-        'requester': 'Kelvin'
-      },
-      {
-        'requestDate': '2025-05-25',
-        'requestNo': 'Req_000_001',
-        'requestType': 'Project',
-        'requestAmount': 200000,
-        'currency': 'MMK',
-        'requester': 'Kelvin'
-      },
-      {
-        'requestDate': '2025-05-25',
-        'requestNo': 'Req_000_001',
-        'requestType': 'Project',
-        'requestAmount': 200000,
-        'currency': 'MMK',
-        'requester': 'Kelvin'
-      },
-    ];
-    return data.map((s) {
-      return PlutoRow(cells: {
-        'requestDate': PlutoCell(value: s['requestDate']),
-        'requestNo': PlutoCell(value: s['requestNo']),
-        'requestType': PlutoCell(value: s['requestType']),
-        'requestAmount': PlutoCell(value: s['requestAmount']),
-        'currency': PlutoCell(value: s['currency']),
-        'requester': PlutoCell(value: s['requester']),
-      });
-    }).toList();
-  }
+  // List<PlutoRow> _buildRows() {
+  //   final data = [
+  //     {
+  //       'requestDate': '2025-05-25',
+  //       'requestNo': 'Req_000_001',
+  //       'requestType': 'Project',
+  //       'requestAmount': 200000,
+  //       'currency': 'USD',
+  //       'requester': 'Kelvin'
+  //     },
+  //     {
+  //       'requestDate': '2025-05-25',
+  //       'requestNo': 'Req_000_001',
+  //       'requestType': 'Project',
+  //       'requestAmount': 200000,
+  //       'currency': 'MMK',
+  //       'requester': 'Kelvin'
+  //     },
+  //     {
+  //       'requestDate': '2025-05-25',
+  //       'requestNo': 'Req_000_001',
+  //       'requestType': 'Project',
+  //       'requestAmount': 200000,
+  //       'currency': 'MMK',
+  //       'requester': 'Kelvin'
+  //     },
+  //     {
+  //       'requestDate': '2025-05-25',
+  //       'requestNo': 'Req_000_001',
+  //       'requestType': 'Project',
+  //       'requestAmount': 200000,
+  //       'currency': 'MMK',
+  //       'requester': 'Kelvin'
+  //     },
+  //     {
+  //       'requestDate': '2025-05-25',
+  //       'requestNo': 'Req_000_001',
+  //       'requestType': 'Project',
+  //       'requestAmount': 200000,
+  //       'currency': 'MMK',
+  //       'requester': 'Kelvin'
+  //     },
+  //     {
+  //       'requestDate': '2025-05-25',
+  //       'requestNo': 'Req_000_001',
+  //       'requestType': 'Project',
+  //       'requestAmount': 200000,
+  //       'currency': 'MMK',
+  //       'requester': 'Kelvin'
+  //     },
+  //   ];
+  //   return data.map((s) {
+  //     return PlutoRow(cells: {
+  //       'requestDate': PlutoCell(value: s['requestDate']),
+  //       'requestNo': PlutoCell(value: s['requestNo']),
+  //       'requestType': PlutoCell(value: s['requestType']),
+  //       'requestAmount': PlutoCell(value: s['requestAmount']),
+  //       'currency': PlutoCell(value: s['currency']),
+  //       'requester': PlutoCell(value: s['requester']),
+  //     });
+  //   }).toList();
+  // }
 
   void _navigateToCashpaymentForm(
       BuildContext context, Map<String, dynamic> advanceData) {
@@ -143,7 +169,9 @@ class _AdvancePageState extends State<AdvancePage> {
             builder: (context) => CashPaymentFormScreen(
                 requestNo: advanceData['requestNo'],
                 requestType: advanceData['requestType'],
-                currency: advanceData['currency'])));
+                currency: advanceData['currency'])
+                )
+                );
   }
 
   @override
@@ -250,9 +278,10 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
     _paymentNoController.text =
         'Pay_${lastPaymentNo.toString().padLeft(3, '0')}';
   }
+
   final ApiService apiService = ApiService();
-   
-  Future<int> generateCashpaymentID() async {  
+
+  Future<int> generateCashpaymentID() async {
     List<Payment> existingCash = await apiService.fetchPayments();
 
     if (existingCash.isEmpty) {
@@ -260,37 +289,35 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
     }
 
     // Find the highest existing ID
-    int maxId =
-        existingCash.map((b) => b.id).reduce((a, b) => a > b ? a : b);
+    int maxId = existingCash.map((b) => b.id).reduce((a, b) => a > b ? a : b);
     return maxId + 1;
   }
 
-  void _submitForm() async{
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      int newId= await generateCashpaymentID();
+      int newId = await generateCashpaymentID();
       try {
-        Payment newPayment= Payment(
-        id: newId, 
-        date: DateFormat('yyyy-MM-dd').parse(_paymentDateController.text), 
-        paymentNo: _paymentNoController.text, 
-        requestNo: _requestNoController.text, 
-        requestType: _requestTypeController.text, 
-        paymentAmount: double.tryParse(_paymentAmountController.text)??0, 
-        currency: widget.currency, 
-        paymentMethod: _selectedPaymentMethod!, 
-        paidPerson: _paidPersonController.text, 
-        receivedPerson: _receivePersonController.text, 
-        paymentNote: _paymentNoteController.text, 
-        status: 'Draft', 
-        settled: 'No'
-        );
+        Payment newPayment = Payment(
+            id: newId,
+            date: DateFormat('yyyy-MM-dd').parse(_paymentDateController.text),
+            paymentNo: _paymentNoController.text,
+            requestNo: _requestNoController.text,
+            requestType: _requestTypeController.text,
+            paymentAmount: double.tryParse(_paymentAmountController.text) ?? 0,
+            currency: widget.currency,
+            paymentMethod: _selectedPaymentMethod!,
+            paidPerson: _paidPersonController.text,
+            receivedPerson: _receivePersonController.text,
+            paymentNote: _paymentNoteController.text,
+            status: 'Draft',
+            settled: 'No');
         await ApiService().postPayment(newPayment);
-      print('Saving to database:');
-      print('Settlement Data: $newPayment');
-      
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Cashpayment Data saved successfully!!")));
-      // Navigator.pop(context);
+        print('Saving to database:');
+        print('Settlement Data: $newPayment');
+
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Cashpayment Data saved successfully!!")));
+        // Navigator.pop(context);
       } catch (e) {
         print("Fail to load cash $e");
       }
@@ -317,12 +344,14 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   IconButton(
-                    onPressed: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>const AdvancePage()));
-                    }, 
-                    icon: const Icon(Icons.arrow_drop_down)
-                    ),
-
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const AdvancePage()));
+                      },
+                      icon: const Icon(Icons.arrow_drop_down)
+                      ),
                   const SizedBox(height: 30),
                   Row(
                     children: [
@@ -436,7 +465,8 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
                           }
                           return null;
                         },
-                      )),
+                      )
+                      ),
                     ],
                   ),
                   const SizedBox(

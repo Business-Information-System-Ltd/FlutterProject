@@ -79,7 +79,8 @@ class _AdvanceEntryState extends State<AdvanceEntry> {
     // Find the highest existing ID
     int maxId =
         existingAvance.map((b) => b.id).reduce((a, b) => a > b ? a : b);
-    return maxId + 1;
+    return( maxId + 1);
+    
   }
 
   void _submitForm() async{
@@ -91,6 +92,7 @@ class _AdvanceEntryState extends State<AdvanceEntry> {
         requestNo: _requestNoController.text, 
         requestCode: _requestCodeController.text, 
         requestDes: _descriptionController.text, 
+       // requestDate: _requestDateController.text,
         requestType: _selectedRequestType!, 
         requestAmount: double.tryParse(_totalAmountController.text)?? 0, 
         currency: _selectedCurrency, 
@@ -99,6 +101,7 @@ class _AdvanceEntryState extends State<AdvanceEntry> {
         approvedAmount: 0.0, 
         purpose: _requestPurposeController.text, 
         status: 'Pending'
+
       );
       try {
         await ApiService().postAdvanceRequests(newAdvance);

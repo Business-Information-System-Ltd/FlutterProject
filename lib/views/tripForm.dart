@@ -41,6 +41,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
   final TextEditingController _returnDate = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _tripCodeController = TextEditingController();
+  final TextEditingController _requestDateController=TextEditingController();
 
   bool _isForOtherPerson = false;
   bool _isRoundTrip = false;
@@ -307,12 +308,17 @@ class _TripRequestFormState extends State<TripRequestForm> {
       String requestNo = 'ADV-${DateTime.now().millisecondsSinceEpoch}';
 
       Advance advanceRequest = Advance(
-        id: 0, // Will be assigned by the server
-        date: DateFormat('yyyy-MM-dd').parse(trip.date.toString()),
+        id: 0, 
+       // date: DateFormat('yyyy-MM-dd').parse(trip.date.toString()),
+        date: trip.date,
+      // requestDate: DateFormat('yyyy-MM-dd').format(trip.date),//
+
         requestNo: requestNo,
+        
         requestCode: trip.tripCode,
         requestDes: trip.tripDescription,
         requestType: 'Trip',
+        
         requestAmount: trip.totalAmount,
         currency: trip.currency,
         requester: trip.requesterName,
