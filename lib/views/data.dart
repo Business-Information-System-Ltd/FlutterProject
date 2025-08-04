@@ -952,7 +952,7 @@ class Trips {
 
 
 class Advance {
-  final int id;
+  final String id;
   final DateTime date;
   final String requestNo;
   final String requestCode;
@@ -986,9 +986,10 @@ class Advance {
 
   factory Advance.fromJson(Map<String, dynamic> json) {
     return Advance(
-      id: json['id'] is int
-          ? json['id']
-          : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'],
+      // is int
+      //     ? json['id']
+      //     : int.tryParse(json['id'].toString()) ?? 0,
       date: DateTime.parse(
           json['Date']?.toString() ?? DateTime.now().toIso8601String()),
       requestNo: json['RequestNo'],
@@ -1086,7 +1087,7 @@ class Payment {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'Date': date,
+      'Date': date.toIso8601String(),
       'PaymentNo': paymentNo,
       'RequestNo': requestNo,
       'RequestType': requestType,

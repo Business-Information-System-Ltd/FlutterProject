@@ -307,7 +307,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
       String requestNo = 'ADV-${DateTime.now().millisecondsSinceEpoch}';
 
       Advance advanceRequest = Advance(
-        id: 0, // Will be assigned by the server
+        id: '', // Will be assigned by the server
         date: DateFormat('yyyy-MM-dd').parse(trip.date.toString()),
         requestNo: requestNo,
         requestCode: trip.tripCode,
@@ -641,6 +641,7 @@ class _TripRequestFormState extends State<TripRequestForm> {
               child: PlutoGrid(
                 columns: _columns,
                 rows: _rows,
+                
                 onLoaded: (PlutoGridOnLoadedEvent event) {
                   _stateManager = event.stateManager;
                   _stateManager!.setShowColumnFooter(true);
@@ -656,9 +657,12 @@ class _TripRequestFormState extends State<TripRequestForm> {
                 configuration: const PlutoGridConfiguration(
                   style: PlutoGridStyleConfig(
                     enableGridBorderShadow: true,
+                    rowHeight: 35,
+                    
                     gridBorderColor: Colors.grey,
                   ),
                   columnSize: PlutoGridColumnSizeConfig(
+                    
                     autoSizeMode: PlutoAutoSizeMode.scale,
                   ),
                 ),

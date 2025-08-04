@@ -28,7 +28,7 @@ router.register(r'cashpayment', CashPaymentViewSet)
 router.register(r'requestsetup', RequestSetUpViewSet)
 router.register(r'approversetupstep', ApproverSetupStepViewSet)
 router.register(r'settlement', SettlementViewSet,basename='settlement')
-router.register(r'request-setup-facade', RequestSetupFacadeViewSet, basename='request-setup-facade')
+router.register(r'request-setups', RequestSetupFacadeViewSet, basename='request-setup-facade')
 # router.register(r'settlementdetail', SettlementDetailViewSet)
 
 

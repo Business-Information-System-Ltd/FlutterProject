@@ -343,7 +343,7 @@ class _BudgetAmountState extends State<BudgetAmount> {
                           style: PlutoGridStyleConfig(
                             gridBorderColor: Colors.black,
                             oddRowColor: Colors.blue[50],
-                            rowHeight: 40,
+                            rowHeight: 35,
                             gridBackgroundColor: Colors.grey.shade300,
                           ),
                         ),

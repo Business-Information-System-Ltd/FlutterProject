@@ -43,6 +43,7 @@ dependencies:
   path_provider: ^2.1.5
   provider: ^6.1.4
   pluto_grid: ^8.0.0
+  file_picker: ^8.3.2
 
 dev_dependencies:
   flutter_test:

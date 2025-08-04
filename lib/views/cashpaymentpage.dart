@@ -1,5 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:html' as html;
 import 'package:advance_budget_request_system/views/data.dart';
+import 'package:advance_budget_request_system/views/datefilter.dart';
+import 'package:advance_budget_request_system/views/pagination.dart';
+import 'package:advance_budget_request_system/views/searchfunction.dart';
+import 'package:csv/csv.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
 import 'package:advance_budget_request_system/views/api_service.dart';
@@ -9,14 +18,23 @@ class CashPaymentPage extends StatefulWidget {
   _CashPaymentPageState createState() => _CashPaymentPageState();
 }
 
-class _CashPaymentPageState extends State<CashPaymentPage>
-    with SingleTickerProviderStateMixin {
+class _CashPaymentPageState extends State<CashPaymentPage> {
   List<PlutoColumn> _columns = [];
-  List<PlutoRow> _draftRows = [];
-  List<PlutoRow> _postedRows = [];
-  List<Payment> _payments = [];
-  PlutoGridStateManager? _stateManager;
+  List<Payment> _allPayments = [];
+  List<Payment> _filteredDraftPayments = [];
+  List<Payment> _filteredPostedPayments = [];
+  PlutoGridStateManager? _stateManagerDraft;
+  PlutoGridStateManager? _stateManagerPosted;
+
   final NumberFormat _formatter = NumberFormat('#,###');
+  bool _isLoading = true;
+  String _searchQuery = '';
+  DateTimeRange? _currentDateRange;
+  String? _currentFilterType;
+
+  int _currentDraftPage = 1;
+  int _currentPostedPage = 1;
+  int _rowsPerPage = 10;
 
   @override
   void initState() {
@@ -27,28 +45,108 @@ class _CashPaymentPageState extends State<CashPaymentPage>
 
   void _loadPayments() async {
     try {
-      _payments = await ApiService().fetchPayments();
-
-      final draftList = _payments;
-
-      final postedList = _payments;
+      final payments = await ApiService().fetchPayments();
       setState(() {
-        _draftRows = _mapPaymentsToRows(draftList);
-        _postedRows = _mapPaymentsToRows(postedList);
+        _allPayments = payments;
+        _applyFilters();
+        _isLoading = false;
       });
-
-      print('Loaded ${_draftRows.length} draft payments');
-      print('Loaded ${_postedRows.length} posted payments');
     } catch (e) {
       print('Error loading payments: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  void _applyFilters() {
+    // Apply both date filter and search filter to all payments
+    List<Payment> filtered = _allPayments;
+
+    // Apply date filter
+    if (_currentDateRange != null) {
+      final startDate = DateTime(
+        _currentDateRange!.start.year,
+        _currentDateRange!.start.month,
+        _currentDateRange!.start.day,
+      );
+
+      final endDate = DateTime(
+        _currentDateRange!.end.year,
+        _currentDateRange!.end.month,
+        _currentDateRange!.end.day,
+      ).add(const Duration(days: 1));
+
+      filtered = filtered.where((payment) {
+        final paymentDate = DateTime(
+          payment.date.year,
+          payment.date.month,
+          payment.date.day,
+        );
+        return paymentDate.isAtSameMomentAs(startDate) ||
+            (paymentDate.isAfter(startDate) && paymentDate.isBefore(endDate));
+      }).toList();
+    }
+
+    // Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered
+          .where((payment) =>
+              SearchUtils.matchesSearchPayment(payment, _searchQuery))
+          .toList();
+    }
+
+    setState(() {
+      _filteredDraftPayments =
+          filtered.where((p) => p.status == 'Draft').toList();
+      _filteredPostedPayments =
+          filtered.where((p) => p.status == 'Posted').toList();
+      _currentDraftPage = 1; 
+      _currentPostedPage = 1;
+    });
+
+    if (_stateManagerDraft != null) {
+      _stateManagerDraft!.removeAllRows();
+      _stateManagerDraft!.appendRows(_mapPaymentsToRows(
+          _getPaginatedPayments(_filteredDraftPayments, _currentDraftPage)));
+    }
+    if (_stateManagerPosted != null) {
+      _stateManagerPosted!.removeAllRows();
+      _stateManagerPosted!.appendRows(_mapPaymentsToRows(
+          _getPaginatedPayments(_filteredPostedPayments, _currentPostedPage)));
+    }
+  }
+
+  List<Payment> _getPaginatedPayments(List<Payment> payments, int page) {
+    final start = (page - 1) * _rowsPerPage;
+    final end = start + _rowsPerPage;
+    return payments.sublist(
+      start,
+      end > payments.length ? payments.length : end,
+    );
+  }
+
+  void _handleDateRangeChange(DateTimeRange range, String selectedValue) {
+    setState(() {
+      _currentDateRange = range;
+      _currentFilterType = selectedValue;
+    });
+    _applyFilters();
+  }
+
+  void _handleSearch(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+    _applyFilters();
   }
 
   List<PlutoRow> _mapPaymentsToRows(List<Payment> payments) {
     return payments.map((p) {
       return PlutoRow(
         cells: {
-          'paymentdate': PlutoCell(value: p.date),
+          'paymentdate': PlutoCell(
+              value: DateFormat('yyyy-MM-dd').parse(p.date.toString())),
           'paymentno': PlutoCell(value: p.paymentNo),
           'requestno': PlutoCell(value: p.requestNo),
           'paymentamount': PlutoCell(value: p.paymentAmount),
@@ -66,7 +164,7 @@ class _CashPaymentPageState extends State<CashPaymentPage>
       PlutoColumn(
         title: 'Payment Date',
         field: 'paymentdate',
-        type: PlutoColumnType.text(),
+        type: PlutoColumnType.date(),
         width: 150,
         enableEditingMode: false,
       ),
@@ -75,7 +173,6 @@ class _CashPaymentPageState extends State<CashPaymentPage>
         field: 'paymentno',
         type: PlutoColumnType.text(),
         width: 150,
-        readOnly: false,
         enableEditingMode: false,
       ),
       PlutoColumn(
@@ -104,8 +201,6 @@ class _CashPaymentPageState extends State<CashPaymentPage>
         type: PlutoColumnType.text(),
         width: 160,
         enableEditingMode: false,
-        textAlign: PlutoColumnTextAlign.left,
-        titleTextAlign: PlutoColumnTextAlign.left,
       ),
       PlutoColumn(
         title: 'Payment Method',
@@ -118,7 +213,7 @@ class _CashPaymentPageState extends State<CashPaymentPage>
         title: 'Status',
         field: 'status',
         type: PlutoColumnType.text(),
-        width: 170,
+        width: 160,
         enableEditingMode: false,
       ),
       PlutoColumn(
@@ -128,10 +223,10 @@ class _CashPaymentPageState extends State<CashPaymentPage>
         width: 170,
         renderer: (rendererContext) {
           return IconButton(
-            icon: Icon(Icons.edit, color: Colors.blue),
+            icon: const Icon(Icons.edit, color: Colors.blue),
             tooltip: 'Edit',
             onPressed: () {
-              print('Action icon pressed on row ${rendererContext.row.key}');
+              print('Edit clicked on ${rendererContext.row.key}');
             },
           );
         },
@@ -142,112 +237,19 @@ class _CashPaymentPageState extends State<CashPaymentPage>
     ];
   }
 
-  // List<PlutoRow> _buildDraftRows() {
-  //   final data = [
-  //     {
-  //       'paymentdate': '2025-06-01',
-  //       'paymentno': 'Pay001',
-  //       'requestno': 'Req-001',
-  //       'paymentamount': 150000,
-  //       'currency': 'MMK',
-  //       'paymentmethod': 'Cash',
-  //       'status': 'Draft',
-  //       'action': '',
-  //     },
-  //     {
-  //       'paymentdate': '2025-06-02',
-  //       'paymentno': 'Pay002',
-  //       'requestno': 'Req-002',
-  //       'paymentamount': 160000,
-  //       'currency': 'USD',
-  //       'paymentmethod': 'Bank',
-  //       'status': 'Draft',
-  //       'action': '',
-  //     },
-  //     {
-  //       'paymentdate': '2025-06-03',
-  //       'paymentno': 'Pay003',
-  //       'requestno': 'Req-003',
-  //       'paymentamount': 170000,
-  //       'currency': 'MMK',
-  //       'paymentmethod': 'Cash',
-  //       'status': 'Draft',
-  //       'action': '',
-  //     },
-  //     {
-  //       'paymentdate': '2025-06-04',
-  //       'paymentno': 'Pay004',
-  //       'requestno': 'Req-004',
-  //       'paymentamount': 190000,
-  //       'currency': 'USD',
-  //       'paymentmethod': 'Bank',
-  //       'status': 'Draft',
-  //       'action': '',
-  //     },
-  //   ];
-  //   return _mapToRows(data);
-  // }
+  void _handleDraftPageChange(int page, int rowsPerPage) {
+    setState(() {
+      _currentDraftPage = page;
+      _rowsPerPage = rowsPerPage;
+    });
+  }
 
-  // List<PlutoRow> _buildPostedRows() {
-  //   final data = [
-  //     {
-  //       'paymentdate': '2025-06-02',
-  //       'paymentno': 'Pay002',
-  //       'requestno': 'Req-002',
-  //       'paymentamount': 160000,
-  //       'currency': 'USD',
-  //       'paymentmethod': 'Bank',
-  //       'status': 'Post',
-  //       'action': '',
-  //     },
-  //     {
-  //       'paymentdate': '2025-06-02',
-  //       'paymentno': 'Pay002',
-  //       'requestno': 'Req-002',
-  //       'paymentamount': 160000,
-  //       'currency': 'USD',
-  //       'paymentmethod': 'Bank',
-  //       'status': 'Post',
-  //       'action': '',
-  //     },
-  //     {
-  //       'paymentdate': '2025-06-03',
-  //       'paymentno': 'Pay003',
-  //       'requestno': 'Req-003',
-  //       'paymentamount': 170000,
-  //       'currency': 'MMK',
-  //       'paymentmethod': 'Cash',
-  //       'status': 'Post',
-  //       'action': '',
-  //     },
-  //     {
-  //       'paymentdate': '2025-06-04',
-  //       'paymentno': 'Pay004',
-  //       'requestno': 'Req-004',
-  //       'paymentamount': 180000,
-  //       'currency': 'MMK',
-  //       'paymentmethod': 'Cash',
-  //       'status': 'Post',
-  //       'action': '',
-  //     },
-  //   ];
-  //   return _mapToRows(data);
-  // }
-
-  // List<PlutoRow> _mapToRows(List<Map<String, dynamic>> data) {
-  //   return data.map((s) {
-  //     return PlutoRow(cells: {
-  //       'paymentdate': PlutoCell(value: s['paymentdate']),
-  //       'paymentno': PlutoCell(value: s['paymentno']),
-  //       'requestno': PlutoCell(value: s['requestno']),
-  //       'paymentamount': PlutoCell(value: s['paymentamount']),
-  //       'currency': PlutoCell(value: s['currency']),
-  //       'paymentmethod': PlutoCell(value: s['paymentmethod']),
-  //       'status': PlutoCell(value: s['status']),
-  //       'action': PlutoCell(value: '')
-  //     });
-  //   }).toList();
-  // }
+  void _handlePostedPageChange(int page, int rowsPerPage) {
+    setState(() {
+      _currentPostedPage = page;
+      _rowsPerPage = rowsPerPage;
+    });
+  }
 
   Widget buildGrid(List<PlutoRow> rows) {
     return PlutoGrid(
@@ -256,34 +258,111 @@ class _CashPaymentPageState extends State<CashPaymentPage>
       configuration: PlutoGridConfiguration(
         style: PlutoGridStyleConfig(
           oddRowColor: Colors.blue[50],
-          rowHeight: 50,
+          rowHeight: 35,
           activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
         ),
       ),
-      onLoaded: (PlutoGridOnLoadedEvent event) {
-        _stateManager = event.stateManager;
+      onLoaded: (event) {
+        _stateManagerDraft = event.stateManager;
+        _stateManagerPosted = event.stateManager;
       },
     );
   }
 
+  void _refreshData() async{
+    setState(() {
+      _searchQuery = "";
+      _currentDateRange = null;
+      _currentFilterType = null;
+      _currentDraftPage = 1;
+      _currentPostedPage=1;
+    });
+    try {
+      List<Payment> payments=await ApiService().fetchPayments();
+      setState(() {
+        payments=payments;
+      });
+      _applyFilters();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to refresh payments: ${e.toString()}')),
+      );
+    }
+  }
+
+  //Export button
+  Future<void> exportToCSV() async{
+    try {
+      List<List<dynamic>> csvData=[];
+      csvData.add([
+        "Payment Date",
+        "Payment No",
+        "Request No",
+        "Request Type",
+        "Payment Amount",
+        "Currency",
+        "Payment Method",
+        "Paid Person",
+        "Received Person",
+        "Payment Note"
+      ]);
+      for(var payment in _allPayments){
+        csvData.add([
+          DateFormat('yyyy-MM-dd').format(payment.date),
+          payment.paymentNo,
+          payment.requestNo,
+          payment.requestType,
+          payment.paymentAmount,
+          payment.currency,
+          payment.paymentMethod,
+          payment.paidPerson,
+          payment.receivedPerson,
+          payment.paymentNote
+
+        ]);
+      }
+      String csv=const ListToCsvConverter().convert(csvData);
+      if (kIsWeb) {
+        final bytes= utf8.encode(csv);
+        final blob=html.Blob([bytes]);
+        final url=html.Url.createObjectUrlFromBlob(blob);
+        final anchor= html.AnchorElement(href: url)
+          ..setAttribute("download", "payment.csv")
+          ..click();
+        
+        html.Url.revokeObjectUrl(url);
+        print("CSV file download in browser");
+      }else{
+        final directory= await getApplicationDocumentsDirectory();
+        final path= "${directory.path}/payment.csv";
+        final file=File(path);
+        await file.writeAsString(csv);
+
+        print("CSV file saved to $path");
+      }
+    } catch (e) {
+      print("Error exporting to CSV: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final paginatedDrafts =
+        _getPaginatedPayments(_filteredDraftPayments, _currentDraftPage);
+    final paginatedPosted =
+        _getPaginatedPayments(_filteredPostedPayments, _currentPostedPage);
+
     return DefaultTabController(
       length: 2,
-      initialIndex: 1,
+      initialIndex: 0,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Cash Payment Lists'),
+          title: const Text('Cash Payment Lists'),
+          toolbarHeight: 35,
           centerTitle: true,
-          bottom: TabBar(
-            labelStyle: TextStyle(
-            fontSize: 15,
-             fontWeight: 
-             FontWeight.bold, 
-             letterSpacing: 1.2
-             ),
+          bottom: const TabBar(
+            labelStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             indicatorWeight: 4,
-            unselectedLabelColor: const Color.fromRGBO(19, 18, 18, 0.702),
             labelColor: Colors.blue,
             tabs: [
               Tab(text: 'Draft'),
@@ -292,25 +371,119 @@ class _CashPaymentPageState extends State<CashPaymentPage>
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(30, 30, 30, 20),
-          child: TabBarView(
+          padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
+          child: Column(
             children: [
-              Column(
+              Row(
                 children: [
-                  Container(
-                    height: 300,
-                    child: buildGrid(_draftRows),
-                    // child: buildGrid(_mapPaymentsToRows(_payments)),
+                  Flexible(
+                    flex: 1,
+                    child: DateFilterDropdown(
+                      onDateRangeChanged: _handleDateRangeChange,
+                      initialValue: _currentFilterType,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  if (_currentFilterType != null)
+                    Chip(
+                      label: Text(
+                        'Filter: ${_currentFilterType!.replaceAll('_', ' ')}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      onDeleted: () {
+                        setState(() {
+                          _currentDateRange = null;
+                          _currentFilterType = null;
+                        });
+                        _applyFilters();
+                      },
+                    ),
+                  const SizedBox(width: 20),
+                  Flexible(
+                    flex: 3,
+                    child: CustomSearchBar(
+                      onSearch: _handleSearch,
+                      hintText: 'Search...',
+                      minWidth: 500,
+                      maxWidth: 800,
+                    ),
                   ),
                 ],
               ),
-              Column(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    height: 300,
-                    child: buildGrid(_postedRows),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.add),
+                    label: const Text('New'),
+                    onPressed: () async {
+                      final success = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => CashPaymentPage()),
+                      );
+                      if (success == true) _loadPayments();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade300,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: _refreshData,
+                        color: Colors.black,
+                      ),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.download),
+                        label: const Text('Export'),
+                        onPressed: exportToCSV,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade300,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
+              ),
+              const SizedBox(height: 7),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    Column(
+                      children: [
+                         Expanded(child: buildDraftGrid(_mapPaymentsToRows(paginatedDrafts))),
+                        if (_stateManagerDraft != null)
+                          PlutoGridPagination(
+                            stateManager: _stateManagerDraft!,
+                            totalRows: _filteredDraftPayments.length,
+                            rowsPerPage: _rowsPerPage,
+                            onPageChanged: _handleDraftPageChange,
+                          ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Expanded(child: buildPostedGrid(_mapPaymentsToRows(paginatedPosted))),
+                        if (_stateManagerPosted != null)
+                          PlutoGridPagination(
+                            stateManager: _stateManagerPosted!,
+                            totalRows: _filteredPostedPayments.length,
+                            rowsPerPage: _rowsPerPage,
+                            onPageChanged: _handlePostedPageChange,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -318,4 +491,34 @@ class _CashPaymentPageState extends State<CashPaymentPage>
       ),
     );
   }
+  Widget buildDraftGrid(List<PlutoRow> rows) {
+  return PlutoGrid(
+    columns: _columns,
+    rows: rows,
+    onLoaded: (event) => _stateManagerDraft = event.stateManager,
+    configuration: PlutoGridConfiguration(
+      style: PlutoGridStyleConfig(
+        oddRowColor: Colors.blue[50],
+        rowHeight: 35,
+        activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+      ),
+    ),
+  );
+}
+
+Widget buildPostedGrid(List<PlutoRow> rows) {
+  return PlutoGrid(
+    columns: _columns,
+    rows: rows,
+    onLoaded: (event) => _stateManagerPosted = event.stateManager,
+    configuration: PlutoGridConfiguration(
+      style: PlutoGridStyleConfig(
+        oddRowColor: Colors.blue[50],
+        rowHeight: 35,
+        activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+      ),
+    ),
+  );
+}
+
 }

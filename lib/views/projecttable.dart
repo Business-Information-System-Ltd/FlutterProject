@@ -1,16 +1,23 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:advance_budget_request_system/views/datefilter.dart';
+import 'package:advance_budget_request_system/views/pagination.dart';
 import 'package:advance_budget_request_system/views/searchfunction.dart';
+import 'package:csv/csv.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
 import 'package:advance_budget_request_system/views/projectentryform.dart';
 import 'package:advance_budget_request_system/views/data.dart';
 import 'package:advance_budget_request_system/views/api_service.dart';
 import 'package:http/http.dart' as http;
+import 'dart:html' as html;
 
 class ProjectInformation extends StatefulWidget {
-  
-   final bool readOnly;
+  final bool readOnly;
   final Map<String, dynamic>? initialRequestData;
 
   const ProjectInformation({
@@ -19,7 +26,6 @@ class ProjectInformation extends StatefulWidget {
     this.initialRequestData,
   }) : super(key: key);
 
-  
   @override
   _ProjectInformationState createState() => _ProjectInformationState();
 }
@@ -28,12 +34,15 @@ class _ProjectInformationState extends State<ProjectInformation> {
   List<PlutoColumn> _columns = [];
   List<PlutoRow> _rows = [];
   List<Project> projects = [];
+  List<PlutoRow> _pagedRows = [];
   DateTimeRange? _currentDateRange;
   String? _currentFilterType;
   PlutoGridStateManager? _stateManager;
   final NumberFormat _formatter = NumberFormat('#,###');
   bool isEditMode = false;
   String _searchQuery = '';
+  int _currentPage = 1;
+  int _rowsPerPage = 10;
 
   @override
   void initState() {
@@ -89,18 +98,31 @@ class _ProjectInformationState extends State<ProjectInformation> {
               SearchUtils.matchesSearchProject(project, _searchQuery))
           .toList();
     }
-    
+
+    final newRows = _buildRows(filteredProjects);
 
     setState(() {
-      _rows = _buildRows(filteredProjects);
+      _rows = newRows;
+      _currentPage = 1;
     });
+    _updatePagedRows();
+
+    // if (_stateManager != null) {
+    //   _stateManager!.removeAllRows();
+    //   _stateManager!.appendRows(_rows);
+    // }
+  }
+
+  void _updatePagedRows() {
+    final start = (_currentPage - 1) * _rowsPerPage;
+    final end = (_currentPage * _rowsPerPage).clamp(0, _rows.length);
     setState(() {
-      _rows = _buildRows(filteredProjects);
+      _pagedRows = _rows.sublist(start, end);
     });
 
     if (_stateManager != null) {
       _stateManager!.removeAllRows();
-      _stateManager!.appendRows(_rows);
+      _stateManager!.appendRows(_pagedRows);
     }
   }
 
@@ -204,21 +226,21 @@ class _ProjectInformationState extends State<ProjectInformation> {
         field: 'date',
         type: PlutoColumnType.text(),
         enableEditingMode: false,
-        width: 150,
+        width: 100,
       ),
       PlutoColumn(
         title: 'Project Code',
         field: 'projectcode',
         type: PlutoColumnType.text(),
         enableEditingMode: false,
-        width: 150,
+        width: 142,
       ),
       PlutoColumn(
         title: 'Description',
         field: 'description',
         type: PlutoColumnType.text(),
         enableEditingMode: false,
-        width: 150,
+        width: 330,
       ),
       PlutoColumn(
         title: 'Total Amount',
@@ -238,7 +260,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
         field: 'currency',
         type: PlutoColumnType.text(),
         enableEditingMode: false,
-        width: 150,
+        width: 100,
         textAlign: PlutoColumnTextAlign.left,
         titleTextAlign: PlutoColumnTextAlign.left,
       ),
@@ -247,14 +269,14 @@ class _ProjectInformationState extends State<ProjectInformation> {
         field: 'department',
         type: PlutoColumnType.text(),
         enableEditingMode: false,
-        width: 150,
+        width: 120,
       ),
       PlutoColumn(
         title: 'Requestable',
         field: 'requestable',
         type: PlutoColumnType.text(),
         enableEditingMode: false,
-        width: 150,
+        width: 120,
       ),
       PlutoColumn(
         title: 'Action',
@@ -263,7 +285,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
         titleTextAlign: PlutoColumnTextAlign.center,
         type: PlutoColumnType.text(),
         enableEditingMode: false,
-        width: 153,
+        width: 143,
         renderer: (rendererContext) {
           final requestable = rendererContext.row.cells['requestable']?.value;
           if (requestable == 'Pending') {
@@ -371,6 +393,82 @@ class _ProjectInformationState extends State<ProjectInformation> {
     ];
   }
 
+  void _refreshButton() async{
+    setState(() {
+      _searchQuery = "";
+      _currentDateRange = null;
+      _currentFilterType = null;
+      _currentPage = 1;
+    });
+    try {
+      List<Project> project = await ApiService().fetchProjects();
+      setState(() {
+        projects = project;
+      });
+
+      _applyDateFilter(); 
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to refresh trips: ${e.toString()}')),
+      );
+    }
+  }
+
+  //Export button
+  Future<void> exportToCSV() async{
+    try {
+      List<List<dynamic>> csvData=[];
+      csvData.add(
+        [
+          "Request Date",
+          "Project Code",
+          "Project Description",
+          "Department",
+          "Total Amount",
+          "Currency",
+          "Approved Amount",
+          "Requestable Status"
+        ]
+      );
+
+    for(var project in projects){
+      csvData.add([
+        DateFormat('yyyy-MM-dd').format(project.date),
+        project.projectCode,
+        project.projectDescription,
+        project.departmentName,
+        project.totalAmount,
+        project.currency,
+        project.approvedAmount,
+        project.requestable
+      ]);
+    }
+    String csv= const ListToCsvConverter().convert(csvData);
+
+    if (kIsWeb) {
+      final bytes = utf8.encode(csv);
+        final blob = html.Blob([bytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute("download", "projectData.csv")
+          ..click();
+
+        html.Url.revokeObjectUrl(url);
+        print("CSV file downloaded in browser.");
+    }else{
+      final directory = await getApplicationDocumentsDirectory();
+        final path = "${directory.path}/projectData.csv";
+        final file = File(path);
+        await file.writeAsString(csv);
+
+        print("CSV file saved to $path");
+    }
+    } catch (e) {
+      print("Error exporting to CSV: $e");
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -431,7 +529,9 @@ class _ProjectInformationState extends State<ProjectInformation> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -464,13 +564,13 @@ class _ProjectInformationState extends State<ProjectInformation> {
                       Container(
                         child: IconButton(
                           icon: const Icon(Icons.refresh),
-                          onPressed: () {},
+                          onPressed: _refreshButton,
                           color: Colors.black,
                         ),
                       ),
                       ElevatedButton.icon(
                         label: const Text('Export'),
-                        onPressed: () {},
+                        onPressed: exportToCSV,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey.shade300,
                           foregroundColor: Colors.black,
@@ -492,21 +592,35 @@ class _ProjectInformationState extends State<ProjectInformation> {
                     PlutoGrid(
                   columns: _columns,
                   rows: _rows,
+                  mode: PlutoGridMode.normal,
                   configuration: PlutoGridConfiguration(
                     style: PlutoGridStyleConfig(
                       oddRowColor: Colors.blue[50],
-                      // rowHeight: 45,
+                      rowHeight: 35,
                       activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
                     ),
                   ),
                   onLoaded: (PlutoGridOnLoadedEvent event) {
                     _stateManager = event.stateManager;
+                    _updatePagedRows();
                     if (_rows.isEmpty) {
                       _fetchProjects();
                     }
                   },
                 ),
               ),
+              const SizedBox(height: 10),
+              if (_stateManager != null)
+                PlutoGridPagination(
+                  stateManager: _stateManager!,
+                  totalRows: _rows.length,
+                  rowsPerPage: _rowsPerPage,
+                  onPageChanged: (page, limit) {
+                    _currentPage = page;
+                    _rowsPerPage = limit;
+                    _updatePagedRows();
+                  },
+                ),
             ],
           ),
         ),

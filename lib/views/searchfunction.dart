@@ -33,7 +33,7 @@ import 'package:intl/intl.dart';
 
 //   void _onSearchChanged(String query) {
 //     if (_debounce?.isActive ?? false) _debounce?.cancel();
-    
+
 //     _debounce = Timer(const Duration(milliseconds: 500), () {
 //       widget.onSearch(query);
 //     });
@@ -70,17 +70,17 @@ import 'package:intl/intl.dart';
 class CustomSearchBar extends StatefulWidget {
   final Function(String) onSearch;
   final String hintText;
-  final double? minWidth; 
-  final double? maxWidth; 
-  final double? flex; 
+  final double? minWidth;
+  final double? maxWidth;
+  final double? flex;
 
   const CustomSearchBar({
     Key? key,
     required this.onSearch,
     this.hintText = 'Search...',
-    this.minWidth = 300, 
+    this.minWidth = 300,
     this.maxWidth,
-    this.flex, 
+    this.flex,
   }) : super(key: key);
 
   @override
@@ -100,7 +100,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
-    
+
     _debounce = Timer(const Duration(milliseconds: 500), () {
       widget.onSearch(query);
     });
@@ -110,8 +110,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        double responsiveWidth = constraints.maxWidth * 0.5; // Default to 50% of available space
-        
+        double responsiveWidth =
+            constraints.maxWidth * 0.5; // Default to 50% of available space
 
         if (widget.minWidth != null && responsiveWidth < widget.minWidth!) {
           responsiveWidth = widget.minWidth!;
@@ -161,30 +161,79 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   }
 }
 
-
 class SearchUtils {
   static bool matchesSearchProject(Project project, String query) {
     if (query.isEmpty) return true;
-    
+
     final lowerQuery = query.toLowerCase();
     return project.projectCode.toLowerCase().contains(lowerQuery) ||
-           project.projectDescription.toLowerCase().contains(lowerQuery) ||
-           project.departmentName.toLowerCase().contains(lowerQuery) ||
-           project.currency.toLowerCase().contains(lowerQuery) ||
-           DateFormat('yyyy-MM-dd').format(project.date).contains(lowerQuery) ||
-           project.totalAmount.toString().contains(lowerQuery)||
-           project.requestable.contains(lowerQuery);
+        project.projectDescription.toLowerCase().contains(lowerQuery) ||
+        project.departmentName.toLowerCase().contains(lowerQuery) ||
+        project.currency.toLowerCase().contains(lowerQuery) ||
+        DateFormat('yyyy-MM-dd').format(project.date).contains(lowerQuery) ||
+        project.totalAmount.toString().contains(lowerQuery) ||
+        project.requestable.contains(lowerQuery);
   }
 
   static bool matchesSearchTrip(Trips trip, String query) {
     if (query.isEmpty) return true;
-    
+
     final lowerQuery = query.toLowerCase();
     return trip.tripCode.toLowerCase().contains(lowerQuery) ||
-           trip.tripDescription.toLowerCase().contains(lowerQuery) ||
-           trip.departmentName.toLowerCase().contains(lowerQuery) ||
-           trip.currency.toLowerCase().contains(lowerQuery) ||
-           DateFormat('yyyy-MM-dd').format(trip.date).contains(lowerQuery) ||
-           trip.totalAmount.toString().contains(lowerQuery);
+        trip.tripDescription.toLowerCase().contains(lowerQuery) ||
+        trip.departmentName.toLowerCase().contains(lowerQuery) ||
+        trip.currency.toLowerCase().contains(lowerQuery) ||
+        DateFormat('yyyy-MM-dd').format(trip.date).contains(lowerQuery) ||
+        trip.totalAmount.toString().contains(lowerQuery);
+  }
+
+  static bool matchesSearchAdvance(Advance advances, String query) {
+    if (query.isEmpty) return true;
+
+    final lowerQuery = query.toLowerCase();
+    return advances.requestNo.toLowerCase().contains(lowerQuery) ||
+        advances.requestType.toLowerCase().contains(lowerQuery) ||
+        advances.departmentName.toLowerCase().contains(lowerQuery) ||
+        advances.currency.toLowerCase().contains(lowerQuery) ||
+        DateFormat('yyyy-MM-dd').format(advances.date).contains(lowerQuery) ||
+        advances.requestCode.toLowerCase().contains(lowerQuery) ||
+        advances.requestAmount.toString().contains(lowerQuery);
+  }
+
+  static bool matchesSearchPayment(Payment payments, String query) {
+    if (query.isEmpty) return true;
+
+    final lowerQuery = query.toLowerCase();
+    return payments.requestNo.toLowerCase().contains(lowerQuery) ||
+        payments.requestType.toLowerCase().contains(lowerQuery) ||
+        payments.paymentNo.toLowerCase().contains(lowerQuery) ||
+        payments.currency.toLowerCase().contains(lowerQuery) ||
+        DateFormat('yyyy-MM-dd').format(payments.date).contains(lowerQuery) ||
+        payments.paymentMethod.toLowerCase().contains(lowerQuery) ||
+        payments.status.toLowerCase().contains(lowerQuery) ||
+        payments.paymentAmount.toString().contains(lowerQuery);
+  }
+
+  static bool matchesSearchSettlement(Settlement settlements, String query) {
+    if (query.isEmpty) return true;
+
+    final lowerQuery = query.toLowerCase();
+    return settlements.withdrawnAmount
+            .toString()
+            .toLowerCase()
+            .contains(lowerQuery) ||
+        settlements.paymentNo.toLowerCase().contains(lowerQuery) ||
+        settlements.refundAmount
+            .toString()
+            .toLowerCase()
+            .contains(lowerQuery) ||
+        DateFormat('yyyy-MM-dd')
+            .format(settlements.settlementDate)
+            .contains(lowerQuery) ||
+        settlements.settleAmount
+            .toString()
+            .toLowerCase()
+            .contains(lowerQuery) ||
+        settlements.settled.toString().toLowerCase().contains(lowerQuery);
   }
 }

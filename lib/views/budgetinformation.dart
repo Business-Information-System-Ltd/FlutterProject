@@ -361,7 +361,7 @@ class _BudgetFormState extends State<BudgetForm> {
                         configuration: PlutoGridConfiguration(
                           style: PlutoGridStyleConfig(
                             oddRowColor: Colors.blue[50],
-                            rowHeight: 50,
+                            rowHeight: 35,
                             activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
                             gridBorderColor: Colors.black,
                             gridBackgroundColor: Colors.grey.shade300,

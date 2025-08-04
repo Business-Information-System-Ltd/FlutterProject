@@ -1,7 +1,14 @@
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:io';
 import 'package:advance_budget_request_system/views/data.dart';
 import 'package:advance_budget_request_system/views/datefilter.dart';
+import 'package:advance_budget_request_system/views/pagination.dart';
 import 'package:advance_budget_request_system/views/searchfunction.dart';
+import 'package:csv/csv.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:intl/intl.dart';
 import 'package:advance_budget_request_system/views/api_service.dart';
@@ -23,13 +30,15 @@ class TripInformation extends StatefulWidget {
 class _TripInformationState extends State<TripInformation> {
   List<PlutoColumn> _columns = [];
   List<PlutoRow> _rows = [];
-  List<Trips> _allTrips=[];
+  List<PlutoRow> _pagedRows = [];
+  List<Trips> _allTrips = [];
   DateTimeRange? _currentDateRange;
   String? _currentFilterType;
   PlutoGridStateManager? _stateManager;
   final NumberFormat _formatter = NumberFormat('#,###');
   String _searchQuery = '';
-
+  int _currentPage = 1;
+  int _rowsPerPage = 10;
 
   @override
   void initState() {
@@ -40,80 +49,69 @@ class _TripInformationState extends State<TripInformation> {
 
   void _fetchTableRows() async {
     try {
-      print('Fetching trips...');
       List<Trips> trips = await ApiService().fetchTrips();
-      print('Fetched ${trips.length} trips');
-      setState((){
-        _allTrips=trips;
+      setState(() {
+        _allTrips = trips;
       });
       _applyDateFilter();
-
-      // Debug: print first trip's ID and type
-      if (trips.isNotEmpty) {
-        print(
-            'First trip ID: ${trips[0].id}, type: ${trips[0].id.runtimeType}');
-      }
-      // List<PlutoRow> newRows = _buildRows(trips);
-      // setState(() {
-      //   _rows = newRows;
-      // });
-      // if (_stateManager != null) {
-      //   _stateManager!.removeAllRows();
-      //   _stateManager!.appendRows(newRows);
-      // }
-      // print("Rows loaded: ${newRows.length}");
     } catch (e) {
-      print('Failed to fetch trips: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load trips: ${e.toString()}')),
       );
     }
   }
-  
-  void _applyDateFilter() {
-  List<Trips> filteredTrips = _allTrips;
-  
-  if (_currentDateRange != null) {
-    final startDate = DateTime(
-      _currentDateRange!.start.year,
-      _currentDateRange!.start.month,
-      _currentDateRange!.start.day,
-    );
-    
-    final endDate = DateTime(
-      _currentDateRange!.end.year,
-      _currentDateRange!.end.month,
-      _currentDateRange!.end.day,
-    ).add(const Duration(days: 1)); // Include the entire end day
 
-    filteredTrips = _allTrips.where((trip) {
-      // Create date-only object for the trip
-      final tripDate = DateTime(
-        trip.date.year,
-        trip.date.month,
-        trip.date.day,
+  void _applyDateFilter() {
+    List<Trips> filteredTrips = _allTrips;
+
+    if (_currentDateRange != null) {
+      final startDate = DateTime(
+        _currentDateRange!.start.year,
+        _currentDateRange!.start.month,
+        _currentDateRange!.start.day,
       );
-      
-      return tripDate.isAtSameMomentAs(startDate) || 
-             (tripDate.isAfter(startDate) && tripDate.isBefore(endDate));
-    }).toList();
-  }
- if (_searchQuery.isNotEmpty) {
-      filteredTrips = filteredTrips.where(
-        (trip) => SearchUtils.matchesSearchTrip(trip, _searchQuery)
-      ).toList();
+      final endDate = DateTime(
+        _currentDateRange!.end.year,
+        _currentDateRange!.end.month,
+        _currentDateRange!.end.day,
+      ).add(const Duration(days: 1));
+
+      filteredTrips = _allTrips.where((trip) {
+        final tripDate =
+            DateTime(trip.date.year, trip.date.month, trip.date.day);
+        return tripDate.isAtSameMomentAs(startDate) ||
+            (tripDate.isAfter(startDate) && tripDate.isBefore(endDate));
+      }).toList();
     }
-  
-  List<PlutoRow> newRows = _buildRows(filteredTrips);
-  setState(() {
-    _rows = newRows;
-  });
-  
-  if (_stateManager != null) {
-    _stateManager!.removeAllRows();
-    _stateManager!.appendRows(newRows);
+
+    if (_searchQuery.isNotEmpty) {
+      filteredTrips = filteredTrips
+          .where((trip) => SearchUtils.matchesSearchTrip(trip, _searchQuery))
+          .toList();
+    }
+
+    final newRows = _buildRows(filteredTrips);
+    setState(() {
+      _rows = newRows;
+      _currentPage = 1;
+    });
+
+    _updatePagedRows();
   }
-}
+
+  void _updatePagedRows() {
+    final start = (_currentPage - 1) * _rowsPerPage;
+    final end = (_currentPage * _rowsPerPage).clamp(0, _rows.length);
+    setState(() {
+      _pagedRows = _rows.sublist(start, end);
+    });
+
+    if (_stateManager != null) {
+      _stateManager!.removeAllRows();
+      _stateManager!.appendRows(_pagedRows);
+    }
+  }
+
   void _handleDateRangeChange(DateTimeRange range, String selectedValue) {
     setState(() {
       _currentDateRange = range;
@@ -121,7 +119,8 @@ class _TripInformationState extends State<TripInformation> {
     });
     _applyDateFilter();
   }
-   void _handleSearch(String query) {
+
+  void _handleSearch(String query) {
     setState(() {
       _searchQuery = query;
     });
@@ -129,64 +128,41 @@ class _TripInformationState extends State<TripInformation> {
   }
 
   void _editTrip(PlutoRow row) async {
-    try {
-      final tripId = row.cells['id']!.value;
-      final trip = await ApiService().getTripById(tripId);
-      print("tripID: $tripId");
-
-      if (trip != null) {
-        final success = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TripRequestForm(
-              trip: trip,
-              isEditMode: true,
-              currentUser: widget.currentUser,
-              tripId: tripId,
-            ),
+    final tripId = row.cells['id']!.value;
+    final trip = await ApiService().getTripById(tripId);
+    if (trip != null) {
+      final success = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TripRequestForm(
+            trip: trip,
+            isEditMode: true,
+            currentUser: widget.currentUser,
+            tripId: tripId,
           ),
-        );
-
-        if (success == true) {
-          _fetchTableRows();
-        }
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to edit trip: $e')),
+        ),
       );
+      if (success == true) _fetchTableRows();
     }
   }
 
-  
-
   void _detailTrip(PlutoRow row) async {
-    try {
-      final tripId = row.cells['id']!.value;
-      final trip = await ApiService().getTripById(tripId);
-
-      if (trip != null) {
-        final success = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TripRequestForm(
-              trip: trip,
-              isEditMode: false,
-              isViewMode: true,
-              currentUser: widget.currentUser,
-              tripId: tripId,
-            ),
+    final tripId = row.cells['id']!.value;
+    final trip = await ApiService().getTripById(tripId);
+    if (trip != null) {
+      final success = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TripRequestForm(
+            trip: trip,
+            isEditMode: false,
+            isViewMode: true,
+            currentUser: widget.currentUser,
+            tripId: tripId,
           ),
-        );
-
-        if (success == true) {
-          _fetchTableRows();
-        }
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to edit trip: $e')),
+        ),
       );
+      if (success == true) _fetchTableRows();
     }
   }
 
@@ -199,61 +175,46 @@ class _TripInformationState extends State<TripInformation> {
         content: const Text('Are you sure you want to delete this trip?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete', style: TextStyle(color: Colors.red))),
         ],
       ),
     );
-
     if (confirmed == true) {
-      try {
-        await ApiService().deleteTrip(tripId);
-        _fetchTableRows();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Trip deleted successfully')),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete trip: $e')),
-        );
-      }
+      await ApiService().deleteTrip(tripId);
+      _fetchTableRows();
     }
   }
 
   List<PlutoColumn> _buildColumns() {
     return [
       PlutoColumn(
-        title: 'Date',
-        field: 'date',
-        type: PlutoColumnType.text(),
-        enableEditingMode: false,
-        width: 160,
-      ),
+          title: 'Date',
+          field: 'date',
+          type: PlutoColumnType.text(),
+          width: 100,
+          enableEditingMode: false),
       PlutoColumn(
-        title: 'Trip Code',
-        field: 'tripcode',
-        type: PlutoColumnType.text(),
-        enableEditingMode: false,
-        width: 162,
-      ),
+          title: 'Trip Code',
+          field: 'tripcode',
+          type: PlutoColumnType.text(),
+          width: 142,
+          enableEditingMode: false),
       PlutoColumn(
-        title: 'Description',
-        field: 'description',
-        type: PlutoColumnType.text(),
-        enableEditingMode: false,
-        width: 200,
-      ),
+          title: 'Description',
+          field: 'description',
+          type: PlutoColumnType.text(),
+          width: 390,
+          enableEditingMode: false),
       PlutoColumn(
         title: 'Total Amount',
         field: 'totalamount',
         type: PlutoColumnType.number(),
-        enableEditingMode: false,
         width: 165,
+        enableEditingMode: false,
         textAlign: PlutoColumnTextAlign.right,
         titleTextAlign: PlutoColumnTextAlign.right,
         renderer: (context) {
@@ -262,45 +223,35 @@ class _TripInformationState extends State<TripInformation> {
         },
       ),
       PlutoColumn(
-        title: 'Currency',
-        field: 'currency',
-        type: PlutoColumnType.text(),
-        enableEditingMode: false,
-        width: 165,
-        textAlign: PlutoColumnTextAlign.left,
-        titleTextAlign: PlutoColumnTextAlign.left,
-      ),
+          title: 'Currency',
+          field: 'currency',
+          type: PlutoColumnType.text(),
+          width: 100,
+          enableEditingMode: false),
       PlutoColumn(
-        title: 'Department',
-        field: 'department',
-        type: PlutoColumnType.text(),
-        enableEditingMode: false,
-        width: 165,
-      ),
+          title: 'Department',
+          field: 'department',
+          type: PlutoColumnType.text(),
+          width: 120,
+          enableEditingMode: false),
       PlutoColumn(
         title: 'Action',
         field: 'action',
-        textAlign: PlutoColumnTextAlign.center,
-        titleTextAlign: PlutoColumnTextAlign.center,
         type: PlutoColumnType.text(),
-        enableEditingMode: false,
         width: 165,
+        enableEditingMode: false,
         renderer: (rendererContext) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.edit, color: Colors.blue),
-                //onPressed: () => _editTrip(context.row),
-                onPressed: () => _editTrip(rendererContext.row),
-              ),
+                  icon: const Icon(Icons.edit, color: Colors.blue),
+                  onPressed: () => _editTrip(rendererContext.row)),
               IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _deleteTrip(rendererContext.row),
-              ),
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _deleteTrip(rendererContext.row)),
               IconButton(
-                  icon: const Icon(Icons.more_horiz_outlined,
-                      color: Colors.black),
+                  icon: const Icon(Icons.more_horiz),
                   onPressed: () => _detailTrip(rendererContext.row)),
             ],
           );
@@ -324,148 +275,220 @@ class _TripInformationState extends State<TripInformation> {
     }).toList();
   }
 
+  // void _refreshData(){
+  //   _searchQuery="";
+  //   _applyDateFilter();
+  //   _currentDateRange=null;
+  //   _currentFilterType=null;
+  //   _currentPage=1;
+  //   _fetchTableRows();
+  //   _updatePagedRows();
+  // }
+
+  void _refreshData() async {
+    setState(() {
+      _searchQuery = "";
+      _currentDateRange = null;
+      _currentFilterType = null;
+      _currentPage = 1;
+    });
+
+    try {
+      List<Trips> trips = await ApiService().fetchTrips();
+      setState(() {
+        _allTrips = trips;
+      });
+
+      _applyDateFilter(); 
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to refresh trips: ${e.toString()}')),
+      );
+    }
+  }
+
+  //Export button
+  Future<void> exportToCSV() async{
+    try {
+      List<List<dynamic>> csvData=[];
+      csvData.add(
+        [
+          "Request Date",
+          "Trip Code",
+          "Trip Description",
+          "Round Trip",
+          "Source",
+          "Destination",
+          "DepartureDate",
+          "Return Date",
+          "Requester Name",
+          "Department",
+          "Total Amount",
+          "Currency",
+          "Direct AdvanceRequest",
+          "Expenduiture Option"
+          
+        ]
+      );
+      for(var trip in _allTrips){
+        csvData.add([
+          DateFormat('yyyy-MM-dd').format(trip.date),
+          trip.tripCode,
+          trip.tripDescription,
+          trip.roundTrip==true? "Yes" : 'No',
+          trip.source,
+          trip.destination,
+          DateFormat('yyyy-MM-dd').format(trip.departureDate),
+          DateFormat('yyyy-MM-dd').format(trip.returnDate),
+          trip.requesterName,
+          trip.departmentName,
+          trip.totalAmount,
+          trip.currency,
+          trip.directAdvanceReq==true? "Yes": "No",
+          trip.expenditureOption == 0 ? 'Fix Allowance' : 'Claim Later',
+        ]);
+      }
+      String csv=const ListToCsvConverter().convert(csvData);
+      if (kIsWeb) {
+        final bytes= utf8.encode(csv);
+        final blob=html.Blob([bytes]);
+        final url=html.Url.createObjectUrlFromBlob(blob);
+        final anchor= html.AnchorElement(href: url)
+          ..setAttribute("download", "tripData.csv")
+          ..click();
+        
+        html.Url.revokeObjectUrl(url);
+        print("CSV file download in browser");
+      }else{
+        final directory= await getApplicationDocumentsDirectory();
+        final path= "${directory.path}/tripData.csv";
+        final file=File(path);
+        await file.writeAsString(csv);
+
+        print("CSV file saved to $path");
+      }
+    } catch (e) {
+      print("Error exporting to CSV: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text(
-          'Trip Information',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
-      ),
+      appBar: AppBar(centerTitle: true, title: const Text('Trip Information')),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(90, 20, 90, 20),
-        child: Container(
-          height: 470,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: DateFilterDropdown(
-                      onDateRangeChanged: _handleDateRangeChange,
-                      initialValue: _currentFilterType,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  // Add filter indicator chip
-                  if (_currentFilterType != null)
-                    Chip(
-                      label: Text(
-                        'Filter: ${_currentFilterType!.replaceAll('_', ' ')}',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      onDeleted: () {
-                        setState(() {
-                          _currentDateRange = null;
-                          _currentFilterType = null;
-                        });
-                        _applyDateFilter();
-                      },
-                    ),
-                  const SizedBox(
-                    width: 20,
-                  ),
-                  Flexible(
-                    flex: 3,
-                    child: CustomSearchBar(
-                      onSearch: _handleSearch,
-                      hintText: 'Search...',
-                      minWidth: 500,
-                      maxWidth: 800,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.add),
-                        label: const Text('New'),
-                        onPressed: () async {
-                          final success = await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => TripRequestForm(
-                                currentUser: widget.currentUser,
-                                tripId: "0", // Will generate new ID
-                              ),
-                            ),
-                          );
-                      
-                          if (success == true) {
-                            _fetchTableRows(); // Refresh the table
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey.shade300,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                      
-                      //  DateFilterDropdown(
-                      //   onDateRangeChanged: _handleDateRangeChange,
-                      //   initialValue: _currentFilterType,
-                      // ),
-                    ],
-                  ),
-                  
-                  Row(
-                    children: [
-                      Container(
-                        child: IconButton(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: () {},
-                          color: Colors.black,
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        label: const Text('Export'),
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey.shade300,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 7),
-              Expanded(
-                child: PlutoGrid(
-                  columns: _columns,
-                  rows: _rows,
-                  configuration: PlutoGridConfiguration(
-                    style: PlutoGridStyleConfig(
-                      oddRowColor: Colors.blue[50],
-                      rowHeight: 50,
-                      activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
-                    ),
-                  ),
-                  onLoaded: (event) {
-                    _stateManager = event.stateManager;
-                  },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Flexible(
+                flex: 1,
+                child: DateFilterDropdown(
+                  onDateRangeChanged: _handleDateRangeChange,
+                  initialValue: _currentFilterType,
                 ),
               ),
-            ],
-          ),
+              const SizedBox(width: 10),
+              if (_currentFilterType != null)
+                Chip(
+                  label: Text(
+                      'Filter: ${_currentFilterType!.replaceAll('_', ' ')}'),
+                  onDeleted: () {
+                    setState(() {
+                      _currentDateRange = null;
+                      _currentFilterType = null;
+                    });
+                    _applyDateFilter();
+                  },
+                ),
+              const SizedBox(width: 20),
+              Flexible(
+                flex: 3,
+                child: CustomSearchBar(
+                  onSearch: _handleSearch,
+                  hintText: 'Search...',
+                  minWidth: 500,
+                  maxWidth: 800,
+                ),
+              ),
+            ]),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text('New'),
+                  onPressed: () async {
+                    final success = await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => TripRequestForm(
+                          currentUser: widget.currentUser,
+                          tripId: "0",
+                        ),
+                      ),
+                    );
+                    if (success == true) _fetchTableRows();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade300,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                ),
+                Row(children: [
+                  IconButton(
+                      icon: const Icon(Icons.refresh), onPressed: _refreshData),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.download),
+                    label: const Text('Export'),
+                    onPressed: exportToCSV,
+                    style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade300,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                  ),
+                ])
+              ],
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: PlutoGrid(
+                columns: _columns,
+                rows: _pagedRows,
+                mode: PlutoGridMode.normal,
+                configuration: PlutoGridConfiguration(
+                  style: PlutoGridStyleConfig(
+                    oddRowColor: Colors.blue[50],
+                    rowHeight: 35,
+                    activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+                  ),
+                ),
+                onLoaded: (event) {
+                  _stateManager = event.stateManager;
+                  _updatePagedRows();
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (_stateManager != null)
+              PlutoGridPagination(
+                stateManager: _stateManager!,
+                totalRows: _rows.length,
+                rowsPerPage: _rowsPerPage,
+                onPageChanged: (page, limit) {
+                  _currentPage = page;
+                  _rowsPerPage = limit;
+                  _updatePagedRows();
+                },
+              ),
+          ],
         ),
       ),
     );

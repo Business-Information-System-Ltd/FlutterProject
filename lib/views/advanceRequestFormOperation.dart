@@ -1,3 +1,4 @@
+import 'package:advance_budget_request_system/views/advancerequestlist.dart';
 import 'package:flutter/material.dart';
 import 'package:advance_budget_request_system/views/api_service.dart';
 import 'package:advance_budget_request_system/views/data.dart';
@@ -7,7 +8,7 @@ import 'package:advance_budget_request_system/views/projecttable.dart';
 import 'package:http/http.dart' as http;
 
 class AdvanceRequestForm extends StatefulWidget {
-   final bool readOnly;
+  final bool readOnly;
   final Map<String, dynamic>? initialRequestData;
 
   const AdvanceRequestForm({
@@ -15,7 +16,6 @@ class AdvanceRequestForm extends StatefulWidget {
     this.readOnly = false,
     this.initialRequestData,
   }) : super(key: key);
-  
 
   @override
   State<AdvanceRequestForm> createState() => _AdvanceRequestFormState();
@@ -46,7 +46,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
     _requestDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
   }
 
-  List<PlutoColumn> _columns = [
+  final List<PlutoColumn> _columns = [
     PlutoColumn(
       title: 'Budget Code',
       field: 'budgetcode',
@@ -72,11 +72,71 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
       titleTextAlign: PlutoColumnTextAlign.center,
     ),
   ];
-  
+
+  final ApiService apiService = ApiService();
+
+  Future<String> generateStringAdvanceID() async {
+    try {
+      List<Advance> existingAdvances =
+          await ApiService().fetchAdvanceRequests();
+
+      if (existingAdvances.isEmpty) {
+        return "1";
+      }
+
+      int maxId = existingAdvances
+          .map((b) => int.tryParse(b.id.toString()) ?? 0)
+          .reduce((a, b) => a > b ? a : b);
+      return (maxId + 1).toString();
+    } catch (e) {
+      print("Error generating string Advance ID: $e");
+      throw Exception('Failed to generate Advance ID');
+    }
+  }
+
+  Future<void> _submitForm() async {
+    String newId = await generateStringAdvanceID();
+    Advance newAdvance = Advance(
+        id: newId,
+        date: DateFormat('yyyy-MM-dd').parse(_requestDate.text),
+        requestNo: _requestNo.text,
+        requestCode: _requestCode.text,
+        requestDes: '',
+        requestType: _requestType.text,
+        requestAmount: double.tryParse(_requestAmount.text) ?? 0,
+        currency: _selectedCurrency!,
+        requester: _requester.text,
+        departmentName: _department.text,
+        approvedAmount: 0,
+        purpose: _requestPurpose.text,
+        status: 'Pending');
+
+    try {
+      await ApiService().postAdvanceRequests(newAdvance);
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Advance Request for operation can be created successfully')),
+      );
+    } catch (e) {
+      print("Fail to insert advance: $e");
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Operation Advance request"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => AdvanceRequestPage()));
+          },
+        ),
+      ),
       body: Container(
-        color: Color.fromRGBO(255, 255, 255, 1),
+        color: const Color.fromRGBO(255, 255, 255, 1),
         padding: const EdgeInsets.fromLTRB(150, 10, 150, 10),
         child: Center(
           child: Card(
@@ -88,7 +148,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                   //crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Align(
+                    const Align(
                       alignment: Alignment.center,
                       child: Text(
                         'Add Advance Request Form',
@@ -96,7 +156,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -144,7 +204,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -158,7 +218,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                             controller: _requestCode,
                             labelText: '',
                             keyboardType: TextInputType.number,
-                            padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
+                            padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
                           ),
                         ),
                         const SizedBox(width: 15),
@@ -172,12 +232,12 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                             controller: _department,
                             labelText: '',
                             keyboardType: TextInputType.number,
-                            padding: EdgeInsets.fromLTRB(10, 10, 46, 10),
+                            padding: const EdgeInsets.fromLTRB(10, 10, 46, 10),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 0),
+                    const SizedBox(height: 0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -191,11 +251,10 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                             controller: _requestAmount,
                             labelText: '',
                             keyboardType: TextInputType.number,
-                            padding: EdgeInsets.fromLTRB(10, 10, 46, 10),
+                            padding: const EdgeInsets.fromLTRB(10, 10, 46, 10),
                           ),
                         ),
                         const SizedBox(width: 15),
-                        
                         const Text(
                           'Currency',
                           style: TextStyle(fontSize: 16),
@@ -206,7 +265,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                             value: _selectedCurrency,
                             items: const ['MMK', 'USD'],
                             labelText: 'Currency',
-                            padding: EdgeInsets.fromLTRB(10, 10, 46, 10),
+                            padding: const EdgeInsets.fromLTRB(10, 10, 46, 10),
                             onChanged: (String? newValue) {
                               setState(() {
                                 _selectedCurrency = newValue;
@@ -216,21 +275,22 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 0),
+                    const SizedBox(height: 0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Attach File', style: TextStyle(fontSize: 16)),
+                        const Text('Attach File',
+                            style: TextStyle(fontSize: 16)),
                         const SizedBox(width: 15),
                         Expanded(
                           child: _buildtextField(
                             controller: _attachFilesController,
                             labelText: '',
-                            padding: EdgeInsets.fromLTRB(50, 10, 24, 10),
+                            padding: const EdgeInsets.fromLTRB(50, 10, 24, 10),
                           ),
                         ),
-                        SizedBox(width: 15),
-                        Text(
+                        const SizedBox(width: 15),
+                        const Text(
                           'Requester',
                           style: TextStyle(fontSize: 16),
                         ),
@@ -240,7 +300,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                             controller: _requester,
                             labelText: '',
                             keyboardType: TextInputType.number,
-                            padding: EdgeInsets.fromLTRB(25, 10, 46, 10),
+                            padding: const EdgeInsets.fromLTRB(25, 10, 46, 10),
                           ),
                         ),
                       ],
@@ -249,7 +309,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'Request Purpose',
                           style: TextStyle(fontSize: 16),
                         ),
@@ -259,9 +319,8 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                             child: TextField(
                               controller: _requestPurpose,
                               maxLines: 2,
-                              decoration: InputDecoration(
-                                  fillColor:
-                                      const Color.fromRGBO(217, 217, 217, 1),
+                              decoration: const InputDecoration(
+                                  fillColor: Color.fromRGBO(217, 217, 217, 1),
                                   filled: true,
                                   border: OutlineInputBorder(
                                     borderSide: BorderSide.none,
@@ -271,8 +330,7 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
-
+                    const SizedBox(height: 20),
                     Container(
                       height: 150,
                       width: 550,
@@ -302,14 +360,13 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () {},
-                          child: Text(
+                          onPressed: _submitForm,
+                          child: const Text(
                             'Submit',
                             style: TextStyle(
                               color: Colors.black,
@@ -317,17 +374,17 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFB2C8A8),
-                            minimumSize: Size(120, 48),
+                            backgroundColor: const Color(0xFFB2C8A8),
+                            minimumSize: const Size(120, 48),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                         ),
-                        SizedBox(width: 20),
+                        const SizedBox(width: 20),
                         ElevatedButton(
                           onPressed: () {},
-                          child: Text(
+                          child: const Text(
                             'Clear',
                             style: TextStyle(
                               color: Colors.black,
@@ -335,8 +392,8 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFB2C8A8),
-                            minimumSize: Size(120, 48),
+                            backgroundColor: const Color(0xFFB2C8A8),
+                            minimumSize: const Size(120, 48),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -367,11 +424,11 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
         controller: controller,
         // readOnly: widget.readOnly,
         keyboardType: keyboardType,
-        style: TextStyle(fontSize: 14),
+        style: const TextStyle(fontSize: 14),
 
         decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: TextStyle(fontSize: 14),
+          labelStyle: const TextStyle(fontSize: 14),
           fillColor: const Color.fromRGBO(217, 217, 217, 1),
           filled: true,
           border: OutlineInputBorder(

@@ -1,3 +1,7 @@
+import 'package:advance_budget_request_system/views/advancerequestlist.dart';
+import 'package:advance_budget_request_system/views/api_service.dart';
+import 'package:advance_budget_request_system/views/cashpaymentEntry.dart';
+import 'package:advance_budget_request_system/views/data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:advance_budget_request_system/views/advanceRequestProjectTripTable.dart.dart';
@@ -157,6 +161,56 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
   //   }
   // }
 
+  // final ApiService apiService = ApiService();
+
+  Future<String> generateStringAdvanceID() async {
+    try {
+      List<Advance> existingAdvances =
+          await ApiService().fetchAdvanceRequests();
+
+      if (existingAdvances.isEmpty) {
+        return "1";
+      }
+
+      int maxId = existingAdvances
+          .map((b) => int.tryParse(b.id.toString()) ?? 0)
+          .reduce((a, b) => a > b ? a : b);
+      return (maxId + 1).toString();
+    } catch (e) {
+      print("Error generating string Advance ID: $e");
+      throw Exception('Failed to generate Advance ID');
+    }
+  }
+
+  Future<void> _submitFroms() async{
+    String newId= await generateStringAdvanceID();
+
+    Advance newAdvance= Advance(
+      id: newId, 
+      date: DateFormat('yyyy-MM-dd').parse(_requestDate.text), 
+      requestNo: _requestNo.text, 
+      requestCode: _requestCode.text, 
+      requestDes: _descriptionController.text, 
+      requestType: _requestType.text, 
+      requestAmount: double.tryParse(_requestAmount.text)??0, 
+      currency: _currencyController.text, 
+      requester: _requester.text, 
+      departmentName: _department.text, 
+      approvedAmount: 0, 
+      purpose: _requestPurpose.text, 
+      status: 'Pending');
+
+      try {
+        await ApiService().postAdvanceRequests(newAdvance);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Advance request can be created successfully')),
+        );
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>  AdvanceRequestPage()));
+      } catch (e) {
+        print("Fail to insert trips: $e");
+      }
+  }
+
 
  void _submitForm() async {
   // Validate required fields
@@ -168,6 +222,7 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
       const SnackBar(content: Text('Please fill all required fields')),
     );
     return;
+
   }
 
   try {
@@ -808,7 +863,7 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
-          onPressed: _submitForm,
+          onPressed: _submitFroms,
           child: Text(
             'Submit',
             style: TextStyle(

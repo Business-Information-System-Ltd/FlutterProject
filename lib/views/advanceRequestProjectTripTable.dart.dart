@@ -1,3 +1,4 @@
+import 'package:advance_budget_request_system/views/advancerequestlist.dart';
 import 'package:advance_budget_request_system/views/data.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -22,8 +23,6 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
   void initState() {
     super.initState();
     _updateTable();
-
-    
   }
 
   List<PlutoColumn> _columns() {
@@ -63,20 +62,6 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
     ];
   }
 
-  // List<PlutoRow> _buildProjectRows() {
-  //   return List.generate(4, (index) {
-  //     return PlutoRow(
-  //       cells: {
-  //         'requestDate': PlutoCell(value: '2025-06-23'),
-  //         'projectCode': PlutoCell(value: 'PRJ_000_00${index + 1}'),
-  //         'projectDesc': PlutoCell(value: 'Project - 1'),
-  //         'amount': PlutoCell(value: '100,0000'),
-  //         'currency': PlutoCell(value: 'MMK'),
-  //       },
-  //     );
-  //   });
-  // }
-
   List<PlutoColumn> _buildTripColumns() {
     return [
       PlutoColumn(
@@ -105,26 +90,6 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
     ];
   }
 
-  // List<PlutoRow> _buildTripRows() {
-  //   return List.generate(3, (index) {
-  //     return PlutoRow(
-  //       cells: {
-  //         'requestDate': PlutoCell(value: '2025-06-24'),
-  //         'tripCode': PlutoCell(value: 'TRP_000_00${index + 1}'),
-  //         'tripDesc': PlutoCell(value: 'Trip - ${index + 1}'),
-  //         'amount': PlutoCell(value: '200,0000'),
-  //         'currency': PlutoCell(value: 'MMK'),
-  //       },
-  //     );
-  //   });
-  // }
-
-  // void _updateTable() {
-  //   setState(() {
-  //     _rows = showProject ? _buildProjectRows() : _buildTripRows();
-  //   });
-  // }
-
   //API
   void _updateTable() async {
     if (_stateManager != null) {
@@ -134,17 +99,16 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
     List<PlutoRow> newRows = [];
 
     if (showProject) {
-      List<Project> projects =
-          await ApiService().fetchProjects(); // from your API
+      List<Project> projects = await ApiService().fetchProjects();
       newRows = projects.map((project) {
         return PlutoRow(cells: {
           'requestDate':
               PlutoCell(value: DateFormat('yyyy-MM-dd').format(project.date)),
-          'projectCode': PlutoCell(value: project.projectCode ?? ''),
-          'projectDesc': PlutoCell(value: project.projectDescription ?? ''),
-          'department': PlutoCell(value: project.departmentName ?? ''),
-          'amount': PlutoCell(value: project.totalAmount?.toString() ?? '0'),
-          'currency': PlutoCell(value: project.currency ?? ''),
+          'projectCode': PlutoCell(value: project.projectCode),
+          'projectDesc': PlutoCell(value: project.projectDescription),
+          'department': PlutoCell(value: project.departmentName),
+          'amount': PlutoCell(value: project.totalAmount.toString()),
+          'currency': PlutoCell(value: project.currency),
         });
       }).toList();
     } else {
@@ -153,14 +117,14 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
         return PlutoRow(cells: {
           'requestDate':
               PlutoCell(value: DateFormat('yyyy-MM-dd').format(trip.date)),
-          'tripCode': PlutoCell(value: trip.tripCode ?? ''),
-          'tripDesc': PlutoCell(value: trip.tripDescription ?? ''),
-          'amount': PlutoCell(value: trip.totalAmount?.toString() ?? ''),
-          'currency': PlutoCell(value: trip.currency ?? ''),
-          'department': PlutoCell(value: trip.departmentName ?? ''),
+          'tripCode': PlutoCell(value: trip.tripCode),
+          'tripDesc': PlutoCell(value: trip.tripDescription),
+          'amount': PlutoCell(value: trip.totalAmount.toString()),
+          'currency': PlutoCell(value: trip.currency),
+          'department': PlutoCell(value: trip.departmentName),
           'roundTrip': PlutoCell(value: trip.roundTrip.toString()),
-          'source': PlutoCell(value: trip.source ?? ''),
-          'destination': PlutoCell(value: trip.destination ?? ''),
+          'source': PlutoCell(value: trip.source),
+          'destination': PlutoCell(value: trip.destination),
           'departureDate': PlutoCell(
               value: DateFormat('yyyy-MM-dd').format(trip.departureDate)),
           'returnDate': PlutoCell(
@@ -215,24 +179,75 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
     );
   }
 
+  
+
+  // Future<void> _submitForm() async{
+  //   String newId= await generateStringAdvanceID();
+
+  //   Advance newAdvance = Advance(
+  //     id: newId,
+  //     date: DateFormat('yyyy-MM-dd').parse(),
+  //     requestNo: requestNo,
+  //     requestCode: requestCode,
+  //     requestDes: requestDes,
+  //     requestType: requestType,
+  //     requestAmount: requestAmount,
+  //     currency: currency,
+  //     requester: requester,
+  //     departmentName: departmentName,
+  //     approvedAmount: approvedAmount,
+  //     purpose: purpose,
+  //     status: status)
+  // }
+  // Future<void> _submitForm(Map<String, dynamic> data) async {
+  //   try {
+  //     String newId = await generateStringAdvanceID();
+
+  //     Advance newAdvance = Advance(
+  //       id: newId,
+  //       date: DateFormat('yyyy-MM-dd').parse(data['requestDate']),
+  //       requestNo: '',
+  //       requestCode: showProject ? data['projectCode'] : data['tripCode'],
+  //       requestDes: data['description'],
+  //       requestType: data['type'],
+  //       requestAmount: double.tryParse(data['amount'].toString()) ?? 0,
+  //       currency: data['currency'],
+  //       requester: 'Current User',
+  //       departmentName: data['department'],
+  //       approvedAmount: 0, 
+  //       purpose: '', 
+  //       status: 'Pending', 
+  //     );
+
+  //     await ApiService().postAdvanceRequests(newAdvance);
+ 
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Advance request submitted successfully')),
+  //       );
+     
+  //   } catch (e) {
+  //     print("Error: $e");
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error submitting request')),
+  //     );
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: Colors.green.shade100,
-        title: Text('Advance Request Form'),
+        title: const Text('Advance Request Form'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_forward), // Custom icon
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        AddAdvanceRequestForm ())); // Manually go back
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => AdvanceRequestPage()));
           },
         ),
       ),
-      backgroundColor: Color.fromRGBO(255, 255, 255, 1),
+      backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
       body: Center(
         child: Container(
           width: 1500,
@@ -246,7 +261,7 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
           ),
           child: Column(
             children: [
-              Text(
+              const Text(
                 'Choose Project or Trip',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
@@ -264,16 +279,16 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
                 color: Colors.black,
                 fillColor: const Color.fromRGBO(217, 217, 217, 2),
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 250),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 250),
                     child: Text(
                       'Project',
                       style:
                           TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 250),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 250),
                     child: Text(
                       'Trip',
                       style:

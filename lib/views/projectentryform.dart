@@ -1,7 +1,10 @@
 import 'package:advance_budget_request_system/views/api_service.dart';
 import 'package:advance_budget_request_system/views/data.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:html' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:advance_budget_request_system/views/projecttable.dart';
 import 'package:http/http.dart' as http;
@@ -33,11 +36,13 @@ class _AddProjectFormState extends State<AddProjectForm> {
   PlutoGridStateManager? _stateManager;
   PlutoGridStateManager? popupGridManager;
   List<Project> projects = [];
-
+  List<String> attachedFiles = [];
   final List<Map<String, String>> _budgetList = [];
   final TextEditingController _projectCodeController = TextEditingController();
   final TextEditingController _projectAdminController = TextEditingController();
   final TextEditingController _projectDateController = TextEditingController();
+  final TextEditingController _requesterNameController =
+      TextEditingController();
   final TextEditingController _projectDescriptionController =
       TextEditingController();
   final TextEditingController _totalAmountController = TextEditingController();
@@ -76,6 +81,7 @@ class _AddProjectFormState extends State<AddProjectForm> {
       projects = project;
     });
   }
+  
 
   void _initializePlutoGrid() {
     _columns = [
@@ -225,19 +231,42 @@ class _AddProjectFormState extends State<AddProjectForm> {
     _attachFilesController.clear();
   }
 
- Future<void> _submitForm() async {
-  if (_totalAmountController.text.isEmpty || 
-      double.tryParse(_totalAmountController.text) == null ||
-      double.parse(_totalAmountController.text) <= 0) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Please enter a valid amount greater than zero')),
-    );
-    return;
+  void _pickFiles() {
+    final uploadInput = html.FileUploadInputElement();
+    uploadInput.multiple = true;
+    uploadInput.accept = '*/*';
+    uploadInput.click();
+
+    uploadInput.onChange.listen((event) {
+      final files = uploadInput.files;
+      if (files != null && files.isNotEmpty) {
+        setState(() {
+          attachedFiles = files.map((file) => file.name).toList();
+        });
+
+        for (final file in files) {
+          print('Selected file: ${file.name}, size: ${file.size}');
+        }
+      } else {
+        print('No files selected.');
+      }
+    });
   }
+
+  Future<void> _submitForm() async {
+    if (_totalAmountController.text.isEmpty ||
+        double.tryParse(_totalAmountController.text) == null ||
+        double.parse(_totalAmountController.text) <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Please enter a valid amount greater than zero')),
+      );
+      return;
+    }
     try {
       int newId = await getProjectById();
       final project = Project(
-        id: widget.isEditMode? widget.projectId: newId,
+        id: widget.isEditMode ? widget.projectId : newId,
         date: DateFormat('yyyy-MM-dd').parse(_projectDateController.text),
         projectCode: _projectCodeController.text,
         projectDescription: _projectDescriptionController.text,
@@ -250,11 +279,11 @@ class _AddProjectFormState extends State<AddProjectForm> {
         budgets: [],
       );
 
-       if (widget.isEditMode) {
-      await ApiService().updateProject(project);
-    } else {
-      await ApiService().postProjects(project);
-    } // new
+      if (widget.isEditMode) {
+        await ApiService().updateProject(project);
+      } else {
+        await ApiService().postProjects(project);
+      } // new
       // Navigator.pop(context, true); // Return true to indicate success
       Navigator.pop(context, project);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -266,8 +295,6 @@ class _AddProjectFormState extends State<AddProjectForm> {
         SnackBar(content: Text('Failed to submit project: $e')),
       );
     }
-
-   
   }
 
   Widget build(BuildContext context) {
@@ -278,216 +305,262 @@ class _AddProjectFormState extends State<AddProjectForm> {
       ),
       // body:_rows.isEmpty
       //? const Center(child: CircularProgressIndicator())
-      body: Container(
-        // decoration: BoxDecoration( ),
-        padding: EdgeInsets.fromLTRB(200, 0, 200, 0),
+      body: SingleChildScrollView(
         child: Center(
-          child: Card(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(10, 30, 10, 35),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                // CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Add Project Form',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          controller: _projectCodeController,
-                          labelText: 'Project Code',
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 1, vertical: 3),
+          child: Container(
+            width: MediaQuery.of(context).size.width / 1.7,
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  // CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Add Project Form',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _projectCodeController,
+                            labelText: 'Project Code',
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 7.0),
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 5.0),
-                      Expanded(
-                        child: _buildTextField(
-                          controller: _projectAdminController,
-                          labelText: 'Department',
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 1, vertical: 3),
+                        SizedBox(width: 5.0),
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _projectDateController,
+                            labelText: 'Requested Date',
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 7.0),
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 5.0),
-                      Expanded(
-                        child: _buildTextField(
-                          controller: _projectDateController,
-                          labelText: 'Requested Date',
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 1, vertical: 3),
+                      ],
+                    ),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _requesterNameController,
+                            labelText: 'Requester Name',
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 7.0),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                 // SizedBox(height: 0),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          controller: _projectDescriptionController,
-                          labelText: 'Enter Project Description',
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 1, vertical: 3),
+                        SizedBox(width: 5.0),
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _projectAdminController,
+                            labelText: 'Department',
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 7.0),
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 5.0),
-                      Expanded(
-                        child: _buildTextField(
-                          controller: _totalAmountController,
-                          labelText: 'Enter total Amount',
-                          keyboardType: TextInputType.number,
-                          
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 1, vertical: 3),
+                      ],
+                    ),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _projectDescriptionController,
+                            labelText: 'Enter Project Description',
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 7.0),
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 5.0),
-                      Expanded(
-                        child: _buildDropdownField(
-                          value: _selectedCurrency,
-                          items: ['MMK', 'USD'],
-                          labelText: 'Currency',
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 1, vertical: 3),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedCurrency = newValue;
-                            });
-                          },
-                          readOnly: widget.readOnly,
+                      ],
+                    ),
+
+                    //]  SizedBox(width: 5.0),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _totalAmountController,
+                            labelText: 'Enter Total Amount',
+                            keyboardType: TextInputType.number,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 7.0),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                 // SizedBox(height: 0),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: SizedBox(
-                      width: 370,
-                      height: 55,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(5, 2, 65, 2),
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[200],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                              side: BorderSide(color: Colors.grey, width: 1),
+                        SizedBox(width: 5.0),
+                        Expanded(
+                          child: _buildDropdownField(
+                            value: _selectedCurrency,
+                            items: ['MMK', 'USD'],
+                            labelText: 'Currency',
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 7.0),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _selectedCurrency = newValue;
+                              });
+                            },
+                            readOnly: widget.readOnly,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 7),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                        width: 370,
+                        height: 80,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 2, 65, 2),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (kIsWeb) {
+                                _pickFiles();
+                              } else {
+                                print('File picking is only supported on web.');
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey[200],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                                side: const BorderSide(
+                                    color: Colors.grey, width: 1),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 7.0),
+                              alignment: Alignment.centerLeft,
                             ),
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                          ), //Text remove
-                          child: const Row(
-                              mainAxisAlignment: MainAxisAlignment
-                                  .start, // Text left, Icon right
-                              children: [
-                                Icon(Icons.attach_file, color: Colors.black),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Attach Files',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              ]),
+                            child: attachedFiles.isEmpty
+                                ? const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.attach_file,
+                                          color: Colors.black),
+                                      SizedBox(width: 8),
+                                      Text('Attach Files',
+                                          style:
+                                              TextStyle(color: Colors.black)),
+                                    ],
+                                  )
+                                : Scrollbar(
+                                    thumbVisibility: true,
+                                    child: ListView.builder(
+                                      itemCount: attachedFiles.length,
+                                      itemBuilder: (context, index) {
+                                        return Text(
+                                          attachedFiles[index],
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          maxLines: 1,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  //SizedBox(height: 0),
 
-                  Center(
-                    child: SizedBox(
-                        width: 200,
-                        height: 35,
-                        child: ElevatedButton(
-                          onPressed: _showPlutoGridDialog,
+                    Center(
+                      child: SizedBox(
+                          width: 200,
+                          height: 35,
+                          child: ElevatedButton(
+                            onPressed: _showPlutoGridDialog,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFFB2C8A8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: Text(
+                              'Add Budget Codes',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.black),
+                            ),
+                          )),
+                    ),
+                    SizedBox(height: 8),
+                    Container(
+                      height: 170,
+                      width: 550,
+                      decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          border: Border.all(color: Colors.grey.shade300)),
+                      child: PlutoGrid(
+                        columns: _columns,
+                        rows: _rows,
+                        onLoaded: (PlutoGridOnLoadedEvent event) {
+                          _stateManager = event.stateManager;
+                          _stateManager!.setShowColumnFilter(false);
+                        },
+                        configuration: PlutoGridConfiguration(
+                          style: PlutoGridStyleConfig(
+                            oddRowColor: Colors.blue[50],
+                            rowHeight: 35,
+                            activatedColor:
+                                Colors.lightBlueAccent.withOpacity(0.2),
+                          ),
+                        ),
+                        mode: PlutoGridMode.readOnly,
+                      ),
+                    ),
+
+                    SizedBox(height: 10),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _submitForm,
+                          child: Text(
+                            'Submit',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFB2C8A8),
+                            minimumSize: Size(120, 48),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
+                        ),
+                        SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: _clearForm,
                           child: Text(
-                            'Add Budget Codes',
-                            style: TextStyle(fontSize: 16, color: Colors.black),
+                            'Clear',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )),
-                  ),
-                  SizedBox(height: 8),
-                  Container(
-                    height: 170,
-                    width: 550,
-                    decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        border: Border.all(color: Colors.grey.shade300)),
-                    child: PlutoGrid(
-                      columns: _columns,
-                      rows: _rows,
-                      onLoaded: (PlutoGridOnLoadedEvent event) {
-                        _stateManager = event.stateManager;
-                        _stateManager!.setShowColumnFilter(false);
-                      },
-                      configuration: PlutoGridConfiguration(
-                        style: PlutoGridStyleConfig(
-                          oddRowColor: Colors.blue[50],
-                          rowHeight: 35,
-                          activatedColor:
-                              Colors.lightBlueAccent.withOpacity(0.2),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFB2C8A8),
+                            minimumSize: Size(120, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
                         ),
-                      ),
-                      mode: PlutoGridMode.readOnly,
+                      ],
                     ),
-                  ),
-
-                  SizedBox(height: 10),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _submitForm,
-                        child: Text(
-                          'Submit',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFB2C8A8),
-                          minimumSize: Size(120, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 20),
-                      ElevatedButton(
-                        onPressed: _clearForm,
-                        child: Text(
-                          'Clear',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFB2C8A8),
-                          minimumSize: Size(120, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -549,7 +622,7 @@ class _AddProjectFormState extends State<AddProjectForm> {
             borderSide: BorderSide(color: Colors.grey, width: 1),
           ),
           contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 12), // 👈 Internal padding
+              horizontal: 16, vertical: 12), 
         ),
         items: items.map<DropdownMenuItem<String>>((String item) {
           return DropdownMenuItem<String>(
@@ -557,11 +630,8 @@ class _AddProjectFormState extends State<AddProjectForm> {
             child: Text(item),
           );
         }).toList(),
-        // onChanged: onChanged,
-        //   onChanged:
-        //       readOnly ? null : onChanged, // 👈 disable selection when readOnly
         disabledHint:
-            value != null ? Text(value) : null, // 👈 show value if disabled
+            value != null ? Text(value) : null, 
       ),
     );
   }

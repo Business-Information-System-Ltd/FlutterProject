@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from decimal import Decimal
 from django.db.models.query_utils import Q
-from .services import SettlementService
+from .services import RequestSetupFacadeService, SettlementService
 from rest_framework import filters, viewsets
 from django.db import transaction  
 from django_filters.rest_framework import DjangoFilterBackend
@@ -603,46 +603,80 @@ class SettlementViewSet(viewsets.ModelViewSet):
 #         serializer = self.get_serializer(instance)
 #         return Response(serializer.data)
 
+# class RequestSetupFacadeViewSet(viewsets.ModelViewSet):
+#     queryset = RequestSetUp.objects.all().select_related('Department_ID')
+#     serializer_class = RequestSetUpSerializer
+    
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+#         return queryset.prefetch_related('approval_steps__user_approval')
+    
+#     def create(self, request, *args, **kwargs):
+#         try:
+#             serializer = self.get_serializer(data=request.data)
+#             serializer.is_valid(raise_exception=True)
+            
+#             with transaction.atomic():
+#                 self.perform_create(serializer)
+            
+#             headers = self.get_success_headers(serializer.data)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+#         except Exception as e:
+#             return Response(
+#                 {'error': str(e)},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+    
+#     def update(self, request, *args, **kwargs):
+#         try:
+#             instance = self.get_object()
+#             serializer = self.get_serializer(instance, data=request.data, partial=kwargs.pop('partial', False))
+#             serializer.is_valid(raise_exception=True)
+            
+#             with transaction.atomic():
+#                 self.perform_update(serializer)
+            
+#             return Response(serializer.data)
+#         except Exception as e:
+#             return Response(
+#                 {'error': str(e)},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+    
+#     @action(detail=True, methods=['get'])
+#     def full_details(self, request, pk=None):
+#         instance = self.get_object()
+#         serializer = self.get_serializer(instance)
+#         return Response(serializer.data)
 class RequestSetupFacadeViewSet(viewsets.ModelViewSet):
     queryset = RequestSetUp.objects.all().select_related('Department_ID')
     serializer_class = RequestSetUpSerializer
-    
+    service = RequestSetupFacadeService()
+
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.prefetch_related('approval_steps__user_approval')
-    
+
     def create(self, request, *args, **kwargs):
         try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            
             with transaction.atomic():
-                self.perform_create(serializer)
-            
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+                instance = self.service.create_request_setup(request.data)
+                serializer = self.get_serializer(instance)
+                headers = self.get_success_headers(serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-    
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     def update(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=kwargs.pop('partial', False))
-            serializer.is_valid(raise_exception=True)
-            
             with transaction.atomic():
-                self.perform_update(serializer)
-            
-            return Response(serializer.data)
+                updated_instance = self.service.update_request_setup(instance, request.data)
+                serializer = self.get_serializer(updated_instance)
+                return Response(serializer.data)
         except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-    
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=True, methods=['get'])
     def full_details(self, request, pk=None):
         instance = self.get_object()

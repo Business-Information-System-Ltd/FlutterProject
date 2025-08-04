@@ -169,7 +169,12 @@ class OperationBudget(models.Model):
     
 class RequestSetUp(models.Model):
     ID = models.AutoField(primary_key=True) 
-    Department_ID=models.ForeignKey(Department, on_delete=models.CASCADE,db_column='Department_ID')
+    Department_ID = models.ForeignKey(
+        Department, 
+        on_delete=models.CASCADE,
+        db_column='Department_ID',
+        related_name='request_setups'
+    )
     Flow_Name=models.CharField(max_length=50)
     Currency=models.CharField(max_length=5)
     Flow_Type=models.CharField(max_length=50, choices=[('Project','Project'),('Trip','Trip'),('Operation','Operation')])
@@ -201,15 +206,13 @@ class ApproverSetupStep(models.Model):
     Setup_ID = models.ForeignKey(RequestSetUp, on_delete=models.CASCADE, db_column='Setup_ID', related_name='approval_steps')
     Step_No = models.IntegerField()
     Maximum_Approval_Amount = models.DecimalField(max_digits=12, decimal_places=2)
+    # Is_All_Approver = models.CharField(max_length=10, choices=[('One','One'),('All','All')]) 
     
-    # Change this field name to match your database column
-    Is_All_Approver = models.CharField(max_length=10, choices=[('One','One'),('All','All')], db_column='is_all_approver')  # or whatever your actual column name is
-    
-    Limited_Time = models.DateTimeField()
-    Request_Status = models.BooleanField()
+    # Limited_Time = models.DateTimeField()
+    # Request_Status = models.BooleanField()
 
     class Meta:
-        managed = False  # Since you're using an existing database
+        managed = False 
         db_table = 'approver_setup_step'
     
     def __str__(self):
@@ -219,7 +222,7 @@ class ApproverSetupStep(models.Model):
 
 
 
-class AdvanceRequest(models.Model):
+class AdvanceRequest(models.Model): 
     ID = models.AutoField(primary_key=True) 
     Request_No = models.CharField(max_length=20, unique=True)
     Requester = models.CharField(max_length=100)
