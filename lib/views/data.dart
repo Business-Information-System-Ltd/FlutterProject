@@ -1,4 +1,3 @@
-
 import 'package:intl/intl.dart';
 
 class Budget {
@@ -166,6 +165,7 @@ class Trip {
   final int status;
   final int departmentId;
   final String departmentName;
+  //final String requestDate;
   final List<Budget> budgetDetails;
 
   Trip(
@@ -179,6 +179,7 @@ class Trip {
       required this.status,
       required this.departmentId,
       required this.departmentName,
+      // required this.requestDate,
       required this.budgetDetails});
 
   factory Trip.fromJson(Map<String, dynamic> json) {
@@ -197,12 +198,14 @@ class Trip {
           : DateTime.now(),
       Trip_Code: json['Trip_Code'],
       description: json['Trip_Description'],
+      // requestDate: json['Trip_requestDate'],
       totalAmount:
           double.tryParse(json['Total_Budget_Amount'].toString()) ?? 0.0,
       currency: json['Currency'],
       departmentId: departmentId,
       departmentName: departmentName,
       status: int.tryParse(json['Status'].toString()) ?? 0,
+
       approveAmount: double.tryParse(json['Approved_Amount'].toString()) ?? 0.0,
       budgetDetails: budgetList,
     );
@@ -219,6 +222,7 @@ class Trip {
       'Department_ID': departmentId,
       'Department_Name': departmentName,
       'Status': status,
+      // 'Trip_requestDate':requestDate,
       'Approved_Amount': approveAmount,
       'Budget_Details': budgetDetails.map((detail) => detail.toJson()).toList(),
       // 'Budget_Details': budgetDetails.map((detail) => detail.toJson()).toList(),
@@ -326,7 +330,6 @@ class Operation {
 //       required this.projectId,
 //       required this.operationId,
 //       required this.budgetDetails});
-
 
 //   factory AdvanceRequest.fromJson(Map<String, dynamic> json) {
 //     return AdvanceRequest(
@@ -453,6 +456,7 @@ class CashPayment {
   final DateTime date;
   final String paymentNo;
   final int requestNo;
+
   final String requestCode;
   final String requestType;
   final double paymentAmount;
@@ -482,23 +486,40 @@ class CashPayment {
 
   factory CashPayment.fromJson(Map<String, dynamic> json) {
     return CashPayment(
-        id: json['ID'],
-        date: DateFormat('yyyy-MM-dd').parse(json['Payment_Date']),
-        paymentNo: json['Payment_No'],
-        requestNo: json['Request_ID'],
-        requestCode: json['Request_Code'] ?? 'Request Code',
-        requestType: json['Request_Type'] ?? 'Request Type',
-        paymentAmount: json['Payment_Amount'] != null
-            ? json['Payment_Amount'].toDouble()
-            : 0.0,
-        currency: json['Currency'],
-        paymentMethod: json['Payment_Method'],
-        paidPerson: json['Paid_Person'],
-        receivePerson: json['Received_Person'],
-        paymentNote: json['Payment_Note'],
-        status: json['Posting_Status'],
-        settledStatus: json["Settlement_Status"]);
+      id: json['ID']??0,
+      //date: DateFormat('yyyy-MM-dd').parse(json['Payment_Date']),
+       date: json['Payment_Date'] != null 
+            ? DateFormat('yyyy-MM-dd').parse(json['Payment_Date'])
+            : DateTime.now(),
+      paymentNo: json['Payment_No']?.toString()??'',
+     // requestNo: json['Request_ID']??'',
+     requestNo: json['Request_ID'] is String 
+            ? int.tryParse(json['Request_ID']) ?? 0
+            : json['Request_ID'] ?? 0,
+      requestCode: json['Request_Code']?.toString() ?? '',
+      requestType: json['Request_Type']?.toString() ?? '',
+      paymentAmount: json['Payment_Amount'] != null
+          ? json['Payment_Amount'].toDouble()
+          : 0.0,
+      
+      currency: json['Currency']??'MMK',
+      paymentMethod: json['Payment_Method']??'Cash',
+      paidPerson: json['Paid_Person']?.toString()??'',
+      receivePerson: json['Received_Person']??'',
+      paymentNote: json['Payment_Note']?.toString()??'',
+      // status: json['Posting_Status']??'',
+      // settledStatus: json["Settlement_Status"]??0
+      status: json['Posting_Status'] is String
+            ? int.tryParse(json['Posting_Status']) ?? 0
+            : json['Posting_Status'] ?? 0,
+        settledStatus: json['Settlement_Status'] is String
+            ? int.tryParse(json['Settlement_Status']) ?? 0
+            : json['Settlement_Status'] ?? 0,
+
+     
+    );
   }
+  
 
   Map<String, dynamic> toJson() {
     return {
@@ -515,7 +536,7 @@ class CashPayment {
       "Received_Person": receivePerson,
       "Payment_Note": paymentNote,
       "Posting_Status": status,
-      "Settlement_Status": settledStatus
+      "Settlement_Status": settledStatus,
     };
   }
 }
@@ -759,9 +780,9 @@ class Budgets {
 
   factory Budgets.fromJson(Map<String, dynamic> json) {
     return Budgets(
-        id: json['id'] ,
-            // ? json['id']
-            // : int.tryParse(json['id'].toString()) ?? 0,
+        id: json['id'],
+        // ? json['id']
+        // : int.tryParse(json['id'].toString()) ?? 0,
         budgetCode: json['BudgetCode'],
         budgetDescription: json['BudgetDescription'],
         intialAmount: json['InitialAmount']);
@@ -841,6 +862,7 @@ class Project {
     };
   }
 }
+
 class Trips {
   final String id;
   final DateTime date;
@@ -888,8 +910,8 @@ class Trips {
   factory Trips.fromJson(Map<String, dynamic> json) {
     return Trips(
       id: json['id'].toString(),
-          // ? json['id']
-          // : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      // ? json['id']
+      // : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       date: DateTime.parse(
           json['Date']?.toString() ?? DateTime.now().toIso8601String()),
       tripCode: json['TripCode']?.toString() ?? '',
@@ -950,22 +972,21 @@ class Trips {
   }
 }
 
-
 class Advance {
   final String id;
   final DateTime date;
-  final String requestNo;
-  final String requestCode;
-  final String requestDes;
-  final String requestType;
-  final double requestAmount;
-  final String currency;
-  final String requester;
+  final String? requestNo;
+  final String? requestCode;
+  final String? requestDes;
+  final String? requestType;
+  final double? requestAmount;
+  final String? currency;
+  final String? requester;
   // final int departmentID;
-  final String departmentName;
-  final double approvedAmount;
-  final String purpose;
-  final String status;
+  final String? departmentName;
+  final double? approvedAmount;
+  final String? purpose;
+  final String? status;
 
   Advance({
     required this.id,
@@ -1021,7 +1042,7 @@ class Advance {
       'DepartmentName': departmentName,
       'ApprovedAmount': approvedAmount,
       'Purpose': purpose,
-      'Status': status
+      'Status': status,
     };
   }
 }
@@ -1215,16 +1236,14 @@ class Departments {
   final String departmentCode;
   final String departmentName;
 
-  Departments({
-    required this.id,
-    required this.departmentCode,
-    required this.departmentName
-  });
+  Departments(
+      {required this.id,
+      required this.departmentCode,
+      required this.departmentName});
 
   factory Departments.fromJson(Map<String, dynamic> json) {
     return Departments(
-      id: json['id']
-      is int
+      id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id'].toString()) ?? 0,
       departmentCode: json['DepartmentCode'] ?? '',
@@ -1241,7 +1260,7 @@ class Departments {
   }
 }
 
-class Users{
+class Users {
   final int id;
   final String userName;
   final String userEmail;
@@ -1250,25 +1269,23 @@ class Users{
   final int departmentID;
   final String departmentName;
 
-Users({
-  required this.id,
-  required this.userName,
-  required this.userEmail,
-  required this.role,
-  required this.password,
-  required this.departmentID,
-  required this.departmentName
-});
+  Users(
+      {required this.id,
+      required this.userName,
+      required this.userEmail,
+      required this.role,
+      required this.password,
+      required this.departmentID,
+      required this.departmentName});
 
-factory Users.fromJson(Map<String, dynamic> json) {
+  factory Users.fromJson(Map<String, dynamic> json) {
     return Users(
-      id: json['id']
-      is int
+      id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id'].toString()) ?? 0,
       userName: json['UserName'] ?? '',
-      userEmail: json['UserEmail']??'',
-      role: json['Role']??'',
+      userEmail: json['UserEmail'] ?? '',
+      role: json['Role'] ?? '',
       password: json['Password'],
       departmentID: json['DepartmentID'],
       departmentName: json['DepartmentName'] ?? '',
@@ -1281,14 +1298,14 @@ factory Users.fromJson(Map<String, dynamic> json) {
       'UserName': userName,
       'UserEmail': userEmail,
       'Role': role,
-      'Password':password,
+      'Password': password,
       'DepartmentID': departmentID,
-      'DepartmentName':departmentName
+      'DepartmentName': departmentName
     };
   }
 }
- 
-class RequestSetup{
+
+class RequestSetup {
   final String id;
   final String departmentID;
   final String currency;
@@ -1297,25 +1314,23 @@ class RequestSetup{
   final int noOfSteps;
   final int managementApprover;
 
-  RequestSetup({
-    required this.id,
-    required this.departmentID,
-    required this.currency,
-    required this.flowType,
-    required this.description,
-    required this.noOfSteps,
-    required this.managementApprover
-  });
+  RequestSetup(
+      {required this.id,
+      required this.departmentID,
+      required this.currency,
+      required this.flowType,
+      required this.description,
+      required this.noOfSteps,
+      required this.managementApprover});
 
   factory RequestSetup.fromJson(Map<String, dynamic> json) {
     return RequestSetup(
-      id: json['id'] 
-      is int
+      id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id'].toString()) ?? 0,
       departmentID: json['DepartmentID'] ?? '',
-      currency: json['Currency']??'',
-      flowType: json['FlowType']??'',
+      currency: json['Currency'] ?? '',
+      flowType: json['FlowType'] ?? '',
       description: json['Description'],
       noOfSteps: json['NoOfStep'],
       managementApprover: json['ManagementApprover'] ?? '',
@@ -1328,14 +1343,9 @@ class RequestSetup{
       'UserName': departmentID,
       'UserEmail': currency,
       'Role': flowType,
-      'Password':description,
+      'Password': description,
       'DepartmentID': noOfSteps,
-      'DepartmentName':managementApprover
+      'DepartmentName': managementApprover
     };
   }
 }
-
-
-
-
-
