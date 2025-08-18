@@ -59,6 +59,11 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
         field: 'currency',
         type: PlutoColumnType.text(),
       ),
+      PlutoColumn(
+        title: 'Requester',
+        field: 'Requester',
+        type: PlutoColumnType.text(),
+      ),
     ];
   }
 
@@ -87,6 +92,11 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
       ),
       PlutoColumn(
           title: 'Currency', field: 'currency', type: PlutoColumnType.text()),
+      PlutoColumn(
+        title: 'Requester',
+        field: 'Requester',
+        type: PlutoColumnType.text(),
+      )
     ];
   }
 
@@ -109,11 +119,12 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
           'department': PlutoCell(value: project.departmentName),
           'amount': PlutoCell(value: project.totalAmount.toString()),
           'currency': PlutoCell(value: project.currency),
+          'Requester': PlutoCell(value: project.requesterName),
         });
       }).toList();
     } else {
-      List<Trips> trips = await ApiService().fetchTrips(); // from your API
-      newRows = trips.map((trip) {
+      List<Trips> trips = await ApiService().fetchTrips(); 
+      newRows = trips.where((t)=> t.directAdvanceReq==false).map((trip) {
         return PlutoRow(cells: {
           'requestDate':
               PlutoCell(value: DateFormat('yyyy-MM-dd').format(trip.date)),
@@ -121,8 +132,9 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
           'tripDesc': PlutoCell(value: trip.tripDescription),
           'amount': PlutoCell(value: trip.totalAmount.toString()),
           'currency': PlutoCell(value: trip.currency),
+          'Requester':PlutoCell(value: trip.requesterName),
           'department': PlutoCell(value: trip.departmentName),
-          'roundTrip': PlutoCell(value: trip.roundTrip.toString()),
+          'roundTrip': PlutoCell(value: trip.roundTrip== true ? 'Yes' : 'No'),
           'source': PlutoCell(value: trip.source),
           'destination': PlutoCell(value: trip.destination),
           'departureDate': PlutoCell(
@@ -130,7 +142,7 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
           'returnDate': PlutoCell(
               value: DateFormat('yyyy-MM-dd').format(trip.returnDate)),
           'expenditureOption':
-              PlutoCell(value: trip.expenditureOption.toString()),
+              PlutoCell(value: trip.expenditureOption==0 ? 'Fix Allowance': 'Claim later'),
         });
       }).toList();
     }
@@ -152,6 +164,8 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
       context,
       MaterialPageRoute(
         builder: (context) => AddAdvanceRequestForm(
+          isViewMode: false,
+          advanceId: '0',
           requestDate: advanceRequestData['requestDate'],
           projectCode: showProject ? advanceRequestData['projectCode'] : null,
           tripCode: !showProject ? advanceRequestData['tripCode'] : null,
@@ -179,59 +193,7 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
     );
   }
 
-  
 
-  // Future<void> _submitForm() async{
-  //   String newId= await generateStringAdvanceID();
-
-  //   Advance newAdvance = Advance(
-  //     id: newId,
-  //     date: DateFormat('yyyy-MM-dd').parse(),
-  //     requestNo: requestNo,
-  //     requestCode: requestCode,
-  //     requestDes: requestDes,
-  //     requestType: requestType,
-  //     requestAmount: requestAmount,
-  //     currency: currency,
-  //     requester: requester,
-  //     departmentName: departmentName,
-  //     approvedAmount: approvedAmount,
-  //     purpose: purpose,
-  //     status: status)
-  // }
-  // Future<void> _submitForm(Map<String, dynamic> data) async {
-  //   try {
-  //     String newId = await generateStringAdvanceID();
-
-  //     Advance newAdvance = Advance(
-  //       id: newId,
-  //       date: DateFormat('yyyy-MM-dd').parse(data['requestDate']),
-  //       requestNo: '',
-  //       requestCode: showProject ? data['projectCode'] : data['tripCode'],
-  //       requestDes: data['description'],
-  //       requestType: data['type'],
-  //       requestAmount: double.tryParse(data['amount'].toString()) ?? 0,
-  //       currency: data['currency'],
-  //       requester: 'Current User',
-  //       departmentName: data['department'],
-  //       approvedAmount: 0, 
-  //       purpose: '', 
-  //       status: 'Pending', 
-  //     );
-
-  //     await ApiService().postAdvanceRequests(newAdvance);
- 
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Advance request submitted successfully')),
-  //       );
-     
-  //   } catch (e) {
-  //     print("Error: $e");
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Error submitting request')),
-  //     );
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -239,13 +201,13 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
       appBar: AppBar(
         backgroundColor: Colors.green.shade100,
         title: const Text('Advance Request Form'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => AdvanceRequestPage()));
-          },
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back),
+        //   onPressed: () {
+        //     Navigator.pushReplacement(context,
+        //         MaterialPageRoute(builder: (context) => AdvanceRequestPage()));
+        //   },
+        // ),
       ),
       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
       body: Center(
@@ -253,7 +215,7 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
           width: 1500,
           height: 1000,
           margin: const EdgeInsets.all(25),
-          padding: const EdgeInsets.fromLTRB(100, 20, 100, 20),
+          // padding: const EdgeInsets.fromLTRB(100, 20, 100, 20),
           decoration: BoxDecoration(
             //color: Color(0xffeaf3e0),
 
@@ -278,17 +240,17 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
                 selectedColor: Colors.black,
                 color: Colors.black,
                 fillColor: const Color.fromRGBO(217, 217, 217, 2),
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 250),
+                children: const [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 300),
                     child: Text(
                       'Project',
                       style:
                           TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 250),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 300),
                     child: Text(
                       'Trip',
                       style:
@@ -300,7 +262,7 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
               const SizedBox(height: 10),
               Container(
                 height: 300,
-                width: 1000,
+                width: MediaQuery.of(context).size.width*0.8,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
                   border: Border.all(color: Colors.grey.shade300),
@@ -316,7 +278,7 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
                   configuration: PlutoGridConfiguration(
                     style: PlutoGridStyleConfig(
                       oddRowColor: Colors.blue[50],
-                      rowHeight: 50,
+                      rowHeight: 35,
                       activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
                     ),
                   ),
@@ -335,6 +297,7 @@ class _AdvanceProjectTripTableState extends State<AdvanceProjectTripTable> {
                           showProject ? null : rowData['tripDesc']?.value,
                       'amount': rowData['amount']?.value,
                       'currency': rowData['currency']?.value,
+                      'Requester': rowData['Requester']?.value,
                       'department': rowData['department']?.value,
                       'roundTrip': rowData['roundTrip']?.value,
                       'source': rowData['source']?.value,

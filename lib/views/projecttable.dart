@@ -18,6 +18,7 @@ import 'dart:html' as html;
 
 class ProjectInformation extends StatefulWidget {
   final bool readOnly;
+  
   final Map<String, dynamic>? initialRequestData;
 
   const ProjectInformation({
@@ -35,6 +36,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
   List<PlutoRow> _rows = [];
   List<Project> projects = [];
   List<PlutoRow> _pagedRows = [];
+  List<Project> _allProjects=[];
   DateTimeRange? _currentDateRange;
   String? _currentFilterType;
   PlutoGridStateManager? _stateManager;
@@ -43,25 +45,29 @@ class _ProjectInformationState extends State<ProjectInformation> {
   String _searchQuery = '';
   int _currentPage = 1;
   int _rowsPerPage = 10;
+  bool _isLoading=true;
 
   @override
   void initState() {
     super.initState();
     _columns = _buildColumns();
-    _rows = [];
+    _rows = _buildRows(projects);
     _fetchProjects();
-    _refreshData();
+    _refreshButton();
+    _isLoading=false;
     print(" Rows loaded: ${_rows.length}");
   }
 
   void _fetchProjects() async {
     try {
-      final projectList = await ApiService().fetchProjects();
+ 
+      List<Project> project = await ApiService().fetchProjects();
       setState(() {
-        projects = projectList;
-        _rows = _buildRows(projects);
-        _applyDateFilter();
+        projects = project;
       });
+
+      _applyDateFilter(); 
+      
     } catch (e) {
       print('Error fetching projects: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -107,10 +113,6 @@ class _ProjectInformationState extends State<ProjectInformation> {
     });
     _updatePagedRows();
 
-    // if (_stateManager != null) {
-    //   _stateManager!.removeAllRows();
-    //   _stateManager!.appendRows(_rows);
-    // }
   }
 
   void _updatePagedRows() {
@@ -141,9 +143,11 @@ class _ProjectInformationState extends State<ProjectInformation> {
     _applyDateFilter();
   }
 
-  void _refreshData() {}
+  
   List<PlutoRow> _buildRows(List<Project> projects) {
-    return projects.map((p) {
+   final validProjects = projects.where((p) => p.id != 0).toList();
+
+    return validProjects.map((p) {
       return PlutoRow(cells: {
         'id': PlutoCell(value: p.id),
         'date': PlutoCell(value: DateFormat('yyyy-MM-dd').format(p.date)),
@@ -181,44 +185,33 @@ class _ProjectInformationState extends State<ProjectInformation> {
     if (confirm == true) {
       try {
         final projectToDelete = projects.firstWhere(
-          (p) => p.id == projectId,
+          (p) => p.id.toString() == projectId,
+          orElse: () => throw Exception('Project not found'),
         );
-        final id = projectToDelete.id; //new
-        // await ApiService().deleteProjects(projectToDelete.id);
-        await ApiService().deleteProject(id);
-
-        // setState(() {
-        //   projects.removeWhere((p) => p.projectCode == projectCode);
-        //   _rows = _buildRows(projects);
-        // });
+        
+        // await ApiService().deleteProject(projectId.toString());
+       
         setState(() {
-          projects.removeWhere((p) => p.id == id);
+          projects.removeWhere((p) => p.id.toString() == projectId);
           _rows = _buildRows(projects);
+          bool _isLoading=false;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Project deleted successfully')),
+          
+          SnackBar(content: Text('Project deleted successfully:$projectId')),
         );
       } catch (e) {
         print('Delete failed: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete project')),
+          SnackBar(content: Text('Failed to delete project:$projectId')),
         );
       }
     }
   }
 
   final ApiService apiService = ApiService();
-  Future<int> getProjectById() async {
-    List<Project> existingProject = await apiService.fetchProjects();
-    if (existingProject.isEmpty) {
-      return 1;
-    }
-    int maxId =
-        existingProject.map((b) => b.id).reduce((a, b) => a > b ? a : b);
-    return maxId + 1;
-  }
-
+  
   List<PlutoColumn> _buildColumns() {
     return [
       PlutoColumn(
@@ -294,36 +287,9 @@ class _ProjectInformationState extends State<ProjectInformation> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () {
-                    final row = rendererContext.row;
-                    final rowData = {
-                      'id': row.cells['id']?.value,
-                      'date': row.cells['date']?.value,
-                      'projectcode': row.cells['projectcode']?.value,
-                      'description': row.cells['description']?.value,
-                      'totalamount': row.cells['totalamount']?.value.toString(),
-                      'currency': row.cells['currency']?.value,
-                      'department': row.cells['department']?.value,
-                      'requestable': row.cells['requestable']?.value,
-                    };
+                  onPressed: () => _editProject(rendererContext.row)
+    
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddProjectForm(
-                          initialData: rowData,
-                          readOnly: false,
-                          isEditMode: true,
-                          projectId: row.cells['id']?.value,
-                          //  projectId: row.cells['id']?.value,
-                        ),
-                      ),
-                    ).then((result) {
-                      if (result == true) {
-                        _fetchProjects();
-                      }
-                    });
-                  },
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
@@ -334,58 +300,19 @@ class _ProjectInformationState extends State<ProjectInformation> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.more_horiz, color: Colors.black),
-                  onPressed: () {
-                    final row = rendererContext.row;
-                    final nonEditableData = {
-                      'id': row.cells['id']?.value,
-                      'date': row.cells['date']?.value,
-                      'projectcode': row.cells['projectcode']?.value,
-                      'description': row.cells['description']?.value,
-                      'totalamount': row.cells['totalamount']?.value.toString(),
-                      'currency': row.cells['currency']?.value,
-                      'department': row.cells['department']?.value,
-                      'requestable': row.cells['requestable']?.value,
-                    };
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddProjectForm(
-                            initialData: nonEditableData,
-                            isEditMode: false,
-                            projectId: row.cells['id']?.value,
-                            readOnly: true),
-                      ),
-                    );
-                  },
+                  onPressed: () => _detailProject(rendererContext.row)
                 ),
               ],
             );
           } else {
             return IconButton(
               icon: const Icon(Icons.more_horiz, color: Colors.black),
-              onPressed: () {
-                final row = rendererContext.row;
-                final nonEditableData = {
-                  'id': row.cells['id']?.value,
-                  'date': row.cells['date']?.value,
-                  'projectcode': row.cells['projectcode']?.value,
-                  'description': row.cells['description']?.value,
-                  'totalamount': row.cells['totalamount']?.value.toString(),
-                  'currency': row.cells['currency']?.value,
-                  'department': row.cells['department']?.value,
-                  'requestable': row.cells['requestable']?.value,
-                };
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddProjectForm(
-                        initialData: nonEditableData,
-                        isEditMode: false,
-                        projectId: row.cells['id']?.value,
-                        readOnly: true),
-                  ),
-                );
-              },
+             // onPressed: () => _detailProject(rendererContext.row),
+             onPressed: () {
+  print("Detail button clicked");
+  _detailProject(rendererContext.row);
+},
+
             );
           }
         },
@@ -409,7 +336,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
       _applyDateFilter(); 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to refresh trips: ${e.toString()}')),
+        SnackBar(content: Text('Failed to refresh projects: ${e.toString()}')),
       );
     }
   }
@@ -468,6 +395,60 @@ class _ProjectInformationState extends State<ProjectInformation> {
     }
   }
 
+   void _editProject(PlutoRow row) async {
+    final projectId = row.cells['id']!.value;
+    setState(() {
+    _isLoading = true;
+  });
+    final project = await ApiService().getProjectById(projectId);
+    if (project != null) {
+      final success = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddProjectForm(
+           projectId: projectId,
+            isEditMode: true,
+            isViewMode: false,
+            project: project,
+          //  project:project,
+            
+           
+          ),
+        ),
+      );
+     
+      if (success == true) _fetchProjects();
+    }
+     setState(() {
+        _isLoading =false;
+      });
+  }
+
+  void _detailProject(PlutoRow row) async {
+    final projectId = row.cells['id']!.value;
+    setState(() {
+    _isLoading = true;
+  });
+    final project = await ApiService().getProjectById(projectId);
+    if (project != null) {
+      final success = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddProjectForm(
+            projectId: projectId,
+            isEditMode: false,
+            isViewMode: true,
+            project: project,
+          ),
+        ),
+      );
+     
+      if (success == true) _fetchProjects();
+    }
+     setState(() {
+        _isLoading =false;
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -541,15 +522,22 @@ class _ProjectInformationState extends State<ProjectInformation> {
                     onPressed: () async {
                       final result = await Navigator.of(context).push<Project>(
                         MaterialPageRoute(
-                            builder: (context) => AddProjectForm(projectId: 0)),
+                            builder: (context) => AddProjectForm(
+                              projectId: '0',
+                              isEditMode: false,
+                              isViewMode: false,)),
                       );
+                      setState(() {
+                        _isLoading=false;
+                      });
+                         if (result == true) _fetchProjects();
 
-                      if (result != null) {
-                        setState(() {
-                          projects.add(result);
-                          _rows = _buildRows(projects);
-                        });
-                      }
+                      // if (result != null) {
+                      //   setState(() {
+                      //     projects.add(result);
+                      //     _rows = _buildRows(projects);
+                      //   });
+                      // }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey.shade300,

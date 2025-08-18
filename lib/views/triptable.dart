@@ -275,15 +275,7 @@ class _TripInformationState extends State<TripInformation> {
     }).toList();
   }
 
-  // void _refreshData(){
-  //   _searchQuery="";
-  //   _applyDateFilter();
-  //   _currentDateRange=null;
-  //   _currentFilterType=null;
-  //   _currentPage=1;
-  //   _fetchTableRows();
-  //   _updatePagedRows();
-  // }
+ 
 
   void _refreshData() async {
     setState(() {

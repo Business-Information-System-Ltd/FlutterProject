@@ -681,30 +681,28 @@ class _TripRequestFormState extends State<TripRequestForm> {
                 
                 SizedBox(
                   width: 150,
-                  child: Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: _currency,
-                      decoration: const InputDecoration(
-                        labelText: 'Currency',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: ['MMK', 'USD']
-                          .map((currency) => DropdownMenuItem(
-                                value: currency,
-                                child: Text(currency, style: const TextStyle(color: Colors.black),),
-                              ))
-                          .toList(),
-                      onChanged: widget.isViewMode
-                          ? null
-                          : (value) {
-                              setState(() {
-                                _currency = value ?? 'MMK';
-                                _recalculateTotals();
-                              });
-                            },
-                      validator: (value) =>
-                          value?.isEmpty ?? true ? 'Currency is required' : null,
+                  child: DropdownButtonFormField<String>(
+                    value: _currency,
+                    decoration: const InputDecoration(
+                      labelText: 'Currency',
+                      border: OutlineInputBorder(),
                     ),
+                    items: ['MMK', 'USD']
+                        .map((currency) => DropdownMenuItem(
+                              value: currency,
+                              child: Text(currency, style: const TextStyle(color: Colors.black),),
+                            ))
+                        .toList(),
+                    onChanged: widget.isViewMode
+                        ? null
+                        : (value) {
+                            setState(() {
+                              _currency = value ?? 'MMK';
+                              _recalculateTotals();
+                            });
+                          },
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Currency is required' : null,
                   ),
                 ),
               ],
@@ -939,21 +937,32 @@ class _TripRequestFormState extends State<TripRequestForm> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
               onPressed: _submitForm,
               style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB2C8A8),
+                foregroundColor: Colors.black,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: Text(widget.isEditMode ? 'Update' : 'Submit'),
             ),
             SizedBox(width: 15,),
             ElevatedButton(
               onPressed: _clearForm,
-              style: ElevatedButton.styleFrom(
+               style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB2C8A8),
+                foregroundColor: Colors.black,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text('Clear'),
             ),

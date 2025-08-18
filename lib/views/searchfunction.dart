@@ -191,12 +191,12 @@ class SearchUtils {
     if (query.isEmpty) return true;
 
     final lowerQuery = query.toLowerCase();
-    return advances.requestNo.toLowerCase().contains(lowerQuery) ||
-        advances.requestType.toLowerCase().contains(lowerQuery) ||
-        advances.departmentName.toLowerCase().contains(lowerQuery) ||
-        advances.currency.toLowerCase().contains(lowerQuery) ||
+    return (advances.requestNo?.toLowerCase() ?? '').contains(lowerQuery) ||
+        (advances.requestType?.toLowerCase() ?? '').contains(lowerQuery) ||
+        (advances.departmentName?.toLowerCase() ?? '').contains(lowerQuery) ||
+        (advances.currency?.toLowerCase() ?? '').contains(lowerQuery) ||
         DateFormat('yyyy-MM-dd').format(advances.date).contains(lowerQuery) ||
-        advances.requestCode.toLowerCase().contains(lowerQuery) ||
+        (advances.requestCode?.toLowerCase() ?? '').contains(lowerQuery) ||
         advances.requestAmount.toString().contains(lowerQuery);
   }
 

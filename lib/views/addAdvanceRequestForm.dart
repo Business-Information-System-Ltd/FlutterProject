@@ -5,6 +5,7 @@ import 'package:advance_budget_request_system/views/data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:advance_budget_request_system/views/advanceRequestProjectTripTable.dart.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 class AddAdvanceRequestForm extends StatefulWidget {
   final String? requestNo;
@@ -17,22 +18,28 @@ class AddAdvanceRequestForm extends StatefulWidget {
   final String? department;
   final String? type;
   final String? requestType;
+  final bool isViewMode;
+  final String advanceId;
+  final Advance? advance;
   final Map<String, dynamic>? tripData;
 
-  const AddAdvanceRequestForm({
-    Key? key,
-    this.requestNo,
-    this.requestDate,
-    this.projectCode,
-    this.tripCode,
-    this.description,
-    this.totalAmount,
-    this.currency,
-    this.department,
-    this.type,
-    this.requestType,
-    this.tripData,
-  }) : super(key: key);
+  const AddAdvanceRequestForm(
+      {Key? key,
+      this.requestNo,
+      this.requestDate,
+      this.projectCode,
+      this.tripCode,
+      this.description,
+      this.totalAmount,
+      this.currency,
+      this.department,
+      this.type,
+      this.requestType,
+      this.tripData,
+      this.advance,
+      required this.advanceId,
+      this.isViewMode = false})
+      : super(key: key);
 
   @override
   State<AddAdvanceRequestForm> createState() => _AddAdvanceRequestFormState();
@@ -63,10 +70,13 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
 
   String? _selectedCurrency = 'MMK';
   bool _isProject = true;
+  bool _formSubmitted=false;
+  bool _showValidationErrors=false;
 
   @override
   void initState() {
     super.initState();
+    _initializeForm();
 
     print('Received trip data: ${widget.tripData}');
     _isProject = widget.projectCode != null ||
@@ -76,20 +86,13 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
     _requestDate.text =
         widget.requestDate ?? DateFormat('yyyy-MM-dd').format(DateTime.now());
     _requestNo.text = widget.requestNo ?? '';
-
-    // Set the request code based on project or trip
     _requestCode.text = widget.projectCode ?? widget.tripCode ?? '';
     _descriptionController.text = widget.description ?? '';
     _totalAmountController.text = widget.totalAmount ?? '';
-
-    // Initialize currency properly
     _selectedCurrency = widget.currency ?? 'MMK';
     _currencyController.text = _selectedCurrency!;
-
-    // Department should come from either project or trip data
     _department.text = widget.department ?? '';
 
-    // Initialize trip-specific fields if trip data exists
     if (widget.tripData != null && !_isProject) {
       _roundTripController.text =
           widget.tripData!['roundTrip']?.toString() ?? '';
@@ -104,64 +107,28 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
       _expenditureTripController.text =
           widget.tripData!['expenditure']?.toString() ?? '';
 
-      // Make sure department is set from trip data if not already set
       if (_department.text.isEmpty) {
         _department.text = widget.tripData!['deptName']?.toString() ?? '';
       }
     }
   }
 
-
-  // void _submitForm() async {
-  //   // Validate required fields
-  //   if (_requestNo.text.isEmpty ||
-  //       _requestAmount.text.isEmpty ||
-  //       _requester.text.isEmpty ||
-  //       _requestPurpose.text.isEmpty) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Please fill all required fields')),
-  //     );
-  //     return;
-  //   }
-  //   try {
-  //     final newRequest = AdvanceRequest(
-  //       requestNo: _requestNo.text,
-  //       requestType: _requestType.text,
-  //       requestDate: _requestDate.text,
-  //       projectCode: _isProject ? _requestCode.text : null,
-  //       tripCode: !_isProject ? _requestCode.text : null,
-  //       requestAmount: double.parse(_requestAmount.text),
-  //       requester: _requester.text,
-  //       requestPurpose: _requestPurpose.text,
-  //       description: _descriptionController.text,
-  //       totalAmount: _totalAmountController.text.isNotEmpty
-  //           ? double.parse(_totalAmountController.text)
-  //           : null,
-  //       currency: _selectedCurrency ?? 'MMK',
-  //       department: _department.text,
-  //       attachFiles: _attachFilesController.text,
-  //     );
-
-  //     final success = await ApiService().postAdvanceRequest(newRequest);
-
-  //     if (success) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Request submitted successfully!')),
-  //       );
-  //       _clearForm();
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Failed to submit request')),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Error: ${e.toString()}')),
-  //     );
-  //   }
-  // }
-
-  // final ApiService apiService = ApiService();
+  void _initializeForm() {
+    if (widget.isViewMode) {
+      final advance = widget.advance!;
+      _requestNo.text = advance.requestNo ?? '';
+      _requestType.text = advance.requestType ?? '';
+      _requestDate.text = DateFormat('yyyy-MM-dd').format(advance.date);
+      _requestAmount.text = advance.requestAmount.toString();
+      _requestCode.text = advance.requestCode ?? '';
+      _descriptionController.text = advance.requestDes ?? '';
+      _requester.text = advance.requester ?? '';
+      _currencyController.text = advance.currency ?? 'MMK';
+      _department.text = advance.departmentName ?? '';
+      _requestPurpose.text = advance.purpose ?? '';
+      // _approvedAmountController.text=advance.approvedAmount??0;
+    }
+  }
 
   Future<String> generateStringAdvanceID() async {
     try {
@@ -182,102 +149,181 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
     }
   }
 
-  Future<void> _submitFroms() async{
-    String newId= await generateStringAdvanceID();
+  // Future<void> _submitFroms() async {
+  //   final requestNoError = _validateRequired(_requestNo.text, 'request number');
+  //   final requestTypeError =
+  //       _validateRequired(_requestType.text, 'request type');
+  //   final requestDateError = _validateDate(_requestDate.text);
+  //   final requestCodeError = _validateRequestCode(_requestCode.text);
+  //   final amountError = _validateAmount(_requestAmount.text);
+  //   final requesterError = _validateRequired(_requester.text, 'requester name');
+  //   final purposeError = _validateRequired(_requestPurpose.text, 'purpose');
 
-    Advance newAdvance= Advance(
-      id: newId, 
-      date: DateFormat('yyyy-MM-dd').parse(_requestDate.text), 
-      requestNo: _requestNo.text, 
-      requestCode: _requestCode.text, 
-      requestDes: _descriptionController.text, 
-      requestType: _requestType.text, 
-      requestAmount: double.tryParse(_requestAmount.text)??0, 
-      currency: _currencyController.text, 
-      requester: _requester.text, 
-      departmentName: _department.text, 
-      approvedAmount: 0, 
-      purpose: _requestPurpose.text, 
-      status: 'Pending');
+  //   // For trip-specific fields
+  //   if (!_isProject) {
+  //     final sourceError =
+  //         _validateRequired(_sourceTripController.text, 'source');
+  //     final destinationError =
+  //         _validateRequired(_destinationTripController.text, 'destination');
+  //     final departureError = _validateDate(_depatureTripController.text);
+  //     final returnError = _validateDate(_returnTripController.text);
 
-      try {
-        await ApiService().postAdvanceRequests(newAdvance);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Advance request can be created successfully')),
-        );
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>  AdvanceRequestPage()));
-      } catch (e) {
-        print("Fail to insert trips: $e");
-      }
-  }
+  //     if (sourceError != null ||
+  //         destinationError != null ||
+  //         departureError != null ||
+  //         returnError != null) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Please fill all required trip fields')),
+  //       );
+  //       return;
+  //     }
+  //   }
 
+  //   if (requestNoError != null ||
+  //       requestTypeError != null ||
+  //       requestDateError != null ||
+  //       requestCodeError != null ||
+  //       amountError != null ||
+  //       requesterError != null ||
+  //       purposeError != null) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Please fill all required fields')),
+  //     );
+  //     return;
+  //   }
 
- void _submitForm() async {
-  // Validate required fields
-  if (_requestNo.text.isEmpty ||
-      _requestAmount.text.isEmpty ||
-      _requester.text.isEmpty ||
-      _requestPurpose.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please fill all required fields')),
-    );
+  //   String newId = widget.isViewMode
+  //       ? widget.advance!.id
+  //       : await generateStringAdvanceID();
+
+  //   Advance newAdvance = Advance(
+  //       id: newId,
+  //       date: DateFormat('yyyy-MM-dd').parse(_requestDate.text),
+  //       requestNo: _requestNo.text,
+  //       requestCode: _requestCode.text,
+  //       requestDes: _descriptionController.text,
+  //       requestType: _requestType.text,
+  //       requestAmount: double.tryParse(_requestAmount.text) ?? 0,
+  //       currency: _currencyController.text,
+  //       requester: _requester.text,
+  //       departmentName: _department.text,
+  //       approvedAmount: 0,
+  //       purpose: _requestPurpose.text,
+  //       status: 'Pending');
+
+  //   try {
+  //     await ApiService().postAdvanceRequests(newAdvance);
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //           content: Text('Advance request can be created successfully')),
+  //     );
+  //     Navigator.of(context).pushReplacement(
+  //         MaterialPageRoute(builder: (context) => AdvanceRequestPage()));
+  //   } catch (e) {
+  //     print("Fail to insert trips: $e");
+  //   }
+  // }
+    Future<void> _submitFroms() async {
+    setState(() {
+    _showValidationErrors = true; 
+  });
+  
+    final requestNoError = _validateRequired(_requestNo.text, 'request number');
+    final requestTypeError = _validateRequired(_requestType.text, 'request type');
+    final requestDateError = _validateDate(_requestDate.text);
+    final requestCodeError = _validateRequestCode(_requestCode.text);
+    final amountError = _validateAmount(_requestAmount.text);
+    final requesterError = _validateRequired(_requester.text, 'requester name');
+    // final purposeError = _validateRequired(_requestPurpose.text, 'purpose');
+     final purposeError = _validatePurpose(_requestPurpose.text);
+     if (requestNoError != null ||
+      requestTypeError != null ||
+      requestDateError != null ||
+      requestCodeError != null ||
+      amountError != null ||
+      requesterError != null ||
+      purposeError != null) {
+    // Keep errors showing
     return;
-
   }
 
-  try {
-    // final newRequested = Advance(
-    //   date: DateTime.now(), // Add current date
-    //   requestCode: _requestNo.text, // Use requestNo as requestCode or generate one
-    //   requestNo: _requestNo.text,
-    //   requestType: _requestType.text,
-    //   requestDate: _requestDate.text,
-    //   requestAmount: double.parse(_requestAmount.text)??0.0,
-    //   requester: _requester.text,
-    //   requestPurpose: _requestPurpose.text,
-    //   purpose: _requestPurpose.text, // Using same as requestPurpose
-    //   projectCode: _isProject ? _requestCode.text : null,
-    //   tripCode: !_isProject ? _requestCode.text : null,
-    //   description: _descriptionController.text,
-    //   totalAmount: _totalAmountController.text.isNotEmpty
-    //       ? double.tryParse(_totalAmountController.text)
-    //       : null,
-    //   currency: _selectedCurrency ?? 'MMK',
-    //   department: _department.text,
-    //   attachFiles: _attachFilesController.text,
-    //   roundTrip: _roundTripController.text.isNotEmpty 
-    //       ? int.tryParse(_roundTripController.text) 
-    //       : null,
-    //   source: _sourceTripController.text,
-    //   destination: _destinationTripController.text,
-    //   departureDate: _depatureTripController.text,
-    //   returnDate: _returnTripController.text,
-    //   expenditure: _expenditureTripController.text.isNotEmpty
-    //       ? int.tryParse(_expenditureTripController.text)
-    //       : null,
-    // );
-    
+    if (!_isProject) {
+      final sourceError = _validateRequired(_sourceTripController.text, 'source');
+      final destinationError = _validateRequired(_destinationTripController.text, 'destination');
+      final departureError = _validateDate(_depatureTripController.text);
+      final returnError = _validateDate(_returnTripController.text);
 
-    // final success = await ApiService().postAdvanceRequested(newRequested);
+      if (sourceError != null || destinationError != null || departureError != null || returnError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill all required trip fields')),
+        );
+        return;
+      }
+    }
 
-    // if (success) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(content: Text('Request submitted successfully!')),
-    //   );
-    //   _clearForm();
-    // } else {
-    //   // debugPrint('API returned failure for: ${newRequested.toJson()}');
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(content: Text('Failed to submit request')),
-    //   );
-    // }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: ${e.toString()}')),
-    );
+    if (requestNoError != null ||
+        requestTypeError != null ||
+        requestDateError != null ||
+        requestCodeError != null ||
+        amountError != null ||
+        requesterError != null ||
+        purposeError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
+      return;
+    }
+      setState(() {
+    _showValidationErrors = false;
+  });
+
+    String newId = widget.isViewMode ? widget.advance!.id : await generateStringAdvanceID();
+
+    Advance newAdvance = Advance(
+        id: newId,
+        date: DateFormat('yyyy-MM-dd').parse(_requestDate.text),
+        requestNo: _requestNo.text,
+        requestCode: _requestCode.text,
+        requestDes: _descriptionController.text,
+        requestType: _requestType.text,
+        requestAmount: double.tryParse(_requestAmount.text) ?? 0,
+        currency: _currencyController.text,
+        requester: _requester.text,
+        departmentName: _department.text,
+        approvedAmount: 0,
+        purpose: _requestPurpose.text,
+        status: 'Pending');
+
+    try {
+      await ApiService().postAdvanceRequests(newAdvance);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Advance request can be created successfully')),
+      );
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => AdvanceRequestPage()));
+    } catch (e) {
+      print("Fail to insert trips: $e");
+    }
   }
-}
 
+  void _submitForm() async {
+    // Validate required fields
+    if (_requestNo.text.isEmpty ||
+        _requestAmount.text.isEmpty ||
+        _requester.text.isEmpty ||
+        _requestPurpose.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
+      return;
+    }
+
+    try {} catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -306,7 +352,6 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
   void _clearForm() {
     setState(() {
       _requestNo.clear();
-      _requestType.clear();
       _requestDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       _requestCode.clear();
       _department.clear();
@@ -314,19 +359,12 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
       _requester.clear();
       _requestPurpose.clear();
       _attachFilesController.clear();
-      _descriptionController.clear();
+      // _descriptionController.clear();
       _totalAmountController.clear();
       _currencyController.text = 'MMK';
       _selectedCurrency = 'MMK';
-
-      // Clear trip-specific fields
-      _roundTripController.clear();
-      _sourceTripController.clear();
-      _destinationTripController.clear();
-      _deptNameTripController.clear();
-      _depatureTripController.clear();
-      _returnTripController.clear();
-      _expenditureTripController.clear();
+       _formSubmitted = false;
+      
 
       // Reset the form type
       _isProject = widget.projectCode != null ||
@@ -342,106 +380,110 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green.shade100,
-        title: Text('Advance Request Form'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back), // Custom icon
-          onPressed: () {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        AdvanceProjectTripTable())); // Manually go back
-          },
-        ),
+        title: Text(widget.isViewMode
+            ? 'Advance Request Details'
+            : 'Add Advance Request Form'),
       ),
-      body: Container(
-        color: Color.fromRGBO(255, 255, 255, 1),
-        padding: const EdgeInsets.fromLTRB(150, 20, 150, 20),
-        child: Center(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(50, 20, 50, 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Add Advance Request Form',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    _buildTopFormFields(),
-                    SizedBox(height: 5),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        InkWell(
-                          onTap: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AdvanceProjectTripTable(),
-                              ),
-                            );
-
-                            if (result != null) {
-                              setState(() {
-                                _isProject = result['type'] == 'Project';
-                                _requestType.text = result['type'] ?? '';
-                                _requestDate.text = result['requestDate'] ?? '';
-                                _requestCode.text = _isProject
-                                    ? result['projectCode'] ?? ''
-                                    : result['tripCode'] ?? '';
-                                _descriptionController.text = _isProject
-                                    ? result['projectDesc'] ?? ''
-                                    : result['tripDesc'] ?? '';
-                                _totalAmountController.text =
-                                    result['amount'] ?? '';
-                                _selectedCurrency = result['currency'] ?? 'MMK';
-                                _currencyController.text = _selectedCurrency!;
-                                _department.text = result['department'] ?? '';
-
-                                if (!_isProject) {
-                                  _roundTripController.text =
-                                      result['roundTrip']?.toString() ?? '';
-                                  _sourceTripController.text =
-                                      result['source'] ?? '';
-                                  _destinationTripController.text =
-                                      result['destination'] ?? '';
-                                  _deptNameTripController.text =
-                                      result['deptName'] ?? '';
-                                  _depatureTripController.text =
-                                      result['departure'] ?? '';
-                                  _returnTripController.text =
-                                      result['return'] ?? '';
-                                  _expenditureTripController.text =
-                                      result['expenditure']?.toString() ?? '';
-                                }
-                              });
-                            }
-                          },
-                          child: Container(
-                            child: Row(
-                              children: [
-                                Icon(Icons.arrow_drop_down),
-                              ],
-                            ),
-                          ),
+      body: Center(
+        child: Container(
+          color: const Color.fromRGBO(255, 255, 255, 1),
+          width: MediaQuery.of(context).size.width * 0.5,
+          child: Center(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: SingleChildScrollView(
+                  // padding: const EdgeInsets.fromLTRB(50, 20, 50, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          widget.isViewMode
+                              ? 'Advance Request Details'
+                              : 'Add Advance Request Form',
+                          // ignore: prefer_const_constructors
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    _isProject ? _buildProjectDetails() : _buildTripDetails(),
-                    SizedBox(height: 15),
-                    _buildBottomFormFields(),
-                    SizedBox(height: 20),
-                    _buildActionButtons(),
-                  ],
+                      ),
+                      const SizedBox(height: 20),
+                      _buildTopFormFields(),
+                      const SizedBox(height: 5),
+                      if (!widget.isViewMode)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        AdvanceProjectTripTable(),
+                                  ),
+                                );
+
+                                if (result != null) {
+                                  setState(() {
+                                    _isProject = result['type'] == 'Project';
+                                    _requestType.text = result['type'] ?? '';
+                                    _requestDate.text =
+                                        result['requestDate'] ?? '';
+                                    _requestCode.text = _isProject
+                                        ? result['projectCode'] ?? ''
+                                        : result['tripCode'] ?? '';
+                                    _descriptionController.text = _isProject
+                                        ? result['projectDesc'] ?? ''
+                                        : result['tripDesc'] ?? '';
+                                    _totalAmountController.text =
+                                        result['amount'] ?? '';
+                                    _selectedCurrency =
+                                        result['currency'] ?? 'MMK';
+                                    _currencyController.text =
+                                        _selectedCurrency!;
+                                    _department.text =
+                                        result['department'] ?? '';
+
+                                    if (!_isProject) {
+                                      _roundTripController.text =
+                                          result['roundTrip']?.toString() ?? '';
+                                      _sourceTripController.text =
+                                          result['source'] ?? '';
+                                      _destinationTripController.text =
+                                          result['destination'] ?? '';
+                                      _deptNameTripController.text =
+                                          result['deptName'] ?? '';
+                                      _depatureTripController.text =
+                                          result['departure'] ?? '';
+                                      _returnTripController.text =
+                                          result['return'] ?? '';
+                                      _expenditureTripController.text =
+                                          result['expenditure']?.toString() ??
+                                              '';
+                                    }
+                                  });
+                                }
+                              },
+                              child: Container(
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.arrow_drop_down),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      const SizedBox(height: 10),
+                      _isProject ? _buildProjectDetails() : _buildTripDetails(),
+                      const SizedBox(height: 15),
+                      _buildBottomFormFields(),
+                      const SizedBox(height: 20),
+                      if (!widget.isViewMode) _buildActionButtons(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -453,34 +495,30 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
 
   Widget _buildTopFormFields() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      // mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text('Request No'),
-        const SizedBox(width: 14),
         Expanded(
           child: _buildtextField(
+            readOnly: widget.isViewMode,
             controller: _requestNo,
-            labelText: '',
-            keyboardType: TextInputType.number,
+            labelText: 'Request No',
+            validator: (value) => _validateRequired(value, 'request number'),
           ),
         ),
         const SizedBox(width: 15),
-        const Text('Request Type'),
-        const SizedBox(width: 14),
         Expanded(
           child: _buildtextField(
             controller: _requestType,
-            labelText: '',
+            labelText: 'Request Type',
             readOnly: true,
+             validator: (value) => _validateRequired(value, 'request type'),
           ),
         ),
         const SizedBox(width: 15),
-        const Text('Request Date'),
-        const SizedBox(width: 14),
         Expanded(
           child: _buildtextField(
             controller: _requestDate,
-            labelText: '',
+            labelText: 'Request Date',
             readOnly: true,
           ),
         ),
@@ -490,19 +528,20 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
 
   Widget _buildProjectDetails() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          width: 925,
-          height: 226,
+          width: 650,
+          // height: 226,
           decoration: BoxDecoration(
-            color: Color.fromRGBO(242, 235, 235, 1),
+            color: const Color.fromRGBO(242, 235, 235, 1),
             borderRadius: BorderRadius.circular(5),
           ),
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Project Details',
                 style: TextStyle(
                   fontSize: 15,
@@ -510,92 +549,88 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Text('Project Code'),
-                  SizedBox(width: 3),
                   Expanded(
                     child: _buildProjecttextInsideField(
                       controller: _requestCode,
-                      labelText: '',
-                      padding: EdgeInsets.fromLTRB(20, 1, 60, 1),
+                      labelText: 'Project Code',
+                      // padding: const EdgeInsets.fromLTRB(20, 1, 60, 1),
                     ),
                   ),
-                  SizedBox(width: 5),
-                  Text('Requested Date'),
-                  SizedBox(width: 3),
+                  const SizedBox(width: 15),
                   Expanded(
                     child: _buildProjecttextInsideField(
                       controller: _requestDate,
-                      labelText: '',
-                      padding: EdgeInsets.fromLTRB(15, 1, 60, 1),
+                      labelText: 'Requested Date',
+                      // padding: const EdgeInsets.fromLTRB(15, 1, 60, 1),
                     ),
                   )
                 ],
               ),
-              SizedBox(height: 1.5),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Text('Description'),
-                  SizedBox(width: 3),
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(30, 1, 60, 1),
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                       child: TextField(
                         controller: _descriptionController,
                         maxLines: 1,
-                        decoration: InputDecoration(
-                          fillColor: const Color.fromRGBO(217, 217, 217, 1),
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                          fillColor: Color.fromRGBO(217, 217, 217, 1),
                           filled: true,
                           border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                          ),
+                              // borderSide: BorderSide.none,
+                              ),
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 1.5),
+              const SizedBox(height: 10),
               Column(
                 children: [
                   Row(
                     children: [
-                      Text('Total Amount'),
-                      SizedBox(width: 5),
                       Expanded(
                         child: _buildProjecttextInsideField(
                           controller: _totalAmountController,
-                          labelText: '',
-                          padding: EdgeInsets.fromLTRB(15, 2, 50, 2),
+                          labelText: 'Total Amount',
+
+                          // padding: const EdgeInsets.fromLTRB(15, 2, 50, 2),
                         ),
                       ),
-                      SizedBox(width: 3),
-                      Text('Currency'),
-                      SizedBox(width: 3),
+                      const SizedBox(width: 15),
                       Expanded(
-                        child: _buildDropdownField(
-                          value: _selectedCurrency,
-                          items: const ['MMK', 'USD'],
+                        child: _buildProjecttextInsideField(
+                          controller: _currencyController,
                           labelText: 'Currency',
-                          padding: EdgeInsets.fromLTRB(15, 2, 50, 2),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedCurrency = newValue;
-                              _currencyController.text = newValue ?? 'MMK';
-                            });
-                          },
+                          // padding: const EdgeInsets.fromLTRB(15, 2, 50, 2),
                         ),
+
+                        // _buildDropdownField(
+                        //   value: _selectedCurrency,
+                        //   items: const ['MMK', 'USD'],
+                        //   labelText: 'Currency',
+                        //   onChanged: (String? newValue) {
+                        //     setState(() {
+                        //       _selectedCurrency = newValue;
+                        //       _currencyController.text = newValue ?? 'MMK';
+                        //     });
+                        //   },
+                        // ),
                       ),
-                      SizedBox(width: 3),
-                      Text('Department'),
-                      SizedBox(width: 3),
+                      const SizedBox(width: 15),
                       Expanded(
                         child: _buildProjecttextInsideField(
                           controller: _department,
-                          labelText: '',
-                          padding: EdgeInsets.fromLTRB(15, 2, 60, 2),
+                          labelText: 'Department',
+                          readOnly: widget.isViewMode,
+                          // padding: const EdgeInsets.fromLTRB(15, 2, 60, 2),
                         ),
                       ),
                     ],
@@ -611,19 +646,20 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
 
   Widget _buildTripDetails() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          width: 925,
+          width: 650,
           height: 350,
           decoration: BoxDecoration(
-            color: Color.fromRGBO(242, 235, 235, 1),
+            color: const Color.fromRGBO(242, 235, 235, 1),
             borderRadius: BorderRadius.circular(5),
           ),
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Trip Details',
                 style: TextStyle(
                   fontSize: 15,
@@ -631,154 +667,136 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Text('Trip Code'),
-                  SizedBox(width: 3),
                   Expanded(
                     child: _buildProjecttextInsideField(
                       controller: _requestCode,
-                      labelText: '',
-                      padding: EdgeInsets.fromLTRB(43, 1, 60, 1),
+                      labelText: 'Trip Code',
+                      // padding: const EdgeInsets.fromLTRB(43, 1, 60, 1),
                     ),
                   ),
-                  SizedBox(width: 5),
-                  Text('Requested Date'),
-                  SizedBox(width: 3),
+                  const SizedBox(width: 15),
                   Expanded(
                     child: _buildProjecttextInsideField(
                       controller: _requestDate,
-                      labelText: '',
-                      padding: EdgeInsets.fromLTRB(43, 1, 60, 1),
+                      labelText: 'Requested Date',
+                      // padding: const EdgeInsets.fromLTRB(43, 1, 60, 1),
                     ),
                   )
                 ],
               ),
-              SizedBox(height: 1.5),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Text('Description'),
-                  SizedBox(width: 3),
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(32, 1, 60, 1),
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                       child: TextField(
                         controller: _descriptionController,
                         maxLines: 1,
-                        decoration: InputDecoration(
-                          fillColor: const Color.fromRGBO(217, 217, 217, 1),
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                          fillColor: Color.fromRGBO(217, 217, 217, 1),
                           filled: true,
                           border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                          ),
+                              // borderSide: BorderSide.none,
+                              ),
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 1.5),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Text('Round Trip'),
-                  SizedBox(width: 3),
                   Expanded(
                       child: _buildTriptextInsideField(
                     controller: _roundTripController,
-                    labelText: '',
-                    padding: EdgeInsets.fromLTRB(35, 2, 50, 2),
+                    labelText: 'Round Trip',
+                    // padding: const EdgeInsets.fromLTRB(35, 2, 50, 2),
                   )),
-                  SizedBox(width: 5),
-                  Text('Source'),
-                  SizedBox(width: 3),
+                  const SizedBox(width: 15),
                   Expanded(
                       child: _buildTriptextInsideField(
                     controller: _sourceTripController,
-                    labelText: '',
-                    padding: EdgeInsets.fromLTRB(35, 2, 50, 2),
+                    labelText: 'Source',
+                    // padding: const EdgeInsets.fromLTRB(35, 2, 50, 2),
                   )),
-                  SizedBox(width: 5),
-                  Text('Destination'),
-                  SizedBox(width: 3),
+                  const SizedBox(width: 15),
                   Expanded(
                       child: _buildTriptextInsideField(
                     controller: _destinationTripController,
-                    labelText: '',
-                    padding: EdgeInsets.fromLTRB(35, 2, 60, 2),
+                    labelText: 'Destination',
+                    // padding: const EdgeInsets.fromLTRB(35, 2, 60, 2),
                   ))
                 ],
               ),
-              SizedBox(height: 1.5),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Text('DeptName'),
-                  SizedBox(width: 3),
                   Expanded(
                       child: _buildTriptextInsideField(
                     controller: _deptNameTripController,
-                    labelText: '',
-                    padding: EdgeInsets.fromLTRB(35, 2, 55, 2),
+                    labelText: 'Department Name',
+                    // padding: const EdgeInsets.fromLTRB(35, 2, 55, 2),
                   )),
-                  SizedBox(width: 5),
-                  Text('Depature'),
-                  SizedBox(width: 3),
+                  const SizedBox(width: 15),
                   Expanded(
                       child: _buildTriptextInsideField(
                     controller: _depatureTripController,
-                    labelText: '',
-                    padding: EdgeInsets.fromLTRB(15, 2, 75, 2),
+                    labelText: 'Depature',
+                    // padding: const EdgeInsets.fromLTRB(15, 2, 75, 2),
                   )),
-                  SizedBox(width: 5),
-                  Text('Return'),
-                  SizedBox(width: 3),
+                  const SizedBox(width: 15),
                   Expanded(
                       child: _buildTriptextInsideField(
                     controller: _returnTripController,
-                    labelText: '',
-                    padding: EdgeInsets.fromLTRB(43, 2, 60, 2),
+                    labelText: 'Return',
+                    // padding: const EdgeInsets.fromLTRB(43, 2, 60, 2),
                   ))
                 ],
               ),
-              SizedBox(height: 1.5),
+              const SizedBox(height: 10),
               Column(
                 children: [
                   Row(
                     children: [
-                      Text('Total Amount'),
-                      SizedBox(width: 5),
                       Expanded(
                         child: _buildProjecttextInsideField(
                           controller: _totalAmountController,
-                          labelText: '',
-                          padding: EdgeInsets.fromLTRB(15, 2, 60, 2),
+                          labelText: 'Total Amount',
+
+                          // padding: const EdgeInsets.fromLTRB(15, 2, 60, 2),
                         ),
                       ),
-                      SizedBox(width: 3),
-                      Text('Currency'),
-                      SizedBox(width: 3),
+                      const SizedBox(width: 15),
                       Expanded(
-                        child: _buildDropdownField(
-                          value: _selectedCurrency,
-                          items: const ['MMK', 'USD'],
-                          labelText: 'Currency',
-                          padding: EdgeInsets.fromLTRB(15, 2, 60, 2),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedCurrency = newValue;
-                              _currencyController.text = newValue ?? 'MMK';
-                            });
-                          },
-                        ),
-                      ),
-                      SizedBox(width: 3),
-                      Text('Expenditure'),
-                      SizedBox(width: 3),
+                          child: _buildTriptextInsideField(
+                        controller: _currencyController,
+                        labelText: 'Currency',
+                      )
+                          // _buildDropdownField(
+                          //   value: _selectedCurrency,
+                          //   items: const ['MMK', 'USD'],
+                          //   labelText: 'Currency',
+                          //   // padding: const EdgeInsets.fromLTRB(15, 2, 60, 2),
+                          //   onChanged: (String? newValue) {
+                          //     setState(() {
+                          //       _selectedCurrency = newValue;
+                          //       _currencyController.text = newValue ?? 'MMK';
+                          //     });
+                          //   },
+                          // ),
+                          ),
+                      const SizedBox(width: 15),
                       Expanded(
                         child: _buildProjecttextInsideField(
                           controller: _expenditureTripController,
-                          labelText: '',
-                          padding: EdgeInsets.fromLTRB(25, 2, 60, 2),
+                          labelText: 'Expenditure',
+                          // padding: const EdgeInsets.fromLTRB(25, 2, 60, 2),
                         ),
                       ),
                     ],
@@ -797,58 +815,61 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
       children: [
         Row(
           children: [
-            const Text('Request Amount'),
-            const SizedBox(width: 3),
             Expanded(
               child: _buildtextField(
                 controller: _requestAmount,
-                labelText: '',
+                labelText: 'Request Amount',
+                readOnly: widget.isViewMode,
                 keyboardType: TextInputType.number,
-                padding: EdgeInsets.fromLTRB(15, 2, 80, 2),
+                validator: _validateAmount,
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
               ),
             ),
-            const SizedBox(width: 3),
-            const Text('Requester'),
+            const SizedBox(width: 15),
             Expanded(
                 child: _buildtextField(
               controller: _requester,
-              labelText: '',
-              padding: EdgeInsets.fromLTRB(15, 1, 80, 1),
+              readOnly: widget.isViewMode,
+              labelText: 'Requester',
+              validator: (value) => _validateRequired(value, 'requester name'),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
             ))
           ],
         ),
-        SizedBox(height: 0.5),
+        const SizedBox(height: 10),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          // mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Attach File'),
-            const SizedBox(width: 3),
             Expanded(
               child: _buildtextField(
+                readOnly: widget.isViewMode,
                 controller: _attachFilesController,
-                labelText: '',
-                padding: EdgeInsets.fromLTRB(54, 1, 525, 1),
+                labelText: 'Attach File',
+                // padding: const EdgeInsets.fromLTRB(54, 1, 525, 1),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 10),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          // crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('Request Purpose'),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15, 0, 6, 0),
-                child: TextField(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                child: TextFormField(
                   controller: _requestPurpose,
+                  readOnly: widget.isViewMode,
+                  validator: _validatePurpose,
                   maxLines: 2,
-                  decoration: InputDecoration(
-                      fillColor: const Color.fromRGBO(217, 217, 217, 1),
+                  decoration: const InputDecoration(
+                      fillColor: Color.fromRGBO(217, 217, 217, 1),
                       filled: true,
+                      labelText: 'Request Purpose',
+
                       border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                      )),
+                          // borderSide: BorderSide.none,
+                          )),
                 ),
               ),
             ),
@@ -864,36 +885,36 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
       children: [
         ElevatedButton(
           onPressed: _submitFroms,
-          child: Text(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFB2C8A8),
+            minimumSize: const Size(120, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: const Text(
             'Submit',
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
             ),
           ),
+        ),
+        const SizedBox(width: 20),
+        ElevatedButton(
+          onPressed: _clearForm,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFFB2C8A8),
-            minimumSize: Size(120, 48),
+            backgroundColor: const Color(0xFFB2C8A8),
+            minimumSize: const Size(120, 48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-        ),
-        SizedBox(width: 20),
-        ElevatedButton(
-          onPressed: _clearForm,
-          child: Text(
+          child: const Text(
             'Clear',
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
-            ),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFFB2C8A8),
-            minimumSize: Size(120, 48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
             ),
           ),
         ),
@@ -901,21 +922,61 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
     );
   }
 
+  // Widget _buildtextField({
+  //   required TextEditingController controller,
+  //   required String labelText,
+  //   required readOnly,
+  //   TextInputType keyboardType = TextInputType.text,
+  //   EdgeInsets padding = const EdgeInsets.all(0),
+  //   TextAlign textAlign = TextAlign.left,
+  //   String? Function(String?)? validator,
+  // }) {
+  //   String? error;
+  //   if (validator != null) {
+  //     error = validator(controller.text);
+  //   }
+  //   return Padding(
+  //     padding: padding,
+  //     child: TextField(
+  //       controller: controller,
+  //       readOnly: readOnly,
+  //       keyboardType: keyboardType,
+  //       style: const TextStyle(fontSize: 14),
+  //       textAlign: textAlign,
+  //       decoration: InputDecoration(
+  //         labelText: labelText,
+  //         fillColor: const Color.fromRGBO(217, 217, 217, 1),
+  //         filled: true,
+  //         border: OutlineInputBorder(
+  //           borderRadius: BorderRadius.circular(2.0),
+  //           // borderSide: BorderSide.none,
+  //         ),
+
+  //       ),
+  //     ),
+  //   );
+  // }
   Widget _buildtextField({
     required TextEditingController controller,
     required String labelText,
-    bool readOnly = false,
+    required bool readOnly,
     TextInputType keyboardType = TextInputType.text,
     EdgeInsets padding = const EdgeInsets.all(0),
     TextAlign textAlign = TextAlign.left,
+    String? Function(String?)? validator,
   }) {
+    String? error;
+    if (validator != null) {
+      error = validator(controller.text);
+    }
+
     return Padding(
       padding: padding,
       child: TextField(
         controller: controller,
         readOnly: readOnly,
         keyboardType: keyboardType,
-        style: TextStyle(fontSize: 14),
+        style: const TextStyle(fontSize: 14),
         textAlign: textAlign,
         decoration: InputDecoration(
           labelText: labelText,
@@ -923,11 +984,15 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
           filled: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.0),
-            borderSide: BorderSide.none,
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+          errorText: error,
+          errorStyle: const TextStyle(fontSize: 12),
         ),
+        onChanged: (value) {
+          if (validator != null) {
+            setState(() {}); 
+          }
+        },
       ),
     );
   }
@@ -946,19 +1011,17 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
         controller: controller,
         readOnly: readOnly,
         keyboardType: keyboardType,
-        style: TextStyle(fontSize: 14),
+        style: const TextStyle(fontSize: 14),
         textAlign: textAlign,
         decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: TextStyle(fontSize: 14),
+          labelStyle: const TextStyle(fontSize: 14),
           fillColor: const Color.fromRGBO(217, 217, 217, 1),
           filled: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.0),
-            borderSide: BorderSide.none,
+            // borderSide: BorderSide.none,
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
         ),
       ),
     );
@@ -978,23 +1041,75 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
         controller: controller,
         readOnly: readOnly,
         keyboardType: keyboardType,
-        style: TextStyle(fontSize: 14),
+        style: const TextStyle(fontSize: 14),
         textAlign: textAlign,
         decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: TextStyle(fontSize: 14),
+          labelStyle: const TextStyle(fontSize: 14),
           fillColor: const Color.fromRGBO(217, 217, 217, 1),
           filled: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.0),
-            borderSide: BorderSide.none,
+            // borderSide: BorderSide.none,
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
         ),
       ),
     );
   }
+
+  // Validation methods
+  String? _validateRequired(String? value, String fieldName) {
+     if (!_showValidationErrors) return null;
+    if (value == null || value.isEmpty) {
+      return 'Please enter $fieldName';
+    }
+    return null;
+  }
+
+  String? _validateAmount(String? value) {
+      if (!_showValidationErrors) return null;
+    if (value == null || value.isEmpty) {
+      return 'Please enter amount';
+    }
+    if (double.tryParse(value) == null) {
+      return 'Please enter a valid number';
+    }
+    if (double.parse(value) <= 0) {
+      return 'Amount must be greater than 0';
+    }
+    return null;
+  }
+
+  String? _validateDate(String? value) {
+      if (!_showValidationErrors) return null;
+    if (value == null || value.isEmpty) {
+      return 'Please select a date';
+    }
+    try {
+      DateFormat('yyyy-MM-dd').parse(value);
+      return null;
+    } catch (e) {
+      return 'Invalid date format';
+    }
+  }
+
+  String? _validateRequestCode(String? value) {
+      if (!_showValidationErrors) return null;
+    if (value == null || value.isEmpty) {
+      return 'Please select a project/trip';
+    }
+    return null;
+  }
+  String? _validatePurpose(String? value) {
+  if (!_showValidationErrors) return null;
+  if (value == null || value.isEmpty) {
+    return 'Please enter request purpose';
+  }
+  if (value.length < 10) {
+    return 'Purpose should be at least 10 characters';
+  }
+  return null;
+}
 
   Widget _buildDropdownField({
     required String? value,
@@ -1012,7 +1127,7 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
           filled: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.0),
-            borderSide: BorderSide.none,
+            // borderSide: BorderSide.none,
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 2, vertical: 3),

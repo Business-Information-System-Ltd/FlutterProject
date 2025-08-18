@@ -798,10 +798,11 @@ class Budgets {
 }
 
 class Project {
-  final int id;
+  final String id;
   final DateTime date;
   final String projectCode;
   final String projectDescription;
+  final String requesterName;
   final double totalAmount;
   final String currency;
   final double approvedAmount;
@@ -815,6 +816,7 @@ class Project {
       required this.date,
       required this.projectCode,
       required this.projectDescription,
+      required this.requesterName,
       required this.totalAmount,
       required this.currency,
       required this.approvedAmount,
@@ -825,14 +827,16 @@ class Project {
 
   factory Project.fromJson(Map<String, dynamic> json) {
     return Project(
-      id: json['id'] is int
-          ? json['id']
-          : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'],
+      // is int
+      //     ? json['id']
+      //     : int.tryParse(json['id'].toString()) ?? 0,
       date: json['Date'] != null
           ? DateFormat('yyyy-MM-dd').parse(json['Date'])
           : DateTime.now(),
       projectCode: json['ProjectCode'],
       projectDescription: json['ProjectDescription'],
+      requesterName: json['RequesterName'] ?? '',
       totalAmount: json['TotalAmount'],
       currency: json['Currency'],
       approvedAmount: json['ApprovedAmount'],
@@ -848,10 +852,11 @@ class Project {
   }
   Map<String, dynamic> toJson() {
     return {
-      // 'id': id,
+       'id': id,
       'Date': DateFormat('yyyy-MM-dd').format(date),
       'ProjectCode': projectCode,
       'ProjectDescription': projectDescription,
+      'RequesterName':requesterName,
       'TotalAmount': totalAmount,
       'Currency': currency,
       'ApprovedAmount': approvedAmount,
@@ -937,7 +942,7 @@ class Trips {
           ? json['ApprovedAmount']
           : double.tryParse(json['ApprovedAmount']?.toString() ?? '0') ?? 0.0,
       status: json['Status']?.toString() ?? 'Active',
-      departmentId: json['DepartmentID'] is int ? json['DepartmentID'] : 0,
+      departmentId: json['DepartmentID'] is int ? json['DepartmentID'] : 1,
       departmentName: json['DepartmentName']?.toString() ?? '',
       budgets: json['BudgetDetails'] != null
           ? (json['BudgetDetails'] as List)
@@ -1048,7 +1053,7 @@ class Advance {
 }
 
 class Payment {
-  final int id;
+  final String id;
   final DateTime date;
   final String paymentNo;
   final String requestNo;
@@ -1061,7 +1066,7 @@ class Payment {
   final String paymentNote;
   final String status;
   final String settled;
-  final List<Advance>? request;
+  
 
   Payment({
     required this.id,
@@ -1077,14 +1082,46 @@ class Payment {
     required this.paymentNote,
     required this.status,
     required this.settled,
-    this.request,
   });
+
+  Payment copyWith({
+    String? id,
+    DateTime? date,
+    String? paymentNo,
+    String? requestNo,
+    String? requestType,
+    double? paymentAmount,
+    String? currency,
+    String? paymentMethod,
+    String? paidPerson,
+    String? receivedPerson,
+    String? paymentNote,
+    String? status,
+    String?settled
+  }) {
+    return Payment(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      paymentNo: paymentNo ?? this.paymentNo,
+      requestNo: requestNo ?? this.requestNo,
+      requestType: requestType ?? this.requestType,
+      paymentAmount: paymentAmount ?? this.paymentAmount,
+      currency: currency ?? this.currency,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      paidPerson: paidPerson ?? this.paidPerson,
+      receivedPerson: receivedPerson ?? this.receivedPerson,
+      paymentNote: paymentNote ?? this.paymentNote,
+      status: status ?? this.status,
+      settled: settled?? this.settled
+    );
+  }
 
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
-      id: json['id'] is int
-          ? json['id']
-          : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'],
+      //  is int
+      //     ? json['id']
+      //     : int.tryParse(json['id'].toString()) ?? 0,
       date: DateTime.parse(json['Date']),
       paymentNo: json['PaymentNo'] ?? '',
       requestNo: json['RequestNo'] ?? '',
@@ -1097,12 +1134,10 @@ class Payment {
       paymentNote: json['PaymentNote'] ?? '',
       status: json['Status'] ?? '',
       settled: json['Settled'] ?? '',
-      request: json['Requests'] != null
-          ? (json['Requests'] as List)
-              .map((item) => Advance.fromJson(item))
-              .toList()
-          : null,
+      
     );
+
+    
   }
 
   Map<String, dynamic> toJson() {
@@ -1120,10 +1155,10 @@ class Payment {
       'PaymentNote': paymentNote,
       'Status': status,
       'Settled': settled,
-      'Requests': request?.map((item) => item.toJson()).toList(),
+      // 'Requests': request?.map((item) => item.toJson()).toList(),
     };
   }
-}
+} 
 
 class Settlement {
   final int id;

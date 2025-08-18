@@ -1,4 +1,5 @@
 import 'package:advance_budget_request_system/views/api_service.dart';
+import 'package:advance_budget_request_system/views/cashpaymentpage.dart';
 import 'package:advance_budget_request_system/views/data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -30,7 +31,9 @@ class _AdvancePageState extends State<AdvancePage> {
     try {
       List<Advance> advanceList = await ApiService().fetchAdvanceRequests();
       setState(() {
-        _rows = advanceList.map((advance) {
+        _rows = advanceList
+            .where((advance) => advance.status == 'Approve')
+            .map((advance) {
           return PlutoRow(cells: {
             'requestDate': PlutoCell(
               value:
@@ -38,10 +41,13 @@ class _AdvancePageState extends State<AdvancePage> {
             ),
             'requestNo': PlutoCell(value: advance.requestNo ?? ""),
             'requestType': PlutoCell(value: advance.requestType ?? ""),
-            'requestAmount':
-                PlutoCell(value: advance.requestAmount ?? 0.toString()),
+            'requestCode': PlutoCell(value: advance.requestCode ?? ""),
+            'requestAmount': PlutoCell(value: advance.requestAmount ?? 0),
             'currency': PlutoCell(value: advance.currency ?? ""),
             'requester': PlutoCell(value: advance.requester ?? ""),
+            'description': PlutoCell(value: advance.requestDes ?? ""),
+            'requestPurpose': PlutoCell(value: advance.purpose ?? ""),
+            'approvedAmount': PlutoCell(value: advance.approvedAmount ?? 0)
           });
         }).toList();
       });
@@ -55,7 +61,7 @@ class _AdvancePageState extends State<AdvancePage> {
       PlutoColumn(
           title: 'Request Date',
           field: 'requestDate',
-          type: PlutoColumnType.text(),
+          type: PlutoColumnType.date(),
           width: 211,
           enableEditingMode: false),
       PlutoColumn(
@@ -67,6 +73,12 @@ class _AdvancePageState extends State<AdvancePage> {
       PlutoColumn(
           title: 'Request Type',
           field: 'requestType',
+          type: PlutoColumnType.text(),
+          width: 211,
+          enableEditingMode: false),
+      PlutoColumn(
+          title: 'Request Code',
+          field: 'requestCode',
           type: PlutoColumnType.text(),
           width: 211,
           enableEditingMode: false),
@@ -98,80 +110,31 @@ class _AdvancePageState extends State<AdvancePage> {
     ];
   }
 
-  // List<PlutoRow> _buildRows() {
-  //   final data = [
-  //     {
-  //       'requestDate': '2025-05-25',
-  //       'requestNo': 'Req_000_001',
-  //       'requestType': 'Project',
-  //       'requestAmount': 200000,
-  //       'currency': 'USD',
-  //       'requester': 'Kelvin'
-  //     },
-  //     {
-  //       'requestDate': '2025-05-25',
-  //       'requestNo': 'Req_000_001',
-  //       'requestType': 'Project',
-  //       'requestAmount': 200000,
-  //       'currency': 'MMK',
-  //       'requester': 'Kelvin'
-  //     },
-  //     {
-  //       'requestDate': '2025-05-25',
-  //       'requestNo': 'Req_000_001',
-  //       'requestType': 'Project',
-  //       'requestAmount': 200000,
-  //       'currency': 'MMK',
-  //       'requester': 'Kelvin'
-  //     },
-  //     {
-  //       'requestDate': '2025-05-25',
-  //       'requestNo': 'Req_000_001',
-  //       'requestType': 'Project',
-  //       'requestAmount': 200000,
-  //       'currency': 'MMK',
-  //       'requester': 'Kelvin'
-  //     },
-  //     {
-  //       'requestDate': '2025-05-25',
-  //       'requestNo': 'Req_000_001',
-  //       'requestType': 'Project',
-  //       'requestAmount': 200000,
-  //       'currency': 'MMK',
-  //       'requester': 'Kelvin'
-  //     },
-  //     {
-  //       'requestDate': '2025-05-25',
-  //       'requestNo': 'Req_000_001',
-  //       'requestType': 'Project',
-  //       'requestAmount': 200000,
-  //       'currency': 'MMK',
-  //       'requester': 'Kelvin'
-  //     },
-  //   ];
-  //   return data.map((s) {
-  //     return PlutoRow(cells: {
-  //       'requestDate': PlutoCell(value: s['requestDate']),
-  //       'requestNo': PlutoCell(value: s['requestNo']),
-  //       'requestType': PlutoCell(value: s['requestType']),
-  //       'requestAmount': PlutoCell(value: s['requestAmount']),
-  //       'currency': PlutoCell(value: s['currency']),
-  //       'requester': PlutoCell(value: s['requester']),
-  //     });
-  //   }).toList();
-  // }
-
   void _navigateToCashpaymentForm(
       BuildContext context, Map<String, dynamic> advanceData) {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => CashPaymentFormScreen(
-                requestNo: advanceData['requestNo'],
-                requestType: advanceData['requestType'],
-                currency: advanceData['currency'])
-                )
-                );
+          builder: (context) => CashPaymentFormScreen(
+            requestDate: advanceData['requestDate'] != null
+                ? dateFormat.parse(advanceData['requestDate'])
+                : DateTime.now(),
+            requestNo: advanceData['requestNo'] ?? "",
+            requestCode: advanceData['requestCode'] ?? "",
+            requestType: advanceData['requestType'] ?? "",
+            currency: advanceData['currency'] ?? "",
+            requestAmount: advanceData['requestAmount'] ?? 0.0,
+            description: advanceData['description'] ?? "",
+            purpose: advanceData['requestPurpose'] ?? "",
+            requester: advanceData['requester'] ?? "",
+            approveAmount: advanceData['approvedAmount'] ?? 0.0,
+            isEditMode: false,
+            isViewMode: false,
+            cashId: "0",
+            // totalWithdrawn: 0,
+            // remainingAmount: 0
+          ),
+        ));
   }
 
   @override
@@ -209,9 +172,18 @@ class _AdvancePageState extends State<AdvancePage> {
                       onRowDoubleTap: (PlutoGridOnRowDoubleTapEvent event) {
                         final rowData = event.row.cells;
                         _navigateToCashpaymentForm(context, {
+                          'requestDate': rowData['requestDate']?.value,
                           'requestNo': rowData['requestNo']?.value,
+                          'requestCode': rowData['requestCode']?.value,
                           'requestType': rowData['requestType']?.value,
-                          'currency': rowData['currency']?.value
+                          'currency': rowData['currency']?.value,
+                          'requestAmount': rowData['requestAmount']?.value,
+                          'description': rowData['description']?.value,
+                          'requestPurpose': rowData['requestPurpose']?.value,
+                          'requester': rowData['requester']?.value,
+                          'approvedAmount': rowData['approvedAmount']?.value,
+                          // 'totalWithdrawn': rowData['totalWithdrawn']?.value,
+                          // 'remainingAmount': rowData['remainingAmount']?.value
                         });
                       },
                     ))
@@ -224,13 +196,36 @@ class _AdvancePageState extends State<AdvancePage> {
 }
 
 class CashPaymentFormScreen extends StatefulWidget {
-  final String requestNo;
-  final String requestType;
-  final String currency;
+  final String? requestNo;
+  final String? requestType;
+  final String? currency;
+  final String? requestCode;
+  final String? description;
+  final double? requestAmount;
+  final String? purpose;
+  final String? requester;
+  final DateTime? requestDate;
+  final double? approveAmount;
+  final bool isEditMode;
+  final bool isViewMode;
+  final String cashId;
+  final Payment? payment;
+
   const CashPaymentFormScreen({
-    required this.requestNo,
-    required this.requestType,
-    required this.currency,
+    this.requestNo,
+    this.requestType,
+    this.currency,
+    this.requestCode,
+    this.description,
+    this.requestAmount,
+    this.purpose,
+    this.requester,
+    this.requestDate,
+    this.approveAmount,
+    this.isEditMode = false,
+    this.isViewMode = false,
+    required this.cashId,
+    this.payment,
     Key? key,
   }) : super(key: key);
 
@@ -241,6 +236,15 @@ class CashPaymentFormScreen extends StatefulWidget {
 class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _paymentNoController = TextEditingController();
+  final TextEditingController _requestDateController = TextEditingController();
+  final TextEditingController _requestCodeController = TextEditingController();
+  final TextEditingController _requestAmountController =
+      TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _purposeController = TextEditingController();
+  final TextEditingController _requesterController = TextEditingController();
+  final TextEditingController _approvedAmountController =
+      TextEditingController();
   final TextEditingController _requestNoController = TextEditingController();
   final TextEditingController _paymentDateController = TextEditingController();
   final TextEditingController _requestTypeController = TextEditingController();
@@ -250,27 +254,105 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
   final TextEditingController _receivePersonController =
       TextEditingController();
   final TextEditingController _paymentNoteController = TextEditingController();
+  final TextEditingController _totalWithdrawnController =
+      TextEditingController();
+  final TextEditingController _remainingAmountController =
+      TextEditingController();
   String? _selectedPaymentMethod;
+
+  String currency = "MMK";
+
+  final ApiService apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
-    _generatePaymentNo();
+    try {
+      _initializeForm();
+      _generatePaymentNo();
 
-    _requestNoController.text = widget.requestNo;
-    _requestTypeController.text = widget.requestType;
-    final currency = widget.currency;
-    _paymentDateController.text =
-        DateFormat('yyyy-MM-dd').format(DateTime.now());
+      // _requestNoController.text = widget.requestNo!;
+      // _requestTypeController.text = widget.requestType!;
+      // _requestDateController.text =
+      //     DateFormat('yyyy-MM-dd').format(widget.requestDate!);
+      // _requestCodeController.text = widget.requestCode!;
+      // _requestAmountController.text = widget.requestAmount.toString();
+      // _descriptionController.text = widget.description!;
+      // _purposeController.text = widget.purpose!;
+      // _requesterController.text = widget.requester!;
+      // _approvedAmountController.text = widget.approveAmount.toString();
+      _requestNoController.text = widget.requestNo ?? "";
+      _requestTypeController.text = widget.requestType ?? "project";
+      _requestDateController.text = widget.requestDate != null
+          ? DateFormat('yyyy-MM-dd').format(widget.requestDate!)
+          : DateFormat('yyyy-MM-dd').format(DateTime.now());
+      _requestCodeController.text = widget.requestCode ?? "";
+      _requestAmountController.text = widget.requestAmount?.toString() ?? "0";
+      _descriptionController.text = widget.description ?? "";
+      _purposeController.text = widget.purpose ?? "";
+      _requesterController.text = widget.requester ?? "";
+      _approvedAmountController.text = widget.approveAmount?.toString() ?? "0";
+      double totalWithdrawn = 0.0;
+      double remainingAmount = (widget.approveAmount ?? 0.0) - totalWithdrawn;
+      _totalWithdrawnController.text = totalWithdrawn.toString() ?? '0';
+      _remainingAmountController.text = remainingAmount.toString() ?? '0';
+
+      currency = widget.currency ?? 'MMK';
+      _paymentDateController.text =
+          DateFormat('yyyy-MM-dd').format(DateTime.now());
+    } catch (e) {
+      print('Error initializing form: $e s');
+    }
   }
 
   void _clearForm() {
     setState(() {
-      _paymentAmountController.text = "";
-      _paidPersonController.text = "";
-      _receivePersonController.text = "";
-      _paymentNoteController.text = "";
+      _paymentAmountController.clear();
+      _paidPersonController.clear();
+      _receivePersonController.clear();
+      _paymentNoteController.clear();
+      _selectedPaymentMethod = null;
     });
+  }
+
+  void _initializeForm() async {
+    _paymentDateController.text =
+        DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    // Populate fields from the advance request or payment object
+    if (widget.isEditMode || widget.isViewMode) {
+      // Logic for editing/viewing existing payments
+      final cash = widget.payment!;
+      _paymentDateController.text = DateFormat('yyyy-MM-dd').format(cash.date);
+      _paymentNoController.text = cash.paymentNo;
+      _requestNoController.text = cash.requestNo;
+      _requestTypeController.text = cash.requestType;
+      _paymentAmountController.text = cash.paymentAmount.toString();
+      _selectedPaymentMethod = cash.paymentMethod;
+      _paidPersonController.text = cash.paidPerson;
+      _receivePersonController.text = cash.receivedPerson;
+      _paymentNoteController.text = cash.paymentNote;
+      // You would also need to fetch and set the other request-related fields here
+      // For this example, we'll assume they are part of the `payment` object or fetched separately.
+    } else {
+      // Logic for a new payment from an advance request
+      _requestNoController.text = widget.requestNo ?? "";
+      _requestTypeController.text = widget.requestType ?? "";
+      _requestDateController.text = widget.requestDate != null
+          ? DateFormat('yyyy-MM-dd').format(widget.requestDate!)
+          : "";
+      _requestCodeController.text = widget.requestCode ?? "";
+      _requestAmountController.text = widget.requestAmount?.toString() ?? "0";
+      _descriptionController.text = widget.description ?? "";
+      _purposeController.text = widget.purpose ?? "";
+      _requesterController.text = widget.requester ?? "";
+      _approvedAmountController.text = widget.approveAmount?.toString() ?? "0";
+
+      double totalWithdrawn = 0.0;
+      double remainingAmount = (widget.approveAmount ?? 0.0) - totalWithdrawn;
+      _totalWithdrawnController.text = totalWithdrawn.toString();
+      _remainingAmountController.text = remainingAmount.toString();
+    }
   }
 
   void _generatePaymentNo() {
@@ -279,47 +361,65 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
         'Pay_${lastPaymentNo.toString().padLeft(3, '0')}';
   }
 
-  final ApiService apiService = ApiService();
+  Future<String> generateCashpaymentID() async {
+    try {
+      List<Payment> existingPayment = await ApiService().fetchPayments();
 
-  Future<int> generateCashpaymentID() async {
-    List<Payment> existingCash = await apiService.fetchPayments();
+      if (existingPayment.isEmpty) {
+        return "1";
+      }
 
-    if (existingCash.isEmpty) {
-      return 1; // Start from 1 if no budget exists
+      int maxId = existingPayment
+          .map((b) => int.tryParse(b.id.toString()) ?? 0)
+          .reduce((a, b) => a > b ? a : b);
+      return (maxId + 1).toString();
+    } catch (e) {
+      print("Error generating string Payment ID: $e");
+      throw Exception('Failed to generate Payment ID');
     }
-
-    // Find the highest existing ID
-    int maxId = existingCash.map((b) => b.id).reduce((a, b) => a > b ? a : b);
-    return maxId + 1;
   }
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      int newId = await generateCashpaymentID();
+      String newId = widget.isEditMode
+          ? widget.payment!.id
+          : await generateCashpaymentID();
       try {
         Payment newPayment = Payment(
-            id: newId,
-            date: DateFormat('yyyy-MM-dd').parse(_paymentDateController.text),
-            paymentNo: _paymentNoController.text,
-            requestNo: _requestNoController.text,
-            requestType: _requestTypeController.text,
-            paymentAmount: double.tryParse(_paymentAmountController.text) ?? 0,
-            currency: widget.currency,
-            paymentMethod: _selectedPaymentMethod!,
-            paidPerson: _paidPersonController.text,
-            receivedPerson: _receivePersonController.text,
-            paymentNote: _paymentNoteController.text,
-            status: 'Draft',
-            settled: 'No');
-        await ApiService().postPayment(newPayment);
-        print('Saving to database:');
-        print('Settlement Data: $newPayment');
+          id: newId,
+          date: DateFormat('yyyy-MM-dd').parse(_paymentDateController.text),
+          paymentNo: _paymentNoController.text,
+          requestNo: _requestNoController.text,
+          requestType: _requestTypeController.text,
+          paymentAmount: double.tryParse(_paymentAmountController.text) ?? 0,
+          currency: currency,
+          paymentMethod: _selectedPaymentMethod!,
+          paidPerson: _paidPersonController.text,
+          receivedPerson: _receivePersonController.text,
+          paymentNote: _paymentNoteController.text,
+          status: 'Draft',
+          settled: 'No',
+        );
 
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Cashpayment Data saved successfully!!")));
-        // Navigator.pop(context);
+        if (widget.isEditMode) {
+          await apiService.updatePayment(newPayment);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Payment updated successfully')),
+          );
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => CashPaymentPage()));
+        } else {
+          await apiService.postPayment(newPayment);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text("Cashpayment Data saved successfully!!")),
+          );
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => CashPaymentPage()));
+        }
       } catch (e) {
-        print("Fail to load cash $e");
+        print("Fail to save cash payment: $e");
       }
     }
   }
@@ -328,249 +428,402 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.green[100],
+      appBar: AppBar(
+        title: Text(widget.isViewMode
+            ? 'Cash Payment Details'
+            : widget.isEditMode
+                ? 'Edit Cash Payment'
+                : 'Add Cash Payment'),
+        // toolbarHeight: 35,
+      ),
       body: Center(
         child: Container(
           margin: const EdgeInsets.all(20),
           padding: const EdgeInsets.all(16),
           width: 800,
           color: Colors.white,
-          child: Form(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Form(
               key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Add Cashpayment Form',
+                  Text(
+                      widget.isViewMode
+                          ? 'Cash Payment Details'
+                          : widget.isEditMode
+                              ? 'Edit Cash Payment'
+                              : 'Add Cash Payment',
                       style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
-                  IconButton(
+                  if (!widget.isViewMode)
+                    IconButton(
                       onPressed: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const AdvancePage()));
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const AdvancePage()),
+                        );
                       },
-                      icon: const Icon(Icons.arrow_drop_down)
-                      ),
-                  const SizedBox(height: 30),
+                      icon: const Icon(Icons.arrow_drop_down),
+                    ),
+                  const SizedBox(height: 15),
                   Row(
                     children: [
                       Expanded(
-                          child: TextFormField(
-                        controller: _paymentNoController,
-                        readOnly: true,
-                        decoration: InputDecoration(
+                        child: TextFormField(
+                          controller: _paymentNoController,
+                          readOnly: true,
+                          decoration: InputDecoration(
                             labelText: "Payment No",
                             filled: true,
                             fillColor: Colors.grey.shade100,
-                            border: const OutlineInputBorder()),
-                      )),
-                      const SizedBox(
-                        width: 10,
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
                       ),
-                      Expanded(
-                          child: TextFormField(
-                        controller: _requestNoController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                            labelText: "Request No",
-                            filled: true,
-                            fillColor: Colors.grey.shade100,
-                            border: const OutlineInputBorder()),
-                      )),
                       const SizedBox(width: 10),
                       Expanded(
-                          child: TextFormField(
-                        controller: _paymentDateController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: "Payment Date",
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          border: const OutlineInputBorder(),
+                        child: TextFormField(
+                          controller: _paymentDateController,
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            labelText: "Payment Date",
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
-                      )),
+                      ),
                     ],
                   ),
                   const SizedBox(
-                    height: 35,
+                    height: 10,
                   ),
+                  Container(
+                    color: const Color(0xFFEADCDC),
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Payment Refrence",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _requestNoController,
+                                decoration: const InputDecoration(
+                                    labelText: "Request No",
+                                    border: OutlineInputBorder()),
+                                // readOnly: true,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _requesterController,
+                                decoration: const InputDecoration(
+                                    labelText: "Requester",
+                                    border: OutlineInputBorder()),
+                                readOnly: true,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _requestDateController,
+                                decoration: const InputDecoration(
+                                    labelText: "Request Date",
+                                    border: OutlineInputBorder()),
+                                readOnly: true,
+                              ),
+                            )
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _requestCodeController,
+                                decoration: const InputDecoration(
+                                    labelText: "Request Code",
+                                    border: OutlineInputBorder()),
+                                // readOnly: true,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _descriptionController,
+                                decoration: const InputDecoration(
+                                    labelText: "Description",
+                                    border: OutlineInputBorder()),
+                                readOnly: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _purposeController,
+                                decoration: const InputDecoration(
+                                    labelText: "Request Purpose",
+                                    border: OutlineInputBorder()),
+                                readOnly: true,
+                              ),
+                            ),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _requestTypeController,
+                                decoration: const InputDecoration(
+                                    labelText: "Request Type",
+                                    border: OutlineInputBorder()),
+                                readOnly: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _requestAmountController,
+                                decoration: const InputDecoration(
+                                    labelText: "Approved Amount",
+                                    border: OutlineInputBorder()),
+                                readOnly: true,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _totalWithdrawnController,
+                                decoration: const InputDecoration(
+                                    labelText: "Total Withdrawn Amount",
+                                    border: OutlineInputBorder()),
+                                readOnly: true,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _remainingAmountController,
+                                decoration: const InputDecoration(
+                                    labelText: "Remaining Amount",
+                                    border: OutlineInputBorder()),
+                                readOnly: true,
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
                   Row(
                     children: [
                       Expanded(
-                          child: TextFormField(
-                        controller: _requestTypeController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: "Request Type",
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          border: const OutlineInputBorder(),
+                        child: DropdownButtonFormField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: "Payment Method",
+                          ),
+                          value: _selectedPaymentMethod,
+                          items: ['Cash', 'Bank', 'Cheque']
+                              .map((selected) => DropdownMenuItem(
+                                    value: selected,
+                                    child: Text(selected),
+                                  ))
+                              .toList(),
+                          onChanged: widget.isViewMode
+                              ? null
+                              : (value) {
+                                  if (value is String) {
+                                    setState(() {
+                                      _selectedPaymentMethod = value;
+                                    });
+                                  }
+                                },
+                          validator: (value) {
+                            if (value == null || value.toString().isEmpty) {
+                              return "Choose Payment Method";
+                            }
+                            return null;
+                          },
                         ),
-                      )),
-                      const SizedBox(
-                        width: 10,
                       ),
+                      const SizedBox(width: 10),
                       Expanded(
-                          child: TextFormField(
-                        controller: _paymentAmountController,
-                        decoration: InputDecoration(
-                          labelText: "Enter Payment Amount",
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          border: const OutlineInputBorder(),
+                        child: TextFormField(
+                          controller: _paymentAmountController,
+                          readOnly: widget.isViewMode,
+                          decoration: InputDecoration(
+                            labelText: "Payment Amount",
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: const OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Enter Total Amount";
+                            }
+                            final amount = double.tryParse(value);
+                            if (amount == null) {
+                              return "Enter a valid amount";
+                            }
+                            if (amount <= 0) {
+                              return "payment Amount must be greater than 0";
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Enter Total Amount";
-                          }
-                          final amount = double.tryParse(value);
-                          if (amount == null) {
-                            return "Enter a valid amount";
-                          }
-                          if (amount <= 0) {
-                            return "payment Amount must be greater than 0";
-                          }
-                          return null;
-                        },
-                      )),
+                      ),
                       Container(
                         decoration: const BoxDecoration(),
                         child: Text(
-                          widget.currency,
-                          style: const TextStyle(fontSize: 16),
+                          currency,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                          child: DropdownButtonFormField(
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Payment Method"),
-                        value: _selectedPaymentMethod,
-                        items: ['Cash', 'Bank', 'Cheque']
-                            .map((selected) => DropdownMenuItem(
-                                value: selected, child: Text(selected)))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedPaymentMethod = value!;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Choose Payment Method";
-                          }
-                          return null;
-                        },
-                      )
                       ),
                     ],
                   ),
                   const SizedBox(
-                    height: 35,
+                    height: 10,
                   ),
                   Row(
                     children: [
                       Expanded(
-                          child: TextFormField(
-                        controller: _paidPersonController,
-                        decoration: InputDecoration(
-                          labelText: "Enter Paid Person",
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          border: const OutlineInputBorder(),
+                        child: TextFormField(
+                          controller: _paidPersonController,
+                          readOnly: widget.isViewMode,
+                          decoration: InputDecoration(
+                            labelText: "Paid Person",
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: const OutlineInputBorder(),
+                          ),
+                          validator: (value){
+                              if (value==null || value.isEmpty) {
+                                return "Enter Payment Note";
+                              }
+                              return null;
+                            },
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Enter Paid Person";
-                          }
-                          return null;
-                        },
-                      )),
-                      const SizedBox(
-                        width: 10,
                       ),
+                      const SizedBox(width: 10),
                       Expanded(
-                          child: TextFormField(
-                        controller: _receivePersonController,
-                        decoration: InputDecoration(
-                          labelText: "Enter Receive Person",
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          border: const OutlineInputBorder(),
+                        child: TextFormField(
+                          controller: _receivePersonController,
+                          readOnly: widget.isViewMode,
+                          decoration: InputDecoration(
+                            labelText: "Received Person",
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: const OutlineInputBorder(),
+                          ),
+                          validator: (value){
+                              if (value==null || value.isEmpty) {
+                                return "Enter Payment Note";
+                              }
+                              return null;
+                            },
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Enter Paid Person";
-                          }
-                          return null;
-                        },
-                      )),
-                      const SizedBox(
-                        width: 10,
                       ),
-                      Expanded(
-                          child: TextFormField(
-                        controller: _paymentNoteController,
-                        decoration: InputDecoration(
-                          labelText: "Enter Payment Note",
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          border: const OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Enter Paid Person";
-                          }
-                          return null;
-                        },
-                      )),
                     ],
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ElevatedButton(
-                        onPressed: _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          textStyle: const TextStyle(
-                            fontSize: 15,
-                          ),
-                          backgroundColor: const Color(0xFFB2C8A8),
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text("Submit"),
-                      ),
-                      const SizedBox(width: 20),
-                      ElevatedButton(
-                        onPressed: _clearForm,
-                        style: ElevatedButton.styleFrom(
-                          textStyle: const TextStyle(
-                            fontSize: 15,
-                          ),
-                          backgroundColor: const Color(0xFFB2C8A8),
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text("Clear"),
+                      Expanded(
+                        child: TextFormField(
+                            controller: _paymentNoteController,
+                            readOnly: widget.isViewMode,
+                            decoration: InputDecoration(
+                              labelText: "Payment Note",
+                              filled: true,
+                              fillColor: Colors.grey.shade100,
+                              border: const OutlineInputBorder(),
+                            ),
+                            validator: (value){
+                              if (value==null || value.isEmpty) {
+                                return "Enter Payment Note";
+                              }
+                              return null;
+                            },
+                            maxLines: 2),
                       ),
                     ],
-                  )
+                  ),
+                  const SizedBox(height: 20),
+                  if (!widget.isViewMode) Center(child: _buildSubmitButton()),
                 ],
-              )),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: _submitForm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB2C8A8),
+                foregroundColor: Colors.black,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(widget.isEditMode ? 'Update' : 'Submit'),
+            ),
+            const SizedBox(
+              width: 15,
+            ),
+            ElevatedButton(
+              onPressed: _clearForm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB2C8A8),
+                foregroundColor: Colors.black,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Clear'),
+            ),
+          ],
         ),
       ),
     );

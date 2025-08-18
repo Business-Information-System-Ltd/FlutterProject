@@ -14,14 +14,18 @@ class AddProjectForm extends StatefulWidget {
   final Map<String, dynamic>? initialData;
   final bool readOnly;
   final bool isEditMode;
-  final int projectId;
+  final bool isViewMode;
+  final String projectId;
+  final Project? project;
 
   AddProjectForm({
     Key? key,
     this.initialData,
     this.readOnly = false,
     this.isEditMode = false,
+    this.isViewMode = false,
     required this.projectId,
+    this.project,
   }) : super(key: key);
 //const AddProjectForm({super.key,this.initialData});
 
@@ -32,14 +36,14 @@ class AddProjectForm extends StatefulWidget {
 class _AddProjectFormState extends State<AddProjectForm> {
   List<PlutoColumn> _columns = [];
   List<PlutoRow> _rows = [];
-
+  bool _isLoading = true;
   PlutoGridStateManager? _stateManager;
   PlutoGridStateManager? popupGridManager;
   List<Project> projects = [];
   List<String> attachedFiles = [];
   final List<Map<String, String>> _budgetList = [];
   final TextEditingController _projectCodeController = TextEditingController();
-  final TextEditingController _projectAdminController = TextEditingController();
+  final TextEditingController _deptController = TextEditingController();
   final TextEditingController _projectDateController = TextEditingController();
   final TextEditingController _requesterNameController =
       TextEditingController();
@@ -50,29 +54,36 @@ class _AddProjectFormState extends State<AddProjectForm> {
 
   // String? _selectedDepartment = 'Admin';
   String? _selectedCurrency = 'MMK';
-  Future<int> getProjectById() async {
-    final prefs = await SharedPreferences.getInstance();
-    int lastId = prefs.getInt('last_project_id') ?? 0;
-    int newId = lastId + 1;
-    await prefs.setInt('last_project_id', newId);
-    return newId;
+ 
+
+Future<String> getProjectById() async {
+    try {
+      List<Project> existingProject = await ApiService().fetchProjects();
+
+      if (existingProject.isEmpty) {
+        return "1";
+      }
+
+      int newId = existingProject
+          .map((p) => int.tryParse(p.id.toString()) ?? 0)
+          .reduce((a, p) => a > p ? a : p);
+      return (newId + 1).toString();
+    } catch (e) {
+      print("Error generating string project ID: $e");
+      throw Exception('Failed to generate project ID');
+    }
   }
+
 
   @override
   void initState() {
     super.initState();
-    _projectDateController.text =
-        DateFormat('yyyy-MM-dd').format(DateTime.now());
-    if (widget.initialData != null) {
-      final data = widget.initialData!;
-      _projectCodeController.text = data['projectcode'] ?? '';
-      _projectDescriptionController.text = data['description'] ?? '';
-      _totalAmountController.text = data['totalamount'] ?? '';
-      _selectedCurrency = data['currency'] ?? 'MMK';
-      _projectAdminController.text = data['department'] ?? '';
-    }
+  _initializeForm();
     _initializePlutoGrid();
     _fetchData();
+    _isLoading=false;
+    _projectDateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
   }
 
   void _fetchData() async {
@@ -82,6 +93,20 @@ class _AddProjectFormState extends State<AddProjectForm> {
     });
   }
   
+  void _initializeForm(){
+  if (widget.isEditMode || widget.isViewMode){
+    final project = widget.project!;
+    _projectCodeController.text =project.projectCode;
+    _projectDateController.text = DateFormat('yyyy-MM-dd').format(project.date);
+    _requesterNameController.text =project.requesterName;
+    _deptController.text = project.departmentName;
+    _projectDescriptionController.text = project.projectDescription;
+    _totalAmountController.text = project.totalAmount.toString();
+    _selectedCurrency=project.currency;
+    
+  }
+
+}
 
   void _initializePlutoGrid() {
     _columns = [
@@ -224,7 +249,7 @@ class _AddProjectFormState extends State<AddProjectForm> {
 
   void _clearForm() {
     _projectCodeController.clear();
-    _projectAdminController.clear();
+    _deptController.clear();
     _projectDateController.clear();
     _projectDescriptionController.clear();
     _totalAmountController.clear();
@@ -264,17 +289,18 @@ class _AddProjectFormState extends State<AddProjectForm> {
       return;
     }
     try {
-      int newId = await getProjectById();
+      String newId = widget.isEditMode? widget.projectId: await getProjectById();
       final project = Project(
-        id: widget.isEditMode ? widget.projectId : newId,
+        id:newId ,
         date: DateFormat('yyyy-MM-dd').parse(_projectDateController.text),
         projectCode: _projectCodeController.text,
         projectDescription: _projectDescriptionController.text,
+        requesterName: _requesterNameController.text ?? '',
         totalAmount: double.tryParse(_totalAmountController.text) ?? 0,
         currency: _selectedCurrency ?? 'MMK',
         approvedAmount: 0,
         departmentId: 0,
-        departmentName: _projectAdminController.text,
+        departmentName: _deptController.text,
         requestable: 'Pending',
         budgets: [],
       );
@@ -297,285 +323,323 @@ class _AddProjectFormState extends State<AddProjectForm> {
     }
   }
 
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade100,
+      backgroundColor: Colors.green[100],
       appBar: AppBar(
-        title: Text("Project Entry Form"),
+        title: Text(widget.isViewMode
+            ? 'Project Details'
+            : widget.isEditMode
+                ? 'Edit Project'
+                : 'New Project Request'),
+        actions: widget.isViewMode
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddProjectForm(
+                         projectId: widget.projectId,
+                          isEditMode: true,
+                          project: widget.project,
+                         
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ]
+            : null,
       ),
-      // body:_rows.isEmpty
-      //? const Center(child: CircularProgressIndicator())
-      body: SingleChildScrollView(
-        child: Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width / 1.7,
-            child: Card(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  // CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Add Project Form',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _projectCodeController,
-                            labelText: 'Project Code',
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 7.0),
-                          ),
-                        ),
-                        SizedBox(width: 5.0),
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _projectDateController,
-                            labelText: 'Requested Date',
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 7.0),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _requesterNameController,
-                            labelText: 'Requester Name',
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 7.0),
-                          ),
-                        ),
-                        SizedBox(width: 5.0),
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _projectAdminController,
-                            labelText: 'Department',
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 7.0),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _projectDescriptionController,
-                            labelText: 'Enter Project Description',
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 7.0),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    //]  SizedBox(width: 5.0),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _totalAmountController,
-                            labelText: 'Enter Total Amount',
-                            keyboardType: TextInputType.number,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 7.0),
-                          ),
-                        ),
-                        SizedBox(width: 5.0),
-                        Expanded(
-                          child: _buildDropdownField(
-                            value: _selectedCurrency,
-                            items: ['MMK', 'USD'],
-                            labelText: 'Currency',
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 7.0),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                _selectedCurrency = newValue;
-                              });
-                            },
-                            readOnly: widget.readOnly,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 7),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        width: 370,
-                        height: 80,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 2, 65, 2),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (kIsWeb) {
-                                _pickFiles();
-                              } else {
-                                print('File picking is only supported on web.');
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey[200],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                side: const BorderSide(
-                                    color: Colors.grey, width: 1),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0, vertical: 7.0),
-                              alignment: Alignment.centerLeft,
-                            ),
-                            child: attachedFiles.isEmpty
-                                ? const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.attach_file,
-                                          color: Colors.black),
-                                      SizedBox(width: 8),
-                                      Text('Attach Files',
-                                          style:
-                                              TextStyle(color: Colors.black)),
-                                    ],
-                                  )
-                                : Scrollbar(
-                                    thumbVisibility: true,
-                                    child: ListView.builder(
-                                      itemCount: attachedFiles.length,
-                                      itemBuilder: (context, index) {
-                                        return Text(
-                                          attachedFiles[index],
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.black,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          maxLines: 1,
-                                        );
-                                      },
-                                    ),
-                                  ),
-                          ),
-                        ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Container(
+                  color: const Color.fromARGB(255, 77, 218, 246),
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Center(
+                              child: Text("Add Project Request Form",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold))),
+                          _buildFormWithSubmit(),
+                          
+                        ],
                       ),
                     ),
-
-                    Center(
-                      child: SizedBox(
-                          width: 200,
-                          height: 35,
-                          child: ElevatedButton(
-                            onPressed: _showPlutoGridDialog,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFB2C8A8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            child: Text(
-                              'Add Budget Codes',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                          )),
-                    ),
-                    SizedBox(height: 8),
-                    Container(
-                      height: 170,
-                      width: 550,
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          border: Border.all(color: Colors.grey.shade300)),
-                      child: PlutoGrid(
-                        columns: _columns,
-                        rows: _rows,
-                        onLoaded: (PlutoGridOnLoadedEvent event) {
-                          _stateManager = event.stateManager;
-                          _stateManager!.setShowColumnFilter(false);
-                        },
-                        configuration: PlutoGridConfiguration(
-                          style: PlutoGridStyleConfig(
-                            oddRowColor: Colors.blue[50],
-                            rowHeight: 35,
-                            activatedColor:
-                                Colors.lightBlueAccent.withOpacity(0.2),
-                          ),
-                        ),
-                        mode: PlutoGridMode.readOnly,
-                      ),
-                    ),
-
-                    SizedBox(height: 10),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: _submitForm,
-                          child: Text(
-                            'Submit',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFB2C8A8),
-                            minimumSize: Size(120, 48),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 20),
-                        ElevatedButton(
-                          onPressed: _clearForm,
-                          child: Text(
-                            'Clear',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFB2C8A8),
-                            minimumSize: Size(120, 48),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
+    );
+  }
+
+Widget _buildFormWithSubmit() {
+    return Column(
+      children: [
+        _buildFormSection(),
+        if (!widget.isViewMode)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                  ),
+                  child: Text(widget.isEditMode ? 'Update' : 'Submit'),
+                ),
+                const SizedBox(width: 15),
+                ElevatedButton(
+                  onPressed: _clearForm,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                  ),
+                  child: const Text('Clear'),
+                ),
+              ],
+            ),
           ),
+      ],
+    );
+  }
+
+
+
+  
+ Widget _buildFormSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+           Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _projectCodeController,
+                              labelText: 'Project Code',
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 7.0),
+                            ),
+                          ),
+                          SizedBox(width: 5.0),
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _projectDateController,
+                              labelText: 'Requested Date',
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 7.0),
+                            ),
+                          ),
+                        ],
+                      ),
+        
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _requesterNameController,
+                              labelText: 'Requester Name',
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 7.0),
+                            ),
+                          ),
+                          SizedBox(width: 5.0),
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _deptController,
+                              labelText: 'Department',
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 7.0),
+                            ),
+                          ),
+                        ],
+                      ),
+        
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _projectDescriptionController,
+                              labelText: 'Enter Project Description',
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 7.0),
+                            ),
+                          ),
+                        ],
+                      ),
+        
+                      //]  SizedBox(width: 5.0),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _totalAmountController,
+                              labelText: 'Enter Total Amount',
+                              keyboardType: TextInputType.number,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 7.0),
+                            ),
+                          ),
+                          SizedBox(width: 5.0),
+                          Expanded(
+                            child: _buildDropdownField(
+                              value: _selectedCurrency,
+                              items: ['MMK', 'USD'],
+                              labelText: 'Currency',
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 7.0),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  _selectedCurrency = newValue;
+                                });
+                              },
+                              readOnly: widget.readOnly,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 7),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: SizedBox(
+                          width: 370,
+                          height: 50,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 2, 65, 2),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (kIsWeb) {
+                                  _pickFiles();
+                                } else {
+                                  print('File picking is only supported on web.');
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey[200],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  side: const BorderSide(
+                                      color: Colors.grey, width: 1),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0, vertical: 7.0),
+                                alignment: Alignment.centerLeft,
+                              ),
+                              child: attachedFiles.isEmpty
+                                  ? const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.attach_file,
+                                            color: Colors.black),
+                                        SizedBox(width: 8),
+                                        Text('Attach Files',
+                                            style:
+                                                TextStyle(color: Colors.black)),
+                                      ],
+                                    )
+                                  : Scrollbar(
+                                      thumbVisibility: true,
+                                      child: ListView.builder(
+                                        itemCount: attachedFiles.length,
+                                        itemBuilder: (context, index) {
+                                          return Text(
+                                            attachedFiles[index],
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.black,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            maxLines: 1,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+        
+                      Center(
+                        child: SizedBox(
+                            width: 200,
+                            height: 45,
+                            child: ElevatedButton(
+                              onPressed: _showPlutoGridDialog,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFFB2C8A8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                              child: Text(
+                                'Add Budget Codes',
+                                style:
+                                    TextStyle(fontSize: 16, color: Colors.black),
+                              ),
+                            )),
+                      ),
+                      SizedBox(height: 8),
+                      Center(
+                        child: Container(
+                          height: 170,
+                          width: 550,
+                          decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              border: Border.all(color: Colors.grey.shade300)),
+                          child: PlutoGrid(
+                            columns: _columns,
+                            rows: _rows,
+                            onLoaded: (PlutoGridOnLoadedEvent event) {
+                              _stateManager = event.stateManager;
+                              _stateManager!.setShowColumnFilter(false);
+                            },
+                            configuration: PlutoGridConfiguration(
+                              style: PlutoGridStyleConfig(
+                                oddRowColor: Colors.blue[50],
+                                rowHeight: 35,
+                                activatedColor:
+                                    Colors.lightBlueAccent.withOpacity(0.2),
+                              ),
+                            ),
+                            mode: PlutoGridMode.readOnly,
+                          ),
+                        ),
+                      ),
+        
+                      
+          ],
         ),
       ),
     );
   }
-
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
     bool readOnly = true,
+    
     TextInputType keyboardType = TextInputType.text,
-    EdgeInsets padding = const EdgeInsets.all(8), // Optional parameter
-    //VoidCallback? onAttachPressed,
+    EdgeInsets padding = const EdgeInsets.all(8), 
+   
   }) {
     return Padding(
       padding: padding,
@@ -636,3 +700,8 @@ class _AddProjectFormState extends State<AddProjectForm> {
     );
   }
 }
+
+
+
+
+  

@@ -35,10 +35,10 @@ class AddCashpaymentForm extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<AddCashpaymentForm> createState() => _AddAdvanceRequestFormState();
+  State<AddCashpaymentForm> createState() => _AddCashpaymentFormState();
 }
 
-class _AddAdvanceRequestFormState extends State<AddCashpaymentForm> {
+class _AddCashpaymentFormState extends State<AddCashpaymentForm> {
   final TextEditingController _requestNo = TextEditingController();
   final TextEditingController _requestType = TextEditingController();
   final TextEditingController _requestDate = TextEditingController();
@@ -235,7 +235,7 @@ Future<void> _loadCashPaymentData(String requestNo) async {
           (_isProject ? 'Project' : 'Trip');
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(

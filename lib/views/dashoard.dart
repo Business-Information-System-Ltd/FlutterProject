@@ -1,6 +1,7 @@
 import 'package:advance_budget_request_system/views/advanceRequest.dart';
 import 'package:advance_budget_request_system/views/advancerequestlist.dart';
 import 'package:advance_budget_request_system/views/approvalsetup.dart';
+import 'package:advance_budget_request_system/views/approvaltable.dart';
 // import 'package:advance_budget_request_system/views/budgetAmount.dart';
 import 'package:advance_budget_request_system/views/budgetamounts.dart';
 import 'package:advance_budget_request_system/views/budgetcodeview.dart';
@@ -42,7 +43,7 @@ class _DashboardState extends State<Dashboard>
     AdvanceRequestPage(),
      CashPaymentPage(),
      SettlementTable(),
-    ApprovalSetupStep(),
+    ApprovalSetupList(),
   ];
 
   @override
@@ -93,8 +94,8 @@ class _DashboardState extends State<Dashboard>
         ProjectInfo(),
         TripInformation(currentUser: UserModel(name: 'Riel', department: 'Admin'),tripId: '0',),
         const Cashpayment(),
-        // const Settlement(),
-        ApprovalSetupStep(),
+        const SettlementTable(),
+        ApprovalSetupList(),
       ];
     // }
 
@@ -296,7 +297,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
       AdvanceRequestPage(),
        CashPaymentPage(),
        SettlementTable(),
-      ApprovalSetupStep(),
+      ApprovalSetupList(),
     ];
 
    

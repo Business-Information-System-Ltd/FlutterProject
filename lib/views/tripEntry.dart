@@ -201,8 +201,8 @@ class _AddTripState extends State<AddTrip> {
       Trip newTrip = Trip(
         id: nextId,
         date: DateFormat('yyyy-MM-dd').parse(_dateController.text),
-        Trip_Code: _tripCodeController.text,
-        description: _tripDesController.text,
+        Trip_Code: _tripCodeController.text?? '',
+        description: _tripDesController.text??'',
         totalAmount: double.tryParse(_totalAmtController.text) ?? 0.0,
         currency: _selectedCurrency,
         departmentId: int.parse(_selectedDepartmentId.toString()),

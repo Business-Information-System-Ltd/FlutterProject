@@ -367,10 +367,11 @@ class ApiService {
   }
 
   Future<CashPayment> fetchCashPaymentById(String requestNo) async {
-    final response = await http.get(Uri.parse('$cashPaymentEndPoint/$requestNo'));
+    final response =
+        await http.get(Uri.parse('$cashPaymentEndPoint/$requestNo'));
     if (response.statusCode == 200) {
-     final data = json.decode(response.body);
-return CashPayment.fromJson(data);
+      final data = json.decode(response.body);
+      return CashPayment.fromJson(data);
     } else {
       throw Exception('Failed to load Cash Payment with ID: ');
     }
@@ -691,12 +692,25 @@ return CashPayment.fromJson(data);
   }
 
 //  GetProjectByID
-  Future<List<Project>> getProjectById(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/projects/$id'));
-    return jsonDecode(response.body);
+  Future<Project?> getProjectById(dynamic id) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/projects/$id'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return Project.fromJson(jsonData);
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching project: $e');
+      return null;
+    }
   }
 
-  Future<void> deleteProjects(int id) async {
+  Future<void> deleteProjects(String id) async {
     final response = await http.delete(
       Uri.parse('$baseUrl/projects/$id'),
       headers: {'Content-Type': 'application/json'},
@@ -825,6 +839,20 @@ return CashPayment.fromJson(data);
     }
   }
 
+  Future<Advance?> getAdvanceById(String id) async {
+    final response = await http.get(Uri.parse('$baseUrl/advanceRequests/$id'));
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      return Advance.fromJson(jsonData);
+    } else if (response.statusCode == 404) {
+      return null;
+    } else {
+      throw Exception(
+          'Failed to fetch advance: ${response.statusCode}-${response.body} ');
+    }
+  }
+
   // Payments
   Future<List<Payment>> fetchPayments() async {
     final response = await http.get(Uri.parse('$baseUrl/payments'));
@@ -833,7 +861,8 @@ return CashPayment.fromJson(data);
       print('API Response: $data');
       return data.map((e) => Payment.fromJson(e)).toList();
     } else {
-      throw Exception('Failed to load Payments');
+      throw Exception(
+          'Failed to load Payments  ${response.statusCode} -${response.body}');
     }
   }
 
@@ -846,33 +875,60 @@ return CashPayment.fromJson(data);
     print(response.statusCode);
     print(response.body);
     if (response.statusCode != 201) {
-      throw Exception('Failed to insert payment');
+      throw Exception(
+          'Failed to insert payment  ${response.statusCode} -${response.body}');
     }
   }
 
   //updatePayment
-  Future<List<Payment>> updatePayment(
-      int id, Map<String, dynamic> updatedData) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/payments/$id'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(updatedData),
-    );
+  Future<void> updatePayment(Payment payment) async {
+    try {
+      // First verify the trip exists
+      final existingPayment = await getPaymentById(payment.id);
+      if (existingPayment == null) {
+        throw Exception('Payment with ID ${payment.id} does not exist');
+      }
 
-    if (response.statusCode == 200) {
-      print('Payment updated successfully');
-      return jsonDecode(response.body); // Return the full response
-    } else {
-      throw Exception('Failed to update payment: ${response.statusCode}');
+      final response = await http.put(
+        Uri.parse('$baseUrl/payments/${payment.id}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode(payment.toJson()),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to update payment ${payment.id}: ${response.statusCode}\n${response.body}');
+      }
+    } catch (e) {
+      print('Error updating payment ${payment.id}: $e');
+      rethrow;
     }
   }
 
   //GetPaymentByID
-  Future<List<Payment>> getPaymentById(int id) async {
+  Future<Payment?> getPaymentById(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/payments/$id'));
-    return jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      return Payment.fromJson(jsonData);
+    } else if (response.statusCode == 404) {
+      return null;
+    } else {
+      throw Exception(
+          'Failed to fetch payment: ${response.statusCode}-${response.body} ');
+    }
+  }
+
+  Future<void> deletePayment(String id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/payments/$id'));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+          'Failed to delete payment. Status code: ${response.statusCode}');
+    }
   }
 
   // Settlements

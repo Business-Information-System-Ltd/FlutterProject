@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:html' as html;
+import 'package:advance_budget_request_system/views/cashpaymentEntry.dart';
 import 'package:advance_budget_request_system/views/data.dart';
 import 'package:advance_budget_request_system/views/datefilter.dart';
 import 'package:advance_budget_request_system/views/pagination.dart';
@@ -145,6 +146,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
     return payments.map((p) {
       return PlutoRow(
         cells: {
+          'id': PlutoCell(value: p.id),
           'paymentdate': PlutoCell(
               value: DateFormat('yyyy-MM-dd').parse(p.date.toString())),
           'paymentno': PlutoCell(value: p.paymentNo),
@@ -161,6 +163,14 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
 
   List<PlutoColumn> _buildColumns() {
     return [
+      PlutoColumn(
+        title: 'ID',
+        field: 'id',
+        type: PlutoColumnType.text(),
+        width: 60,
+        enableEditingMode: false,
+        hide: true, 
+      ),
       PlutoColumn(
         title: 'Payment Date',
         field: 'paymentdate',
@@ -222,12 +232,41 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
         type: PlutoColumnType.text(),
         width: 170,
         renderer: (rendererContext) {
-          return IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blue),
-            tooltip: 'Edit',
-            onPressed: () {
-              print('Edit clicked on ${rendererContext.row.key}');
-            },
+          final status = rendererContext.row.cells['status']?.value;
+          return Row(
+            children: [
+              // IconButton(
+              //   icon: const Icon(Icons.edit, color: Colors.blue),
+              //   tooltip: 'Edit',
+              //   onPressed: ()=> _editPayment(rendererContext.row),
+              // ),
+              // IconButton(
+              //   icon: const Icon(Icons.more_horiz_outlined, color: Colors.blue),
+              //   tooltip: 'Detail',
+              //   onPressed: ()=> _detailPayment(rendererContext.row),
+              // ),
+              
+            // Conditionally show Edit and Post icons for 'Draft' status
+            if (status == 'Draft') ...[
+              IconButton(
+                icon: const Icon(Icons.edit, color: Colors.blue),
+                tooltip: 'Edit',
+                onPressed: () => _editPayment(rendererContext.row),
+              ),
+              IconButton(
+                icon: const Icon(Icons.check, color: Colors.green),
+                tooltip: 'Post',
+                onPressed: () => _postedPayment(rendererContext.row),
+              ),
+            ],
+             IconButton(
+              icon: const Icon(Icons.more_horiz_outlined),
+              tooltip: 'Detail',
+              onPressed: () => _detailPayment(rendererContext.row),
+            ),
+            
+            
+            ],
           );
         },
         enableEditingMode: false,
@@ -250,6 +289,37 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       _rowsPerPage = rowsPerPage;
     });
   }
+
+  void _postedPayment(PlutoRow row) async {
+  try {
+    final cashId = row.cells['id']?.value;
+    if (cashId == null) {
+      throw Exception('Payment ID not found');
+    }
+    final paymentToPost = await ApiService().getPaymentById(cashId);
+
+    if (paymentToPost != null) {
+      final updatedPayment = paymentToPost.copyWith(status: 'Posted');
+    await ApiService().updatePayment(updatedPayment);
+      // if (success) _refreshData();
+      setState(() {
+        _refreshData();
+        _loadPayments();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment posted successfully!')),
+      );
+
+      _refreshData();
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error posting payment: $e')),
+    );
+    print('ERROR posting payment: $e');
+  }
+}
 
   Widget buildGrid(List<PlutoRow> rows) {
     return PlutoGrid(
@@ -345,6 +415,39 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
     }
   }
 
+  //edit 
+  void _editPayment(PlutoRow row) async{
+    try{
+   final cashId = row.cells['id']?.value;
+    if (cashId == null) {
+      throw Exception('Payment ID not found');
+    };
+    final cash= await ApiService().getPaymentById(cashId);
+    
+    if (cash!=null) {
+      final success= await Navigator.push(context, MaterialPageRoute(builder: (context)=> CashPaymentFormScreen(cashId: cashId,payment: cash, isEditMode: true, )));
+      if(success==true) _refreshData();
+    }
+    }catch(e){
+       ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error editing payment: $e')),
+    );
+    print('ERROR:$e ');
+    }
+  }
+
+  //detail
+  void _detailPayment(PlutoRow row) async{
+    final cashId= row.cells['id']!.value;
+    final cash= await ApiService().getPaymentById(cashId);
+
+    if (cash!=null) {
+      final success= await Navigator.push(context, MaterialPageRoute(builder: (context)=> CashPaymentFormScreen(cashId: cashId,payment: cash, isViewMode: true, )));
+      if(success==true) _refreshData();
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final paginatedDrafts =
@@ -419,7 +522,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                     onPressed: () async {
                       final success = await Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) => CashPaymentPage()),
+                            builder: (context) => AdvancePage()),
                       );
                       if (success == true) _loadPayments();
                     },

@@ -9,19 +9,26 @@ import 'package:http/http.dart' as http;
 
 class AdvanceRequestForm extends StatefulWidget {
   final bool readOnly;
+  final bool isViewMode;
+  final String advanceId;
+  final Advance? advance;
   final Map<String, dynamic>? initialRequestData;
 
-  const AdvanceRequestForm({
-    Key? key,
-    this.readOnly = false,
-    this.initialRequestData,
-  }) : super(key: key);
+  const AdvanceRequestForm(
+      {Key? key,
+      this.readOnly = false,
+      this.initialRequestData,
+      this.advance,
+      this.isViewMode = false,
+      required this.advanceId})
+      : super(key: key);
 
   @override
   State<AdvanceRequestForm> createState() => _AdvanceRequestFormState();
 }
 
 class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _requestNo = TextEditingController();
   final TextEditingController _requestDate = TextEditingController();
   final TextEditingController _requestType =
@@ -42,8 +49,26 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
   String? _selectedCurrency = 'MMK';
   @override
   void initState() {
+    _initializeForm();
     super.initState();
-    _requestDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    if (!widget.isViewMode) {
+      _requestDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    }
+  }
+
+  void _initializeForm() {
+    if (widget.isViewMode) {
+      final advance = widget.advance!;
+      _requestNo.text = advance.requestNo ?? '';
+      _requestType.text = advance.requestType ?? '';
+      _requestDate.text = DateFormat('yyyy-MM-dd').format(advance.date);
+      _requestAmount.text = advance.requestAmount.toString();
+      _requestCode.text = advance.requestCode ?? '';
+      _requester.text = advance.requester ?? '';
+      _selectedCurrency = advance.currency ?? 'MMK';
+      _department.text = advance.departmentName ?? '';
+      _requestPurpose.text = advance.purpose ?? '';
+    }
   }
 
   final List<PlutoColumn> _columns = [
@@ -95,7 +120,10 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
   }
 
   Future<void> _submitForm() async {
-    String newId = await generateStringAdvanceID();
+    if(_formKey.currentState!.validate()){
+    String newId = widget.isViewMode
+        ? widget.advance!.id
+        : await generateStringAdvanceID();
     Advance newAdvance = Advance(
         id: newId,
         date: DateFormat('yyyy-MM-dd').parse(_requestDate.text),
@@ -115,10 +143,13 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
       await ApiService().postAdvanceRequests(newAdvance);
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Advance Request for operation can be created successfully')),
+        const SnackBar(
+            content: Text(
+                'Advance Request for operation can be created successfully')),
       );
     } catch (e) {
       print("Fail to insert advance: $e");
+    }
     }
   }
 
@@ -126,282 +157,271 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Operation Advance request"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => AdvanceRequestPage()));
-          },
-        ),
+        title: Text(widget.isViewMode
+            ? 'Operation Advance Request Details'
+            : 'Add Operation Advance Request Form'),
       ),
-      body: Container(
-        color: const Color.fromRGBO(255, 255, 255, 1),
-        padding: const EdgeInsets.fromLTRB(150, 10, 150, 10),
-        child: Center(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(50, 20, 50, 20),
-                child: Column(
-                  //crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Add Advance Request Form',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+      body: Center(
+        child: Container(
+          color: const Color.fromRGBO(255, 255, 255, 1),
+          width: MediaQuery.of(context).size.width * 0.6,
+          child: Center(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: SingleChildScrollView(
+                  // padding: const EdgeInsets.fromLTRB(50, 20, 50, 20),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      //crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'Request No',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildtextField(
-                            controller: _requestNo,
-                            labelText: '',
-                            keyboardType: TextInputType.number,
-                            // padding: EdgeInsets.fromLTRB(1, 10, 10, 10),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            widget.isViewMode
+                                ? 'Operation Advance Request Details'
+                                : 'Add Operation Advance Request Form',
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        const SizedBox(width: 15),
-                        const Text(
-                          'Request Type',
-                          style: TextStyle(fontSize: 16),
+                        const SizedBox(height: 10),
+                        Row(
+                          // mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // const SizedBox(width: 14),
+                            Expanded(
+                              child: _buildtextField(
+                                controller: _requestNo,
+                                labelText: 'Request No',
+                                readOnly: widget.isViewMode,
+                                // keyboardType: TextInputType.number,
+                                // padding: EdgeInsets.fromLTRB(1, 10, 10, 10),
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                    
+                            Expanded(
+                              child: _buildtextField(
+                                controller: _requestType,
+                                labelText: 'Request Type',
+                                readOnly: true,
+                                // keyboardType: TextInputType.number,
+                                // padding: EdgeInsets.fromLTRB(1, 10, 10, 10),
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: _buildtextField(
+                                controller: _requestDate,
+                                labelText: 'Request Date',
+                                // keyboardType: TextInputType.number,
+                                readOnly: true,
+                                //padding: EdgeInsets.fromLTRB(1, 10, 10, 10),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildtextField(
-                            controller: _requestType,
-                            labelText: '',
-                            keyboardType: TextInputType.number,
-                            // padding: EdgeInsets.fromLTRB(1, 10, 10, 10),
-                          ),
+                        const SizedBox(height: 2),
+                        Row(
+                          // mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: _buildtextField(
+                                controller: _requestCode,
+                                labelText: 'Request Code',
+                                readOnly: widget.isViewMode,
+                                // keyboardType: TextInputType.number,
+                                // padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: _buildtextField(
+                                controller: _department,
+                                labelText: 'Department',
+                                readOnly: widget.isViewMode,
+                                // keyboardType: TextInputType.number,
+                                // padding: const EdgeInsets.fromLTRB(10, 10, 46, 10),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 15),
-                        const Text(
-                          'Request Date',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildtextField(
-                            controller: _requestDate,
-                            labelText: '',
-                            keyboardType: TextInputType.number,
-                            readOnly: false,
-                            //padding: EdgeInsets.fromLTRB(1, 10, 10, 10),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Request Code',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildtextField(
-                            controller: _requestCode,
-                            labelText: '',
-                            keyboardType: TextInputType.number,
-                            padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        const Text(
-                          'Department',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildtextField(
-                            controller: _department,
-                            labelText: '',
-                            keyboardType: TextInputType.number,
-                            padding: const EdgeInsets.fromLTRB(10, 10, 46, 10),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Request Amount',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildtextField(
-                            controller: _requestAmount,
-                            labelText: '',
-                            keyboardType: TextInputType.number,
-                            padding: const EdgeInsets.fromLTRB(10, 10, 46, 10),
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        const Text(
-                          'Currency',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildDropdownField(
-                            value: _selectedCurrency,
-                            items: const ['MMK', 'USD'],
-                            labelText: 'Currency',
-                            padding: const EdgeInsets.fromLTRB(10, 10, 46, 10),
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                _selectedCurrency = newValue;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Attach File',
-                            style: TextStyle(fontSize: 16)),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: _buildtextField(
-                            controller: _attachFilesController,
-                            labelText: '',
-                            padding: const EdgeInsets.fromLTRB(50, 10, 24, 10),
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        const Text(
-                          'Requester',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildtextField(
-                            controller: _requester,
-                            labelText: '',
-                            keyboardType: TextInputType.number,
-                            padding: const EdgeInsets.fromLTRB(25, 10, 46, 10),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 13),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Request Purpose',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 0, 40, 0),
-                            child: TextField(
-                              controller: _requestPurpose,
-                              maxLines: 2,
-                              decoration: const InputDecoration(
-                                  fillColor: Color.fromRGBO(217, 217, 217, 1),
+                        const SizedBox(height: 0),
+                        Row(
+                          // mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: _buildtextField(
+                                controller: _requestAmount,
+                                labelText: 'Request Amount',
+                                readOnly: widget.isViewMode,
+                                // keyboardType: TextInputType.number,
+                                // padding: const EdgeInsets.fromLTRB(10, 10, 46, 10),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: _selectedCurrency,
+                                decoration:  InputDecoration(
+                                  fillColor: Colors.white,
                                   filled: true,
                                   border: OutlineInputBorder(
-                                    borderSide: BorderSide.none,
-                                  )),
+                                    borderRadius: BorderRadius.circular(2.0),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 2, vertical: 3),
+                                ),
+                                items: ['MMK', 'USD']
+                                    .map((currency) => DropdownMenuItem(
+                                          value: currency,
+                                          child: Text(
+                                            currency,
+                                            style: const TextStyle(
+                                                color: Colors.black),
+                                          ),
+                                        ))
+                                    .toList(),
+                                onChanged: widget.isViewMode
+                                    ? null
+                                    : (value) {
+                                        setState(() {
+                                          _selectedCurrency = value ?? 'MMK';
+                                        });
+                                      },
+                                validator: (value) => value?.isEmpty ?? true
+                                    ? 'Currency is required'
+                                    : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 0),
+                        Row(
+                          // mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // const SizedBox(width: 15),
+                            Expanded(
+                              child: _buildtextField(
+                                controller: _attachFilesController,
+                                labelText: 'Attach File',
+                                readOnly: widget.isViewMode,
+                                // padding: const EdgeInsets.fromLTRB(50, 10, 24, 10),
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: _buildtextField(
+                                controller: _requester,
+                                labelText: 'Requester',
+                                readOnly: widget.isViewMode,
+                                // keyboardType: TextInputType.number,
+                                // padding: const EdgeInsets.fromLTRB(25, 10, 46, 10),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 13),
+                        Row(
+                          // crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(20, 0, 40, 0),
+                                child: TextFormField(
+                                  controller: _requestPurpose,
+                                  maxLines: 2,
+                                  readOnly: widget.isViewMode,
+                                  decoration: const InputDecoration(
+                                      labelText: 'Request Purpose',
+                                      fillColor: Colors.white,
+                                      filled: true,
+                                      border: OutlineInputBorder(
+                                          // borderSide: BorderSide.none,
+                                          )),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
+                          height: 150,
+                          width: 550,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Center(
+                            // Add this Center widget
+                    
+                            child: PlutoGrid(
+                              columns: _columns,
+                              rows: _rows,
+                              onLoaded: (PlutoGridOnLoadedEvent event) {
+                                _stateManager = event.stateManager;
+                                _stateManager!.setShowColumnFilter(false);
+                              },
+                              configuration: PlutoGridConfiguration(
+                                style: PlutoGridStyleConfig(
+                                  oddRowColor: Colors.blue[50],
+                                  rowHeight: 35,
+                                  activatedColor:
+                                      Colors.lightBlueAccent.withOpacity(0.2),
+                                ),
+                              ),
+                              mode: PlutoGridMode.readOnly,
                             ),
                           ),
                         ),
+                        const SizedBox(height: 10),
+                        if (!widget.isViewMode)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: _submitForm,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFB2C8A8),
+                                  minimumSize: const Size(120, 48),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Submit',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFB2C8A8),
+                                  minimumSize: const Size(120, 48),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Clear',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    Container(
-                      height: 150,
-                      width: 550,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Center(
-                        // Add this Center widget
-
-                        child: PlutoGrid(
-                          columns: _columns,
-                          rows: _rows,
-                          onLoaded: (PlutoGridOnLoadedEvent event) {
-                            _stateManager = event.stateManager;
-                            _stateManager!.setShowColumnFilter(false);
-                          },
-                          configuration: PlutoGridConfiguration(
-                            style: PlutoGridStyleConfig(
-                              oddRowColor: Colors.blue[50],
-                              rowHeight: 35,
-                              activatedColor:
-                                  Colors.lightBlueAccent.withOpacity(0.2),
-                            ),
-                          ),
-                          mode: PlutoGridMode.readOnly,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: _submitForm,
-                          child: const Text(
-                            'Submit',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFB2C8A8),
-                            minimumSize: const Size(120, 48),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        ElevatedButton(
-                          onPressed: () {},
-                          child: const Text(
-                            'Clear',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFB2C8A8),
-                            minimumSize: const Size(120, 48),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -414,30 +434,27 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
   Widget _buildtextField({
     required TextEditingController controller,
     required String labelText,
-    bool readOnly = true,
+    required bool readOnly, 
     TextInputType keyboardType = TextInputType.text,
     EdgeInsets padding = const EdgeInsets.all(8),
   }) {
     return Padding(
       padding: padding,
-      child: TextField(
+      child: TextFormField(
         controller: controller,
         // readOnly: widget.readOnly,
         keyboardType: keyboardType,
+        readOnly:readOnly,
         style: const TextStyle(fontSize: 14),
 
         decoration: InputDecoration(
           labelText: labelText,
           labelStyle: const TextStyle(fontSize: 14),
-          fillColor: const Color.fromRGBO(217, 217, 217, 1),
+          fillColor: Colors.white,
           filled: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.0),
-            borderSide: BorderSide.none,
           ),
-
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: 0, vertical: 0), // internal padding
         ),
       ),
     );
@@ -456,11 +473,11 @@ class _AdvanceRequestFormState extends State<AdvanceRequestForm> {
         value: value,
         decoration: InputDecoration(
           // labelText: labelText,
-          fillColor: const Color.fromRGBO(217, 217, 217, 1),
+          fillColor: Colors.white,
           filled: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(2.0),
-            borderSide: BorderSide.none,
+            // borderSide: BorderSide.none,
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 2, vertical: 3),
