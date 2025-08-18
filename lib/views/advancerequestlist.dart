@@ -1331,9 +1331,6 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
   List<Advance> advances = [];
   List<Project> projects = [];
   List<Trips> trips = [];
-  List<Advance> _filteredAdvances = [];
-  List<Project> _filteredProjects = [];
-  List<Trips> _filteredTrips = [];
   final NumberFormat _formatter = NumberFormat('#,###');
   String _searchQuery = '';
   DateTimeRange? _currentDateRange;
@@ -1341,7 +1338,6 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
   int _currentPage = 1;
   int _rowsPerPage = 10;
   PlutoGridStateManager? _gridStateManager;
-   final TextEditingController _searchController = TextEditingController();
   bool _loading = true;
   int _currentPageAdvance = 1;
   int _currentPageProject = 1;
@@ -1355,10 +1351,6 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
   void initState() {
     super.initState();
     _fetchAllData();
-
-    _filteredAdvances = advances;
-    _filteredProjects = projects;
-    _filteredTrips = trips;
   }
 
   Future<void> _fetchAllData() async {
@@ -1379,27 +1371,6 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
     setState(() => _loading = false);
   }
 
-  void _onSearchChanged(String query) {
-    setState(() {
-      _searchQuery = query;
-      if (_selectedTab == 0) {
-        _filteredAdvances = advances
-            .where(
-                (advance) => SearchUtils.matchesSearchAdvance(advance, query))
-            .toList();
-      } else if (_selectedTab == 1) {
-        _filteredProjects = projects
-            .where(
-                (project) => SearchUtils.matchesSearchProject(project, query))
-            .toList();
-      } else if (_selectedTab == 2) {
-        _filteredTrips = trips
-            .where((trip) => SearchUtils.matchesSearchTrip(trip, query))
-            .toList();
-      }
-      _currentPage = 1;
-    });
-  }
 
   void _refreshData() async {
     setState(() {
@@ -1417,9 +1388,6 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
         projects =
             project.where((p) => p.requestable.toLowerCase() == 'yes').toList();
         trips = trip.where((t) => t.directAdvanceReq == false).toList();
-        _filteredAdvances = advances;
-        _filteredProjects = projects;
-        _filteredTrips = trips;
       });
 
       // _applyDateFilter();
@@ -1495,11 +1463,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
     if (total == 0) return [];
     final start = ((_currentPageAdvance - 1) * _rowsPerPage).clamp(0, total);
     final end = (start + _rowsPerPage).clamp(0, total);
-    // return advances.sublist(start, end);
-    return _filteredAdvances.sublist(
-      start,
-      end > _filteredAdvances.length ? _filteredAdvances.length : end,
-    );
+    return advances.sublist(start, end);
   }
 
   List<Project> get _paginatedProjects {
@@ -1507,11 +1471,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
     if (total == 0) return [];
     final start = ((_currentPageProject - 1) * _rowsPerPage).clamp(0, total);
     final end = (start + _rowsPerPage).clamp(0, total);
-    // return projects.sublist(start, end);
-    return _filteredProjects.sublist(
-      start,
-      end > _filteredProjects.length ? _filteredProjects.length : end,
-    );
+    return projects.sublist(start, end);
   }
 
   List<Trips> get _paginatedTrips {
@@ -1519,11 +1479,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
     if (total == 0) return [];
     final start = ((_currentPageTrip - 1) * _rowsPerPage).clamp(0, total);
     final end = (start + _rowsPerPage).clamp(0, total);
-    // return trips.sublist(start, end);
-    return _filteredTrips.sublist(
-      start,
-      end > _filteredTrips.length ? _filteredTrips.length : end,
-    );
+    return trips.sublist(start, end);
   }
 
   void _onPageChangedProject(int page, int rowsPerPage) {
@@ -2042,6 +1998,9 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
               _gridStateManagerTrip = event.stateManager;
               _gridStateManagerTrip!.setPage(1, notify: false);
               _gridStateManagerTrip!.setPageSize(_rowsPerPage, notify: false);
+              setState(() {
+                
+              });
             },
           ),
         ),
@@ -2113,21 +2072,6 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
           height: 470,
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 300,
-                      child: CustomSearchBar(
-                        onSearch: _onSearchChanged,
-                        hintText: 'Search...',
-                        // controller: _searchController,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               // Tabs
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2168,7 +2112,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
                         },
                       ),
                       TrapezoidTab(
-                        label: "Operation Request",
+                        label: "New Operation Request",
                         isSelected: _selectedTab == 3,
                         onTap: () {
                           Navigator.push(
