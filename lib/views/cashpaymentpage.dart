@@ -24,8 +24,11 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
   List<Payment> _allPayments = [];
   List<Payment> _filteredDraftPayments = [];
   List<Payment> _filteredPostedPayments = [];
+  List<Advance> _advance = [];
+  List<Advance> _filterAdvance = [];
   PlutoGridStateManager? _stateManagerDraft;
   PlutoGridStateManager? _stateManagerPosted;
+  PlutoGridStateManager? _stateManagerAdvance;
 
   final NumberFormat _formatter = NumberFormat('#,###');
   bool _isLoading = true;
@@ -35,6 +38,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
 
   int _currentDraftPage = 1;
   int _currentPostedPage = 1;
+  int _currentAdvancePage = 1;
   int _rowsPerPage = 10;
 
   @override
@@ -47,8 +51,12 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
   void _loadPayments() async {
     try {
       final payments = await ApiService().fetchPayments();
+      final advances = (await ApiService().fetchAdvanceRequests())
+          .where((a) => a.status == 'Approve')
+          .toList();
       setState(() {
         _allPayments = payments;
+        _advance = advances;
         _applyFilters();
         _isLoading = false;
       });
@@ -60,9 +68,87 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
     }
   }
 
+  // void _applyFilters() {
+
+  //   List<Payment> filtered = _allPayments;
+  //   List<Advance> filteredAdvance =
+  //       _advance.where((a) => a.status == 'Approve').toList();
+
+  //   // Apply date filter
+  //   if (_currentDateRange != null) {
+  //     final startDate = DateTime(
+  //       _currentDateRange!.start.year,
+  //       _currentDateRange!.start.month,
+  //       _currentDateRange!.start.day,
+  //     );
+
+  //     final endDate = DateTime(
+  //       _currentDateRange!.end.year,
+  //       _currentDateRange!.end.month,
+  //       _currentDateRange!.end.day,
+  //     ).add(const Duration(days: 1));
+
+  //     filtered = filtered.where((payment) {
+  //       final paymentDate = DateTime(
+  //         payment.date.year,
+  //         payment.date.month,
+  //         payment.date.day,
+  //       );
+  //       return paymentDate.isAtSameMomentAs(startDate) ||
+  //           (paymentDate.isAfter(startDate) && paymentDate.isBefore(endDate));
+  //     }).toList();
+
+  //     filteredAdvance = filteredAdvance.where((a) {
+  //       final advanceDate = DateTime(a.date.year, a.date.month, a.date.day);
+  //       return advanceDate.isAtSameMomentAs(startDate) ||
+  //           (advanceDate.isAfter(startDate) && advanceDate.isBefore(endDate));
+  //     }).toList();
+  //   }
+
+  //   // Apply search filter
+  //   if (_searchQuery.isNotEmpty) {
+  //     filtered = filtered
+  //         .where((payment) =>
+  //             SearchUtils.matchesSearchPayment(payment, _searchQuery))
+  //         .toList();
+  //     filteredAdvance = filteredAdvance
+  //         .where((advance) =>
+  //             SearchUtils.matchesSearchAdvance(advance, _searchQuery))
+  //         .toList();
+  //   }
+
+  //   setState(() {
+  //     _filteredDraftPayments =
+  //         filtered.where((p) => p.status == 'Draft').toList();
+  //     _filteredPostedPayments =
+  //         filtered.where((p) => p.status == 'Posted').toList();
+  //     _filterAdvance = filteredAdvance;
+  //     _currentDraftPage = 1;
+  //     _currentPostedPage = 1;
+  //     _currentAdvancePage = 1;
+  //   });
+
+  //   if (_stateManagerDraft != null) {
+  //     _stateManagerDraft!.removeAllRows();
+  //     _stateManagerDraft!.appendRows(_mapPaymentsToRows(
+  //         _getPaginatedPayments(_filteredDraftPayments, _currentDraftPage)));
+  //   }
+  //   if (_stateManagerPosted != null) {
+  //     _stateManagerPosted!.removeAllRows();
+  //     _stateManagerPosted!.appendRows(_mapPaymentsToRows(
+  //         _getPaginatedPayments(_filteredPostedPayments, _currentPostedPage)));
+  //   }
+  //   if (_stateManagerAdvance != null) {
+  //     _stateManagerAdvance!.removeAllRows();
+  //     _stateManagerAdvance!.appendRows(_mapAdvanceToRows(
+  //         _getPaginatedAdvance(_filterAdvance, _currentAdvancePage)));
+  //   }
+  // }
+
   void _applyFilters() {
-    // Apply both date filter and search filter to all payments
+    // Start with all payments & advances
     List<Payment> filtered = _allPayments;
+    List<Advance> filteredAdvance = _advance; // ✅ no extra status filter
 
     // Apply date filter
     if (_currentDateRange != null) {
@@ -87,6 +173,12 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
         return paymentDate.isAtSameMomentAs(startDate) ||
             (paymentDate.isAfter(startDate) && paymentDate.isBefore(endDate));
       }).toList();
+
+      filteredAdvance = filteredAdvance.where((a) {
+        final advanceDate = DateTime(a.date.year, a.date.month, a.date.day);
+        return advanceDate.isAtSameMomentAs(startDate) ||
+            (advanceDate.isAfter(startDate) && advanceDate.isBefore(endDate));
+      }).toList();
     }
 
     // Apply search filter
@@ -95,6 +187,10 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
           .where((payment) =>
               SearchUtils.matchesSearchPayment(payment, _searchQuery))
           .toList();
+      filteredAdvance = filteredAdvance
+          .where((advance) =>
+              SearchUtils.matchesSearchAdvance(advance, _searchQuery))
+          .toList();
     }
 
     setState(() {
@@ -102,8 +198,10 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
           filtered.where((p) => p.status == 'Draft').toList();
       _filteredPostedPayments =
           filtered.where((p) => p.status == 'Posted').toList();
-      _currentDraftPage = 1; 
+      _filterAdvance = filteredAdvance; // ✅ fixed
+      _currentDraftPage = 1;
       _currentPostedPage = 1;
+      _currentAdvancePage = 1;
     });
 
     if (_stateManagerDraft != null) {
@@ -115,6 +213,11 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       _stateManagerPosted!.removeAllRows();
       _stateManagerPosted!.appendRows(_mapPaymentsToRows(
           _getPaginatedPayments(_filteredPostedPayments, _currentPostedPage)));
+    }
+    if (_stateManagerAdvance != null) {
+      _stateManagerAdvance!.removeAllRows();
+      _stateManagerAdvance!.appendRows(_mapAdvanceToRows(
+          _getPaginatedAdvance(_filterAdvance, _currentAdvancePage)));
     }
   }
 
@@ -140,6 +243,117 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       _searchQuery = query;
     });
     _applyFilters();
+  }
+
+  List<PlutoRow> _mapAdvanceToRows(List<Advance> advance) {
+    return advance.map((advance) {
+      // Remove the .where filter
+      return PlutoRow(cells: {
+        'id': PlutoCell(value: advance.id),
+        'requestdate':
+            PlutoCell(value: DateFormat('yyyy-MM-dd').format(advance.date)),
+        'requestno': PlutoCell(value: advance.requestNo),
+        'requesttype': PlutoCell(value: advance.requestType),
+        'requestcode': PlutoCell(value: advance.requestCode),
+        'requestamount': PlutoCell(value: advance.requestAmount),
+        'currency': PlutoCell(value: advance.currency),
+        'requester': PlutoCell(value: advance.requester),
+        'action': PlutoCell(value: '')
+      });
+    }).toList();
+  }
+
+  List<PlutoColumn> _buildAdvanceColumn() {
+    return [
+      PlutoColumn(
+        title: 'ID',
+        field: 'id',
+        type: PlutoColumnType.text(),
+        enableEditingMode: false,
+        hide: true,
+      ),
+      PlutoColumn(
+        title: 'Request Date',
+        field: 'requestdate',
+        type: PlutoColumnType.text(),
+        enableEditingMode: false,
+        width: 145,
+      ),
+      PlutoColumn(
+        title: 'Request No',
+        field: 'requestno',
+        type: PlutoColumnType.text(),
+        enableEditingMode: false,
+        width: 142,
+      ),
+      PlutoColumn(
+        title: 'Request Type',
+        field: 'requesttype',
+        type: PlutoColumnType.text(),
+        enableEditingMode: false,
+        width: 200,
+      ),
+      PlutoColumn(
+        title: 'Request Code',
+        field: 'requestcode',
+        type: PlutoColumnType.text(),
+        enableEditingMode: false,
+        width: 142,
+        textAlign: PlutoColumnTextAlign.left,
+        titleTextAlign: PlutoColumnTextAlign.left,
+      ),
+      PlutoColumn(
+        title: 'Request Amount',
+        field: 'requestamount',
+        type: PlutoColumnType.number(),
+        enableEditingMode: false,
+        width: 180,
+        textAlign: PlutoColumnTextAlign.right,
+        titleTextAlign: PlutoColumnTextAlign.right,
+        renderer: (context) {
+          final value = int.tryParse(context.cell.value.toString()) ?? 0;
+          return Text(_formatter.format(value), textAlign: TextAlign.right);
+        },
+      ),
+      PlutoColumn(
+        title: 'Currency',
+        field: 'currency',
+        type: PlutoColumnType.text(),
+        enableEditingMode: false,
+        width: 100,
+        textAlign: PlutoColumnTextAlign.left,
+        titleTextAlign: PlutoColumnTextAlign.left,
+      ),
+      PlutoColumn(
+        title: 'Requester',
+        field: 'requester',
+        type: PlutoColumnType.text(),
+        enableEditingMode: false,
+        width: 200,
+        textAlign: PlutoColumnTextAlign.left,
+        titleTextAlign: PlutoColumnTextAlign.left,
+      ),
+      PlutoColumn(
+        title: 'Action',
+        field: 'action',
+        type: PlutoColumnType.text(),
+        width: 180,
+        textAlign: PlutoColumnTextAlign.center,
+        titleTextAlign: PlutoColumnTextAlign.center,
+        enableEditingMode: false,
+        renderer: (rendererContext) {
+          final row = rendererContext.row;
+          // final requestType = row.cells['requesttype']?.value.toString() ?? '';
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(onPressed: null, child: Text("Request Advance"))
+            ],
+          );
+        },
+      ),
+    ];
   }
 
   List<PlutoRow> _mapPaymentsToRows(List<Payment> payments) {
@@ -169,7 +383,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
         type: PlutoColumnType.text(),
         width: 60,
         enableEditingMode: false,
-        hide: true, 
+        hide: true,
       ),
       PlutoColumn(
         title: 'Payment Date',
@@ -245,27 +459,25 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
               //   tooltip: 'Detail',
               //   onPressed: ()=> _detailPayment(rendererContext.row),
               // ),
-              
-            // Conditionally show Edit and Post icons for 'Draft' status
-            if (status == 'Draft') ...[
+
+              // Conditionally show Edit and Post icons for 'Draft' status
+              if (status == 'Draft') ...[
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue),
+                  tooltip: 'Edit',
+                  onPressed: () => _editPayment(rendererContext.row),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.check, color: Colors.green),
+                  tooltip: 'Post',
+                  onPressed: () => _postedPayment(rendererContext.row),
+                ),
+              ],
               IconButton(
-                icon: const Icon(Icons.edit, color: Colors.blue),
-                tooltip: 'Edit',
-                onPressed: () => _editPayment(rendererContext.row),
+                icon: const Icon(Icons.more_horiz_outlined),
+                tooltip: 'Detail',
+                onPressed: () => _detailPayment(rendererContext.row),
               ),
-              IconButton(
-                icon: const Icon(Icons.check, color: Colors.green),
-                tooltip: 'Post',
-                onPressed: () => _postedPayment(rendererContext.row),
-              ),
-            ],
-             IconButton(
-              icon: const Icon(Icons.more_horiz_outlined),
-              tooltip: 'Detail',
-              onPressed: () => _detailPayment(rendererContext.row),
-            ),
-            
-            
             ],
           );
         },
@@ -281,6 +493,8 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       _currentDraftPage = page;
       _rowsPerPage = rowsPerPage;
     });
+    _stateManagerDraft?.setShowLoading(true);
+    _applyFilters();
   }
 
   void _handlePostedPageChange(int page, int rowsPerPage) {
@@ -288,69 +502,92 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       _currentPostedPage = page;
       _rowsPerPage = rowsPerPage;
     });
+    _stateManagerPosted?.setShowLoading(true);
+    _applyFilters();
   }
 
   void _postedPayment(PlutoRow row) async {
-  try {
-    final cashId = row.cells['id']?.value;
-    if (cashId == null) {
-      throw Exception('Payment ID not found');
-    }
-    final paymentToPost = await ApiService().getPaymentById(cashId);
+    try {
+      final cashId = row.cells['id']?.value;
+      if (cashId == null) {
+        throw Exception('Payment ID not found');
+      }
+      final paymentToPost = await ApiService().getPaymentById(cashId);
 
-    if (paymentToPost != null) {
-      final updatedPayment = paymentToPost.copyWith(status: 'Posted');
-    await ApiService().updatePayment(updatedPayment);
-      // if (success) _refreshData();
-      setState(() {
+      if (paymentToPost != null) {
+        final updatedPayment = paymentToPost.copyWith(status: 'Posted');
+        await ApiService().updatePayment(updatedPayment);
+
+        setState(() {
+          _refreshData();
+          _loadPayments();
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment posted successfully!')),
+        );
+
         _refreshData();
-        _loadPayments();
-      });
-
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment posted successfully!')),
+        SnackBar(content: Text('Error posting payment: $e')),
       );
-
-      _refreshData();
+      print('ERROR posting payment: $e');
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error posting payment: $e')),
-    );
-    print('ERROR posting payment: $e');
   }
-}
 
-  Widget buildGrid(List<PlutoRow> rows) {
-    return PlutoGrid(
-      columns: _columns,
-      rows: rows,
-      configuration: PlutoGridConfiguration(
-        style: PlutoGridStyleConfig(
-          oddRowColor: Colors.blue[50],
-          rowHeight: 35,
-          activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
-        ),
-      ),
-      onLoaded: (event) {
-        _stateManagerDraft = event.stateManager;
-        _stateManagerPosted = event.stateManager;
-      },
+  void _handleAdvancePageChange(int page, int rowsPerPage) {
+    setState(() {
+      _currentAdvancePage = page;
+      _rowsPerPage = rowsPerPage;
+    });
+    _stateManagerAdvance?.setShowLoading(true);
+    _applyFilters();
+  }
+
+  List<Advance> _getPaginatedAdvance(List<Advance> advances, int page) {
+    final start = (page - 1) * _rowsPerPage;
+    final end = start + _rowsPerPage;
+    return advances.sublist(
+      start,
+      end > advances.length ? advances.length : end,
     );
   }
 
-  void _refreshData() async{
+  // Widget buildGrid(List<PlutoRow> rows) {
+  //   return PlutoGrid(
+  //     columns: _columns,
+  //     rows: rows,
+  //     configuration: PlutoGridConfiguration(
+  //       style: PlutoGridStyleConfig(
+  //         oddRowColor: Colors.blue[50],
+  //         rowHeight: 35,
+  //         activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+  //       ),
+  //     ),
+  //     onLoaded: (event) {
+  //       _stateManagerDraft = event.stateManager;
+  //       _stateManagerPosted = event.stateManager;
+  //     },
+  //   );
+  // }
+
+  void _refreshData() async {
     setState(() {
       _searchQuery = "";
       _currentDateRange = null;
       _currentFilterType = null;
       _currentDraftPage = 1;
-      _currentPostedPage=1;
+      _currentPostedPage = 1;
+      _currentAdvancePage = 1;
     });
     try {
-      List<Payment> payments=await ApiService().fetchPayments();
+      List<Payment> payments = await ApiService().fetchPayments();
+      List<Advance> advances = await ApiService().fetchAdvanceRequests();
       setState(() {
-        payments=payments;
+        _allPayments = payments;
+        _advance = _advance;
       });
       _applyFilters();
     } catch (e) {
@@ -361,9 +598,9 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
   }
 
   //Export button
-  Future<void> exportToCSV() async{
+  Future<void> exportToCSV() async {
     try {
-      List<List<dynamic>> csvData=[];
+      List<List<dynamic>> csvData = [];
       csvData.add([
         "Payment Date",
         "Payment No",
@@ -376,7 +613,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
         "Received Person",
         "Payment Note"
       ]);
-      for(var payment in _allPayments){
+      for (var payment in _allPayments) {
         csvData.add([
           DateFormat('yyyy-MM-dd').format(payment.date),
           payment.paymentNo,
@@ -388,24 +625,23 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
           payment.paidPerson,
           payment.receivedPerson,
           payment.paymentNote
-
         ]);
       }
-      String csv=const ListToCsvConverter().convert(csvData);
+      String csv = const ListToCsvConverter().convert(csvData);
       if (kIsWeb) {
-        final bytes= utf8.encode(csv);
-        final blob=html.Blob([bytes]);
-        final url=html.Url.createObjectUrlFromBlob(blob);
-        final anchor= html.AnchorElement(href: url)
+        final bytes = utf8.encode(csv);
+        final blob = html.Blob([bytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
           ..setAttribute("download", "payment.csv")
           ..click();
-        
+
         html.Url.revokeObjectUrl(url);
         print("CSV file download in browser");
-      }else{
-        final directory= await getApplicationDocumentsDirectory();
-        final path= "${directory.path}/payment.csv";
-        final file=File(path);
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        final path = "${directory.path}/payment.csv";
+        final file = File(path);
         await file.writeAsString(csv);
 
         print("CSV file saved to $path");
@@ -415,38 +651,51 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
     }
   }
 
-  //edit 
-  void _editPayment(PlutoRow row) async{
-    try{
-   final cashId = row.cells['id']?.value;
-    if (cashId == null) {
-      throw Exception('Payment ID not found');
-    };
-    final cash= await ApiService().getPaymentById(cashId);
-    
-    if (cash!=null) {
-      final success= await Navigator.push(context, MaterialPageRoute(builder: (context)=> CashPaymentFormScreen(cashId: cashId,payment: cash, isEditMode: true, )));
-      if(success==true) _refreshData();
-    }
-    }catch(e){
-       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error editing payment: $e')),
-    );
-    print('ERROR:$e ');
+  //edit
+  void _editPayment(PlutoRow row) async {
+    try {
+      final cashId = row.cells['id']?.value;
+      if (cashId == null) {
+        throw Exception('Payment ID not found');
+      }
+      final cash = await ApiService().getPaymentById(cashId);
+
+      if (cash != null) {
+        final success = await Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => CashPaymentFormScreen(
+                      cashId: cashId,
+                      payment: cash,
+                      isEditMode: true,
+                    )));
+        if (success == true) _refreshData();
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error editing payment: $e')),
+      );
+      print('ERROR:$e ');
     }
   }
 
   //detail
-  void _detailPayment(PlutoRow row) async{
-    final cashId= row.cells['id']!.value;
-    final cash= await ApiService().getPaymentById(cashId);
+  void _detailPayment(PlutoRow row) async {
+    final cashId = row.cells['id']!.value;
+    final cash = await ApiService().getPaymentById(cashId);
 
-    if (cash!=null) {
-      final success= await Navigator.push(context, MaterialPageRoute(builder: (context)=> CashPaymentFormScreen(cashId: cashId,payment: cash, isViewMode: true, )));
-      if(success==true) _refreshData();
+    if (cash != null) {
+      final success = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => CashPaymentFormScreen(
+                    cashId: cashId,
+                    payment: cash,
+                    isViewMode: true,
+                  )));
+      if (success == true) _refreshData();
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -456,7 +705,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
         _getPaginatedPayments(_filteredPostedPayments, _currentPostedPage);
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       initialIndex: 0,
       child: Scaffold(
         appBar: AppBar(
@@ -470,6 +719,9 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
             tabs: [
               Tab(text: 'Draft'),
               Tab(text: 'Posted'),
+              Tab(
+                text: 'Approved Advance Request List',
+              )
             ],
           ),
         ),
@@ -521,8 +773,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                     label: const Text('New'),
                     onPressed: () async {
                       final success = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => AdvancePage()),
+                        MaterialPageRoute(builder: (context) => AdvancePage()),
                       );
                       if (success == true) _loadPayments();
                     },
@@ -563,7 +814,9 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                   children: [
                     Column(
                       children: [
-                         Expanded(child: buildDraftGrid(_mapPaymentsToRows(paginatedDrafts))),
+                        Expanded(
+                            child: buildDraftGrid(
+                                _mapPaymentsToRows(paginatedDrafts))),
                         if (_stateManagerDraft != null)
                           PlutoGridPagination(
                             stateManager: _stateManagerDraft!,
@@ -575,7 +828,9 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                     ),
                     Column(
                       children: [
-                        Expanded(child: buildPostedGrid(_mapPaymentsToRows(paginatedPosted))),
+                        Expanded(
+                            child: buildPostedGrid(
+                                _mapPaymentsToRows(paginatedPosted))),
                         if (_stateManagerPosted != null)
                           PlutoGridPagination(
                             stateManager: _stateManagerPosted!,
@@ -585,6 +840,21 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                           ),
                       ],
                     ),
+                    Column(
+                      children: [
+                        Expanded(
+                            child: buildAdvanceGrid(_mapAdvanceToRows(
+                                _getPaginatedAdvance(
+                                    _filterAdvance, _currentAdvancePage)))),
+                        if (_stateManagerAdvance != null)
+                          PlutoGridPagination(
+                            stateManager: _stateManagerAdvance!,
+                            totalRows: _filterAdvance.length,
+                            rowsPerPage: _rowsPerPage,
+                            onPageChanged: _handleAdvancePageChange,
+                          ),
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -594,34 +864,58 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       ),
     );
   }
+
   Widget buildDraftGrid(List<PlutoRow> rows) {
-  return PlutoGrid(
-    columns: _columns,
-    rows: rows,
-    onLoaded: (event) => _stateManagerDraft = event.stateManager,
-    configuration: PlutoGridConfiguration(
-      style: PlutoGridStyleConfig(
-        oddRowColor: Colors.blue[50],
-        rowHeight: 35,
-        activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+    return PlutoGrid(
+      columns: _columns,
+      rows: rows,
+      onLoaded: (event) {
+        _stateManagerDraft = event.stateManager;
+        _stateManagerDraft?.setShowLoading(false);
+      },
+      configuration: PlutoGridConfiguration(
+        style: PlutoGridStyleConfig(
+          oddRowColor: Colors.blue[50],
+          rowHeight: 35,
+          activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget buildPostedGrid(List<PlutoRow> rows) {
-  return PlutoGrid(
-    columns: _columns,
-    rows: rows,
-    onLoaded: (event) => _stateManagerPosted = event.stateManager,
-    configuration: PlutoGridConfiguration(
-      style: PlutoGridStyleConfig(
-        oddRowColor: Colors.blue[50],
-        rowHeight: 35,
-        activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+  Widget buildPostedGrid(List<PlutoRow> rows) {
+    return PlutoGrid(
+      columns: _columns,
+      rows: rows,
+      onLoaded: (event) {
+        _stateManagerPosted = event.stateManager;
+        _stateManagerPosted?.setShowLoading(false);
+      },
+      configuration: PlutoGridConfiguration(
+        style: PlutoGridStyleConfig(
+          oddRowColor: Colors.blue[50],
+          rowHeight: 35,
+          activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
+  Widget buildAdvanceGrid(List<PlutoRow> rows) {
+    return PlutoGrid(
+      columns: _buildAdvanceColumn(),
+      rows: rows,
+      onLoaded: (event) {
+        _stateManagerAdvance = event.stateManager;
+        _stateManagerAdvance?.setShowLoading(false);
+      },
+      configuration: PlutoGridConfiguration(
+        style: PlutoGridStyleConfig(
+          oddRowColor: Colors.blue[50],
+          rowHeight: 35,
+          activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+        ),
+      ),
+    );
+  }
 }
