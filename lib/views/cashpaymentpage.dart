@@ -148,7 +148,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
   void _applyFilters() {
     // Start with all payments & advances
     List<Payment> filtered = _allPayments;
-    List<Advance> filteredAdvance = _advance; // ✅ no extra status filter
+    List<Advance> filteredAdvance = _advance;
 
     // Apply date filter
     if (_currentDateRange != null) {
@@ -198,11 +198,14 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
           filtered.where((p) => p.status == 'Draft').toList();
       _filteredPostedPayments =
           filtered.where((p) => p.status == 'Posted').toList();
-      _filterAdvance = filteredAdvance; // ✅ fixed
+      _filterAdvance = filteredAdvance;
       _currentDraftPage = 1;
       _currentPostedPage = 1;
       _currentAdvancePage = 1;
     });
+    print('Filtered Draft Payments Count: ${_filteredDraftPayments.length}');
+    print('Filtered Posted Payments Count: ${_filteredPostedPayments.length}');
+    print('Filtered Advance Requests Count: ${_filterAdvance.length}');
 
     if (_stateManagerDraft != null) {
       _stateManagerDraft!.removeAllRows();
@@ -348,7 +351,19 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(onPressed: null, child: Text("Request Advance"))
+              ElevatedButton(onPressed: ()=> _newPayment(row)
+              ,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB2C8A8),
+                foregroundColor: Colors.black,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ), child: const Text("Add Payment"),
+              
+              )
             ],
           );
         },
@@ -651,6 +666,33 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
     }
   }
 
+  //new cash payment
+  void _newPayment(PlutoRow row) {
+    final advanceId = row.cells['id']?.value;
+    final advance = _advance.firstWhere((a) => a.id == advanceId.toString());
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CashPaymentFormScreen(
+                  cashId: '0',
+                  requestNo: advance.requestNo,
+                  requestType: advance.requestType,
+                  currency: advance.currency,
+                  requestCode: advance.requestCode,
+                  description: advance.requestDes,
+                  requestAmount: advance.requestAmount,
+                  purpose: advance.purpose,
+                  requester: advance.requester,
+                  requestDate: advance.date,
+                  approveAmount: advance.approvedAmount,
+                ))).then((success){
+                  if (success==true) {
+                    _refreshData();
+                  }
+                });
+  }
+
   //edit
   void _editPayment(PlutoRow row) async {
     try {
@@ -768,23 +810,24 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text('New'),
-                    onPressed: () async {
-                      final success = await Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => AdvancePage()),
-                      );
-                      if (success == true) _loadPayments();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade300,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
+                  Container(),
+                  // ElevatedButton.icon(
+                  //   icon: const Icon(Icons.add),
+                  //   label: const Text('New'),
+                  //   onPressed: () async {
+                  //     final success = await Navigator.of(context).push(
+                  //       MaterialPageRoute(builder: (context) => AdvancePage()),
+                  //     );
+                  //     if (success == true) _loadPayments();
+                  //   },
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.grey.shade300,
+                  //     foregroundColor: Colors.black,
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(8),
+                  //     ),
+                  //   ),
+                  // ),
                   Row(
                     children: [
                       IconButton(
@@ -816,7 +859,9 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                       children: [
                         Expanded(
                             child: buildDraftGrid(
-                                _mapPaymentsToRows(paginatedDrafts))),
+                                _mapPaymentsToRows(paginatedDrafts)
+                                // _mapPaymentsToRows(_getPaginatedPayments(_filteredDraftPayments, _currentDraftPage))
+                                )),
                         if (_stateManagerDraft != null)
                           PlutoGridPagination(
                             stateManager: _stateManagerDraft!,
@@ -829,8 +874,10 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                     Column(
                       children: [
                         Expanded(
-                            child: buildPostedGrid(
-                                _mapPaymentsToRows(paginatedPosted))),
+                            child: buildPostedGrid(_mapPaymentsToRows(
+                                paginatedPosted
+                                //  _getPaginatedPayments(_filteredPostedPayments, _currentPostedPage),
+                                ))),
                         if (_stateManagerPosted != null)
                           PlutoGridPagination(
                             stateManager: _stateManagerPosted!,

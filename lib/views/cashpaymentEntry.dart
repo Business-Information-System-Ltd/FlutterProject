@@ -316,6 +316,7 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
   }
 
   void _initializeForm() async {
+    
     _paymentDateController.text =
         DateFormat('yyyy-MM-dd').format(DateTime.now());
 
@@ -458,17 +459,7 @@ class _CashPaymentFormScreenState extends State<CashPaymentFormScreen> {
                       style:
                           const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
-                  if (!widget.isViewMode)
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const AdvancePage()),
-                        );
-                      },
-                      icon: const Icon(Icons.arrow_drop_down),
-                    ),
+                  
                   const SizedBox(height: 15),
                   Row(
                     children: [

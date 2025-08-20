@@ -223,6 +223,7 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
   //     print("Fail to insert trips: $e");
   //   }
   // }
+  
     Future<void> _submitFroms() async {
     setState(() {
     _showValidationErrors = true; 
@@ -411,71 +412,6 @@ class _AddAdvanceRequestFormState extends State<AddAdvanceRequestForm> {
                       const SizedBox(height: 20),
                       _buildTopFormFields(),
                       const SizedBox(height: 5),
-                      if (!widget.isViewMode)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            InkWell(
-                              onTap: () async {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        AdvanceProjectTripTable(),
-                                  ),
-                                );
-
-                                if (result != null) {
-                                  setState(() {
-                                    _isProject = result['type'] == 'Project';
-                                    _requestType.text = result['type'] ?? '';
-                                    _requestDate.text =
-                                        result['requestDate'] ?? '';
-                                    _requestCode.text = _isProject
-                                        ? result['projectCode'] ?? ''
-                                        : result['tripCode'] ?? '';
-                                    _descriptionController.text = _isProject
-                                        ? result['projectDesc'] ?? ''
-                                        : result['tripDesc'] ?? '';
-                                    _totalAmountController.text =
-                                        result['amount'] ?? '';
-                                    _selectedCurrency =
-                                        result['currency'] ?? 'MMK';
-                                    _currencyController.text =
-                                        _selectedCurrency!;
-                                    _department.text =
-                                        result['department'] ?? '';
-
-                                    if (!_isProject) {
-                                      _roundTripController.text =
-                                          result['roundTrip']?.toString() ?? '';
-                                      _sourceTripController.text =
-                                          result['source'] ?? '';
-                                      _destinationTripController.text =
-                                          result['destination'] ?? '';
-                                      _deptNameTripController.text =
-                                          result['deptName'] ?? '';
-                                      _depatureTripController.text =
-                                          result['departure'] ?? '';
-                                      _returnTripController.text =
-                                          result['return'] ?? '';
-                                      _expenditureTripController.text =
-                                          result['expenditure']?.toString() ??
-                                              '';
-                                    }
-                                  });
-                                }
-                              },
-                              child: Container(
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.arrow_drop_down),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       const SizedBox(height: 10),
                       _isProject ? _buildProjectDetails() : _buildTripDetails(),
                       const SizedBox(height: 15),
