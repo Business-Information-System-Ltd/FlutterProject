@@ -645,6 +645,16 @@ class ApiService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> fetchAccounts() async {
+  final response = await http.get(Uri.parse('http://127.0.0.1:8000/api/accounts-list/'));
+
+  if (response.statusCode == 200) {
+    List<dynamic> data = json.decode(response.body);
+    return data.cast<Map<String, dynamic>>();
+  } else {
+    throw Exception('Failed to load accounts');
+  }
+}
   //Projects
   Future<List<Project>> fetchProjects() async {
     final response = await http.get(Uri.parse('$baseUrl/projects'));

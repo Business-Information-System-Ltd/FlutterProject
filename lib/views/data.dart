@@ -797,14 +797,26 @@ class Budgets {
   }
 }
 
+double parseDouble(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  return 0.0;
+}
+
 class Project {
   final String id;
   final DateTime date;
   final String projectCode;
+  final DateTime startdate;
+  final DateTime enddate;
   final String projectDescription;
   final String requesterName;
   final double totalAmount;
   final String currency;
+  final double rate;
+  final double homeAmount;
   final double approvedAmount;
   final int departmentId;
   final String departmentName;
@@ -815,10 +827,14 @@ class Project {
       {required this.id,
       required this.date,
       required this.projectCode,
+      required this.startdate,
+      required this.enddate,
       required this.projectDescription,
       required this.requesterName,
       required this.totalAmount,
       required this.currency,
+      required this.rate,
+      required this.homeAmount,
       required this.approvedAmount,
       required this.departmentId,
       required this.departmentName,
@@ -835,10 +851,18 @@ class Project {
           ? DateFormat('yyyy-MM-dd').parse(json['Date'])
           : DateTime.now(),
       projectCode: json['ProjectCode'],
+      startdate: json['StartDate'] != null
+          ? DateFormat('yyyy-MM-dd').parse(json['StartDate'])
+          : DateTime.now() ,
+       enddate: json['EndDate'] != null
+          ? DateFormat('yyyy-MM-dd').parse(json['EndDate'])
+          : DateTime.now(),
       projectDescription: json['ProjectDescription'],
       requesterName: json['RequesterName'] ?? '',
       totalAmount: json['TotalAmount'],
       currency: json['Currency'],
+      rate: parseDouble(json['Rate']),
+      homeAmount: parseDouble(json['HomeAmount']),
       approvedAmount: json['ApprovedAmount'],
       departmentId: json['DepartmentID'],
       departmentName: json['DepartmentName'],
@@ -854,11 +878,15 @@ class Project {
     return {
        'id': id,
       'Date': DateFormat('yyyy-MM-dd').format(date),
+      'StartDate': DateFormat('yyyy-MM-dd').format(startdate),
+      'EndDate': DateFormat('yyyy-MM-dd').format(enddate),
       'ProjectCode': projectCode,
       'ProjectDescription': projectDescription,
       'RequesterName':requesterName,
       'TotalAmount': totalAmount,
       'Currency': currency,
+      'Rate': rate,
+      'HomeAmount':homeAmount,
       'ApprovedAmount': approvedAmount,
       'DepartmentID': departmentId,
       'DepartmentName': departmentName,
@@ -867,6 +895,7 @@ class Project {
     };
   }
 }
+
 
 class Trips {
   final String id;
