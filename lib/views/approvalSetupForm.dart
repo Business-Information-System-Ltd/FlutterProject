@@ -1,4 +1,6 @@
+import 'package:advance_budget_request_system/views/pagination.dart';
 import 'package:flutter/material.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
 class ApprovalSetup extends StatefulWidget {
   final bool readOnly;
@@ -19,6 +21,11 @@ class ApprovalSetup extends StatefulWidget {
 class _ApprovalSetupState extends State<ApprovalSetup> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
+
+  List<PlutoColumn> _columns=[];
+  List<PlutoRow> _rows=[];
+  List<PlutoRow> _pagedRows=[];
+  PlutoGridStateManager? _stateManager;
 
   final flowNameController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -47,8 +54,87 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
     selectedCurrency;
     selectedDepartment;
   }
+
   Future<void> _submitForm() async {}
 
+  @override
+  void initState() {
+    super.initState();
+    _isLoading = false;
+     _columns = _buildColumns();
+    _rows = [];
+  }
+
+List<PlutoColumn> _buildColumns(){
+  return [
+   PlutoColumn(
+        title: 'Step No',
+        field: 'step_no',
+        type: PlutoColumnType.number(),
+        readOnly: true,
+        width: 100,
+      ),
+      PlutoColumn(
+        title: "Approver's Email",
+        field: 'approver_email',
+        type: PlutoColumnType.text(),
+        width: 200,
+      ),
+      PlutoColumn(
+        title: 'Approver Name',
+        field: 'approver_name',
+        type: PlutoColumnType.text(),
+        width: 200,
+
+      ),
+      PlutoColumn(
+        title: 'Maximum Amount',
+        field: 'max_amount',
+        type: PlutoColumnType.number(),
+        width: 200,
+      ),
+     PlutoColumn(
+      title: "Action", 
+      field: "Action",
+      textAlign: PlutoColumnTextAlign.center,
+      titleTextAlign: PlutoColumnTextAlign.center,
+       type: PlutoColumnType.text(),
+       enableEditingMode: false,
+       width: 150,
+       renderer: (rendererContext) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed:(){}, 
+              icon: Icon(Icons.edit, color: Colors.blue),
+              ),
+              IconButton(
+                onPressed: (){},
+                 icon: Icon(Icons.delete,color: Colors.red),
+                 ),
+                 IconButton(
+                  onPressed: (){},
+                   icon: Icon(Icons.more_horiz, color: Colors.black),
+                   ),
+          ],
+        );
+       },
+       ),
+  ];
+  
+}
+List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
+  return approverlist.map((data){
+      return PlutoRow(cells: {
+        "step_no": PlutoCell(value: data['step_No']),
+        "approver_email": PlutoCell(value: data['approver_email']),
+        "approver_name": PlutoCell(value: data['approver_name']),
+        "max_amount": PlutoCell(value: data['max_amount']),
+        "Action": PlutoCell(value: data['']),
+      });
+  }).toList();
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -226,52 +312,84 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
             Row(
               children: [
                 Expanded(
-                  child: _buildDropdownField(
-                    value: approvalSteps.toString(),
-                    items: steps.map((e) => e.toString()).toList(),
-                    labelText: 'Department',
+                  child: Padding(
+                    
                     padding:
                         EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedDepartment = newValue;
-                      });
-                    },
-                    readOnly: widget.readOnly,
+                    child: DropdownButtonFormField<int>(
+                      value: approvalSteps,
+                      items: List.generate(5, (i) => i + 1)
+                          .map((e) => DropdownMenuItem<int>(
+                                value: e,
+                                child: Text("$e"),
+                              ))
+                          .toList(),
+                      onChanged: widget.readOnly
+                          ? null
+                          : (val) => 
+                          setState((){ approvalSteps = val; _buildRows;}),
+                      decoration: InputDecoration(
+                        labelText: 'Approval Steps',
+                        fillColor: Colors.grey[200],
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(color: Colors.grey, width: 1),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                      disabledHint: approvalSteps != null ? Text("$approvalSteps") : null,
+                    ),
                   ),
                 ),
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    decoration: InputDecoration(labelText: "Approval Steps"),
-                    value: approvalSteps,
-                    items: List.generate(10, (i) => i + 1)
-                        .map((e) =>
-                            DropdownMenuItem(value: e, child: Text("$e")))
-                        .toList(),
-                    onChanged: (val) =>
-                        setState(() => approvalSteps = val ?? 1),
-                  ),
-                ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Row(
                     children: [
                       Checkbox(
                         value: isManagementApprover,
-                        onChanged: (val) =>
-                            setState(() => isManagementApprover = val ?? false),
+                        onChanged: widget.readOnly
+                            ? null
+                            : (val) => setState(
+                                () => isManagementApprover = val ?? false),
                       ),
-                      Text("Management Approver"),
+                      const Text("Management Approver"),
                     ],
                   ),
                 ),
-              ],
-            ),
+                 const SizedBox(height: 10),
+             
+           
           ],
+        ),
+        SizedBox(height: 10),
+         Container(
+               padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 1),
+              height: 170,
+              width: MediaQuery.of(context).size.width ,
+             
+              child: PlutoGrid(
+                columns: _columns,
+                rows: _rows,
+                onLoaded: (PlutoGridOnLoadedEvent event) {
+                  _stateManager = event.stateManager;
+                  _stateManager!.setShowColumnFilter(false);
+                },
+                configuration: PlutoGridConfiguration(
+                  
+                  style: PlutoGridStyleConfig(
+                    columnHeight: 30,
+                    oddRowColor: Colors.blue[50],
+                    rowHeight: 35,
+                    activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
+                  ),
+                ),
+                mode: PlutoGridMode.readOnly,
+              ),
+            ),
+              ],
+          
         ),
       ),
     );

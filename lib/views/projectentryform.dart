@@ -1436,11 +1436,7 @@ _rows = accountList.map((item){
                           horizontal: 16.0, vertical: 1),
               height: 170,
               width: MediaQuery.of(context).size.width,
-              // decoration: BoxDecoration(
-                
-              //    // color: Colors.grey.shade300,
-              //     border: Border.all(color: Colors.grey.shade300),
-              //     ),
+             
               child: PlutoGrid(
                 columns: _columns,
                 rows: _rows,

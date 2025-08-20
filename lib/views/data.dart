@@ -1369,47 +1369,186 @@ class Users {
   }
 }
 
+// class RequestSetup {
+//   final String id;
+//   final String departmentID;
+//   final String currency;
+//   final String flowType;
+//   final String description;
+//   final int noOfSteps;
+//   final int managementApprover;
+
+//   RequestSetup(
+//       {required this.id,
+//       required this.departmentID,
+//       required this.currency,
+//       required this.flowType,
+//       required this.description,
+//       required this.noOfSteps,
+//       required this.managementApprover});
+
+//   factory RequestSetup.fromJson(Map<String, dynamic> json) {
+//     return RequestSetup(
+//       id: json['id'] is int
+//           ? json['id']
+//           : int.tryParse(json['id'].toString()) ?? 0,
+//       departmentID: json['DepartmentID'] ?? '',
+//       currency: json['Currency'] ?? '',
+//       flowType: json['FlowType'] ?? '',
+//       description: json['Description'],
+//       noOfSteps: json['NoOfStep'],
+//       managementApprover: json['ManagementApprover'] ?? '',
+//     );
+//   }
+
+//   Map<String, dynamic> toJson() {
+//     return {
+//       'id': id,
+//       'UserName': departmentID,
+//       'UserEmail': currency,
+//       'Role': flowType,
+//       'Password': description,
+//       'DepartmentID': noOfSteps,
+//       'DepartmentName': managementApprover
+//     };
+//   }
+// }
+
 class RequestSetup {
-  final String id;
-  final String departmentID;
+  final int id;
+  final String flowName;
+  final int departmentId;
   final String currency;
   final String flowType;
   final String description;
   final int noOfSteps;
-  final int managementApprover;
+  final bool managementApprover;
+  final List<ApprovalStep> approvalSteps;
 
-  RequestSetup(
-      {required this.id,
-      required this.departmentID,
-      required this.currency,
-      required this.flowType,
-      required this.description,
-      required this.noOfSteps,
-      required this.managementApprover});
+  RequestSetup({
+    required this.id,
+    required this.flowName,
+    required this.departmentId,
+    required this.currency,
+    required this.flowType,
+    required this.description,
+    required this.noOfSteps,
+    required this.managementApprover,
+    required this.approvalSteps,
+  });
 
   factory RequestSetup.fromJson(Map<String, dynamic> json) {
     return RequestSetup(
-      id: json['id'] is int
-          ? json['id']
-          : int.tryParse(json['id'].toString()) ?? 0,
-      departmentID: json['DepartmentID'] ?? '',
-      currency: json['Currency'] ?? '',
-      flowType: json['FlowType'] ?? '',
-      description: json['Description'],
-      noOfSteps: json['NoOfStep'],
-      managementApprover: json['ManagementApprover'] ?? '',
+      id: json['id'] ?? 0,
+      flowName: json['flow_name'] ?? '',
+      departmentId: json['department_id'] ?? 0,
+      currency: json['currency'] ?? '',
+      flowType: json['flow_type'] ?? '',
+      description: json['description'] ?? '',
+      noOfSteps: json['no_of_steps'] ?? 0,
+      managementApprover:json[' managementApprover'] is bool ? json[' managementApprover'] : false,
+      approvalSteps: (json['approval_steps'] as List<dynamic>? ?? [])
+          .map((e) => ApprovalStep.fromJson(e))
+          .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'UserName': departmentID,
-      'UserEmail': currency,
-      'Role': flowType,
-      'Password': description,
-      'DepartmentID': noOfSteps,
-      'DepartmentName': managementApprover
+      'flow_name': flowName,
+      'department_id': departmentId,
+      'currency': currency,
+      'flow_type': flowType,
+      'description': description,
+      'no_of_steps': noOfSteps,
+      'management_approver': managementApprover,
+      'approval_steps': approvalSteps.map((e) => e.toJson()).toList(),
     };
   }
 }
+//RequestSetup
+class ApprovalSetupStep {
+  final int id;
+  final int setupId;
+  final int stepNo;
+  final double maximumApprovalAmount;
+  final String approverEmail;
+  final String isAllApprover; // Enum handled as String
+  final DateTime? limitedTime;
+  final bool requestStatus;
+  final List<UserApproval> userApprovals;
+
+  ApprovalSetupStep({
+    required this.id,
+    required this.setupId,
+    required this.stepNo,
+    required this.maximumApprovalAmount,
+    required this.approverEmail,
+    required this.isAllApprover,
+    this.limitedTime,
+    required this.requestStatus,
+    required this.userApprovals,
+  });
+
+  factory ApprovalSetupStep.fromJson(Map<String, dynamic> json) {
+    return ApprovalSetupStep(
+      id: json['id'] ?? 0,
+      setupId: json['setup_id'] ?? 0,
+      stepNo: json['step_no'] ?? 0,
+      maximumApprovalAmount: (json['maximum_approval_amount'] ?? 0).toDouble(),
+      approverEmail: json['approver_email'] ?? '',
+      isAllApprover: json['is_all_approver'] ?? 'One approver',
+      limitedTime: json['limited_time'] != null
+          ? DateTime.tryParse(json['limited_time'])
+          : null,
+      requestStatus: json['request_status'] ?? false,
+      userApprovals: (json['user_approvals'] as List<dynamic>? ?? [])
+          .map((e) => UserApproval.fromJson(e))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'setup_id': setupId,
+      'step_no': stepNo,
+      'maximum_approval_amount': maximumApprovalAmount,
+      'approver_email': approverEmail,
+      'is_all_approver': isAllApprover,
+      'limited_time': limitedTime?.toIso8601String(),
+      'request_status': requestStatus,
+      'user_approvals': userApprovals.map((e) => e.toJson()).toList(),
+    };
+  }
+}
+
+class UserApproval {
+  final int id;
+  final int userId;
+  final int setupStepId;
+
+  UserApproval({
+    required this.id,
+    required this.userId,
+    required this.setupStepId,
+  });
+
+  factory UserApproval.fromJson(Map<String, dynamic> json) {
+    return UserApproval(
+      id: json['id'] ?? 0,
+      userId: json['user_id'] ?? 0,
+      setupStepId: json['setup_step_id'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'setup_step_id': setupStepId,
+    };
+  }
+}
+

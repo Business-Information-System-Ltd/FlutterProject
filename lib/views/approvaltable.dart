@@ -1,3 +1,4 @@
+import 'package:advance_budget_request_system/views/approvalSetupForm.dart';
 import 'package:advance_budget_request_system/views/pagination.dart';
 import 'package:advance_budget_request_system/views/searchfunction.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class _ApprovalSetupListState extends State<ApprovalSetupList> {
   String _searchQuery = '';
   int _currentPage = 1;
   int _rowsPerPage=10; 
+    bool _isLoading=true;
   bool _managementApprover=true;
   String? _selectedDepartmentName;
   String? _selectedType;
@@ -307,7 +309,19 @@ void _handleSearch(String query){
                 children: [
                   ElevatedButton.icon(
                     icon: const Icon(Icons.add),
-                    onPressed: (){},
+                   onPressed: () async {
+                      final result = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => ApprovalSetup(
+                             
+                              isEditMode: false,
+                              isViewMode: false,)),
+                      );
+                      setState(() {
+                        _isLoading=false;
+                      });
+                         
+                    },
                      label: const Text('New'),
                      style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey.shade300,

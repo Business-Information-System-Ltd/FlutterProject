@@ -837,6 +837,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                             totalRows: _filteredPostedPayments.length,
                             rowsPerPage: _rowsPerPage,
                             onPageChanged: _handlePostedPageChange,
+                            
                           ),
                       ],
                     ),
@@ -844,6 +845,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                       children: [
                         Expanded(
                             child: buildAdvanceGrid(_mapAdvanceToRows(
+                              
                                 _getPaginatedAdvance(
                                     _filterAdvance, _currentAdvancePage)))),
                         if (_stateManagerAdvance != null)

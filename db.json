@@ -1012,5 +1012,59 @@
       "SettledAmount": 5000,
       "SettlementID": 1
     }
-  ]
+  ],
+   "requestsetups": [
+  {
+    "id": 1,
+    "flow_name": "Project Approval Flow",
+    "department_id": 2,
+    "currency": "USD",
+    "flow_type": "Project",
+    "description": "Approval flow for project requests",
+    "no_of_steps": 2,
+    "management_approver": "Yes",
+    "approval_steps": [
+      {
+        "id": 10,
+        "setup_id": 1,
+        "step_no": 1,
+        "maximum_approval_amount": 5000.0,
+        "approver_email": "manager1@company.com",
+        "is_all_approver": "One approver",
+        "limited_time": "2025-08-20T18:00:00Z",
+        "request_status": true,
+        "user_approvals": [
+          {
+            "id": 1001,
+            "user_id": 201,
+            "setup_step_id": 10
+          },
+          {
+            "id": 1002,
+            "user_id": 202,
+            "setup_step_id": 10
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "setup_id": 1,
+        "step_no": 2,
+        "maximum_approval_amount": 20000.0,
+        "approver_email": "director@company.com",
+        "is_all_approver": "All Approvers",
+        "limited_time": "2025-08-25T18:00:00Z",
+        "request_status": false,
+        "user_approvals": [
+          {
+            "id": 1003,
+            "user_id": 301,
+            "setup_step_id": 11
+          }
+        ]
+      }
+    ]
+  }
+]
+
 }

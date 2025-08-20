@@ -1025,5 +1025,63 @@ class ApiService {
     }
   }
 
-  //approval setup
+//ApprovalSetup
+ // Fetch all request setups
+  Future<List<RequestSetup>> fetchRequestSetups() async {
+    final response = await http.get(Uri.parse("http://localhost:3000/requestsetups/"));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((e) => RequestSetup.fromJson(e)).toList();
+    } else {
+      throw Exception("Failed to fetch request setups");
+    }
+  }
+
+  // Fetch single setup by ID
+  Future<RequestSetup> fetchRequestSetupById(int id) async {
+    final response = await http.get(Uri.parse("http://localhost:3000/requestsetups/$id/"));
+    if (response.statusCode == 200) {
+      return RequestSetup.fromJson(json.decode(response.body));
+    } else {
+      throw Exception("Failed to fetch request setup");
+    }
+  }
+
+  // Create new setup
+  Future<RequestSetup> createRequestSetup(RequestSetup setup) async {
+    final response = await http.post(
+      Uri.parse("http://localhost:3000/requestsetups/"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(setup.toJson()),
+    );
+    if (response.statusCode == 201) {
+      return RequestSetup.fromJson(json.decode(response.body));
+    } else {
+      throw Exception("Failed to create request setup");
+    }
+  }
+
+  // Update setup
+  Future<RequestSetup> updateRequestSetup(int id, RequestSetup setup) async {
+    final response = await http.put(
+      Uri.parse("http://localhost:3000/requestsetups/$id/"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(setup.toJson()),
+    );
+    if (response.statusCode == 200) {
+      return RequestSetup.fromJson(json.decode(response.body));
+    } else {
+      throw Exception("Failed to update request setup");
+    }
+  }
+
+  // Delete setup
+  Future<void> deleteRequestSetup(int id) async {
+    final response = await http.delete(Uri.parse("http://localhost:3000/requestsetups/$id/"));
+    if (response.statusCode != 204) {
+      throw Exception("Failed to delete request setup");
+    }
+  }
 }
+
+
