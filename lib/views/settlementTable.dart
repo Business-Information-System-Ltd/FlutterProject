@@ -293,7 +293,7 @@ class _SettlementTableState extends State<SettlementTable> {
                 flex: 1,
                 child: DateFilterDropdown(
                   onDateRangeChanged: _handleDateRangeChange,
-                  initialValue: _currentFilterType,
+                  selectedValue: _currentFilterType,
                 ),
               ),
               const SizedBox(width: 10),

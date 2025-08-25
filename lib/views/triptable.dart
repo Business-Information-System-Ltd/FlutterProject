@@ -378,7 +378,7 @@ class _TripInformationState extends State<TripInformation> {
                 flex: 1,
                 child: DateFilterDropdown(
                   onDateRangeChanged: _handleDateRangeChange,
-                  initialValue: _currentFilterType,
+                  selectedValue: _currentFilterType,
                 ),
               ),
               const SizedBox(width: 10),
@@ -395,15 +395,16 @@ class _TripInformationState extends State<TripInformation> {
                   },
                 ),
               const SizedBox(width: 20),
-              Flexible(
-                flex: 3,
-                child: CustomSearchBar(
-                  onSearch: _handleSearch,
-                  hintText: 'Search...',
-                  minWidth: 500,
-                  maxWidth: 800,
-                ),
-              ),
+               Flexible(
+                      flex: 3,
+                      child: CustomSearchBar(
+                        onSearch: _handleSearch,
+                        hintText: 'Search...',
+                        minWidth: 500,
+                        maxWidth: 800,
+                        initialValue: _searchQuery,
+                      ),
+                    ),
             ]),
             const SizedBox(height: 20),
             Row(

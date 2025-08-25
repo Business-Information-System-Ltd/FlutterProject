@@ -48,6 +48,31 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
     _loadPayments();
   }
 
+void _newPayment(PlutoRow row) {
+    final advanceId = row.cells['id']?.value;
+    final advance = _advance.firstWhere((a) => a.id == advanceId.toString());
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CashPaymentFormScreen(
+                  cashId: '0',
+                  requestNo: advance.requestNo,
+                  requestType: advance.requestType,
+                  currency: advance.currency,
+                  requestCode: advance.requestCode,
+                  description: advance.requestDes,
+                  requestAmount: advance.requestAmount,
+                  purpose: advance.purpose,
+                  requester: advance.requester,
+                  requestDate: advance.date,
+                  approveAmount: advance.approvedAmount,
+                ))).then((success){
+                  if (success==true) {
+                    _refreshData();
+                  }
+                });
+  }
   void _loadPayments() async {
     try {
       final payments = await ApiService().fetchPayments();
@@ -68,89 +93,11 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
     }
   }
 
-  // void _applyFilters() {
-
-  //   List<Payment> filtered = _allPayments;
-  //   List<Advance> filteredAdvance =
-  //       _advance.where((a) => a.status == 'Approve').toList();
-
-  //   // Apply date filter
-  //   if (_currentDateRange != null) {
-  //     final startDate = DateTime(
-  //       _currentDateRange!.start.year,
-  //       _currentDateRange!.start.month,
-  //       _currentDateRange!.start.day,
-  //     );
-
-  //     final endDate = DateTime(
-  //       _currentDateRange!.end.year,
-  //       _currentDateRange!.end.month,
-  //       _currentDateRange!.end.day,
-  //     ).add(const Duration(days: 1));
-
-  //     filtered = filtered.where((payment) {
-  //       final paymentDate = DateTime(
-  //         payment.date.year,
-  //         payment.date.month,
-  //         payment.date.day,
-  //       );
-  //       return paymentDate.isAtSameMomentAs(startDate) ||
-  //           (paymentDate.isAfter(startDate) && paymentDate.isBefore(endDate));
-  //     }).toList();
-
-  //     filteredAdvance = filteredAdvance.where((a) {
-  //       final advanceDate = DateTime(a.date.year, a.date.month, a.date.day);
-  //       return advanceDate.isAtSameMomentAs(startDate) ||
-  //           (advanceDate.isAfter(startDate) && advanceDate.isBefore(endDate));
-  //     }).toList();
-  //   }
-
-  //   // Apply search filter
-  //   if (_searchQuery.isNotEmpty) {
-  //     filtered = filtered
-  //         .where((payment) =>
-  //             SearchUtils.matchesSearchPayment(payment, _searchQuery))
-  //         .toList();
-  //     filteredAdvance = filteredAdvance
-  //         .where((advance) =>
-  //             SearchUtils.matchesSearchAdvance(advance, _searchQuery))
-  //         .toList();
-  //   }
-
-  //   setState(() {
-  //     _filteredDraftPayments =
-  //         filtered.where((p) => p.status == 'Draft').toList();
-  //     _filteredPostedPayments =
-  //         filtered.where((p) => p.status == 'Posted').toList();
-  //     _filterAdvance = filteredAdvance;
-  //     _currentDraftPage = 1;
-  //     _currentPostedPage = 1;
-  //     _currentAdvancePage = 1;
-  //   });
-
-  //   if (_stateManagerDraft != null) {
-  //     _stateManagerDraft!.removeAllRows();
-  //     _stateManagerDraft!.appendRows(_mapPaymentsToRows(
-  //         _getPaginatedPayments(_filteredDraftPayments, _currentDraftPage)));
-  //   }
-  //   if (_stateManagerPosted != null) {
-  //     _stateManagerPosted!.removeAllRows();
-  //     _stateManagerPosted!.appendRows(_mapPaymentsToRows(
-  //         _getPaginatedPayments(_filteredPostedPayments, _currentPostedPage)));
-  //   }
-  //   if (_stateManagerAdvance != null) {
-  //     _stateManagerAdvance!.removeAllRows();
-  //     _stateManagerAdvance!.appendRows(_mapAdvanceToRows(
-  //         _getPaginatedAdvance(_filterAdvance, _currentAdvancePage)));
-  //   }
-  // }
-
   void _applyFilters() {
-    // Start with all payments & advances
     List<Payment> filtered = _allPayments;
-    List<Advance> filteredAdvance = _advance; // ✅ no extra status filter
+    List<Advance> filteredAdvance = _advance; 
 
-    // Apply date filter
+   
     if (_currentDateRange != null) {
       final startDate = DateTime(
         _currentDateRange!.start.year,
@@ -181,7 +128,6 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       }).toList();
     }
 
-    // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered
           .where((payment) =>
@@ -198,10 +144,8 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
           filtered.where((p) => p.status == 'Draft').toList();
       _filteredPostedPayments =
           filtered.where((p) => p.status == 'Posted').toList();
-      _filterAdvance = filteredAdvance; // ✅ fixed
-      _currentDraftPage = 1;
-      _currentPostedPage = 1;
-      _currentAdvancePage = 1;
+      _filterAdvance = filteredAdvance; 
+      
     });
 
     if (_stateManagerDraft != null) {
@@ -348,7 +292,19 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(onPressed: null, child: Text("Request Advance"))
+             ElevatedButton(onPressed: ()=> _newPayment(row)
+              ,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB2C8A8),
+                foregroundColor: Colors.black,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),  
+              ), child: const Text("Add Payment"),
+              
+              )
             ],
           );
         },
@@ -449,18 +405,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
           final status = rendererContext.row.cells['status']?.value;
           return Row(
             children: [
-              // IconButton(
-              //   icon: const Icon(Icons.edit, color: Colors.blue),
-              //   tooltip: 'Edit',
-              //   onPressed: ()=> _editPayment(rendererContext.row),
-              // ),
-              // IconButton(
-              //   icon: const Icon(Icons.more_horiz_outlined, color: Colors.blue),
-              //   tooltip: 'Detail',
-              //   onPressed: ()=> _detailPayment(rendererContext.row),
-              // ),
-
-              // Conditionally show Edit and Post icons for 'Draft' status
+             
               if (status == 'Draft') ...[
                 IconButton(
                   icon: const Icon(Icons.edit, color: Colors.blue),
@@ -487,25 +432,31 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       ),
     ];
   }
+void _handleDraftPageChange(int page, int rowsPerPage) {
+  setState(() {
+    _currentDraftPage = page;
+    _rowsPerPage = rowsPerPage;
+  });
+  _stateManagerDraft?.setShowLoading(true);
 
-  void _handleDraftPageChange(int page, int rowsPerPage) {
-    setState(() {
-      _currentDraftPage = page;
-      _rowsPerPage = rowsPerPage;
-    });
-    _stateManagerDraft?.setShowLoading(true);
+  Future.delayed(Duration(milliseconds: 100), () {
     _applyFilters();
-  }
+    _stateManagerDraft?.setShowLoading(false);  
+  });
+}
 
-  void _handlePostedPageChange(int page, int rowsPerPage) {
-    setState(() {
-      _currentPostedPage = page;
-      _rowsPerPage = rowsPerPage;
-    });
-    _stateManagerPosted?.setShowLoading(true);
+ void _handlePostedPageChange(int page, int rowsPerPage) {
+  setState(() {
+    _currentPostedPage = page;
+    _rowsPerPage = rowsPerPage;
+  });
+  _stateManagerPosted?.setShowLoading(true);
+
+  Future.delayed(Duration(milliseconds: 100), () {
     _applyFilters();
-  }
-
+    _stateManagerPosted?.setShowLoading(false);  
+  });
+}
   void _postedPayment(PlutoRow row) async {
     try {
       final cashId = row.cells['id']?.value;
@@ -554,24 +505,6 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       end > advances.length ? advances.length : end,
     );
   }
-
-  // Widget buildGrid(List<PlutoRow> rows) {
-  //   return PlutoGrid(
-  //     columns: _columns,
-  //     rows: rows,
-  //     configuration: PlutoGridConfiguration(
-  //       style: PlutoGridStyleConfig(
-  //         oddRowColor: Colors.blue[50],
-  //         rowHeight: 35,
-  //         activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
-  //       ),
-  //     ),
-  //     onLoaded: (event) {
-  //       _stateManagerDraft = event.stateManager;
-  //       _stateManagerPosted = event.stateManager;
-  //     },
-  //   );
-  // }
 
   void _refreshData() async {
     setState(() {
@@ -735,7 +668,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                     flex: 1,
                     child: DateFilterDropdown(
                       onDateRangeChanged: _handleDateRangeChange,
-                      initialValue: _currentFilterType,
+                      selectedValue: _currentFilterType,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -754,15 +687,16 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                       },
                     ),
                   const SizedBox(width: 20),
-                  Flexible(
-                    flex: 3,
-                    child: CustomSearchBar(
-                      onSearch: _handleSearch,
-                      hintText: 'Search...',
-                      minWidth: 500,
-                      maxWidth: 800,
+                   Flexible(
+                      flex: 3,
+                      child: CustomSearchBar(
+                        onSearch: _handleSearch,
+                        hintText: 'Search...',
+                        minWidth: 500,
+                        maxWidth: 800,
+                        initialValue: _searchQuery,
+                      ),
                     ),
-                  ),
                 ],
               ),
               Row(
@@ -890,9 +824,11 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       columns: _columns,
       rows: rows,
       onLoaded: (event) {
+       setState(() {
         _stateManagerPosted = event.stateManager;
-        _stateManagerPosted?.setShowLoading(false);
-      },
+      });
+      _stateManagerPosted?.setShowLoading(false);
+    },
       configuration: PlutoGridConfiguration(
         style: PlutoGridStyleConfig(
           oddRowColor: Colors.blue[50],
@@ -908,9 +844,11 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
       columns: _buildAdvanceColumn(),
       rows: rows,
       onLoaded: (event) {
+         setState(() {
         _stateManagerAdvance = event.stateManager;
-        _stateManagerAdvance?.setShowLoading(false);
-      },
+      });
+      _stateManagerAdvance?.setShowLoading(false);
+    },
       configuration: PlutoGridConfiguration(
         style: PlutoGridStyleConfig(
           oddRowColor: Colors.blue[50],

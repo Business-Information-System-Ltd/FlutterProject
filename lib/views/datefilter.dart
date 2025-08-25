@@ -3,12 +3,15 @@ import 'package:intl/intl.dart';
 
 class DateFilterDropdown extends StatefulWidget {
   final Function(DateTimeRange range, String selectedValue) onDateRangeChanged;
-  final String? initialValue;
+ 
+  final String? selectedValue; 
+  final DateTimeRange? customRange;
 
   const DateFilterDropdown({
     super.key,
     required this.onDateRangeChanged,
-    this.initialValue,
+    this.selectedValue,
+    this.customRange,
   });
 
   @override
@@ -144,25 +147,21 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
   @override
   void initState() {
     super.initState();
-    selectedDate = widget.initialValue;
+    selectedDate = widget.selectedValue;
   }
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      value: selectedDate,
-      hint: const Text("Filter by Date"),
-      onChanged: (value) {
-        setState(() {
-          selectedDate = value;
-        });
-
-        if (value == 'custom_date') {
-          _showCustomDateDialog(context);
-        } else if (value != null) {
-          _filterByPresetDate(value);
-        }
-      },
+      return DropdownButton<String>(
+    value: widget.selectedValue, 
+    hint: const Text("Filter by Date"),
+    onChanged: (value) {
+      if (value == 'custom_date') {
+        _showCustomDateDialog(context);
+      } else if (value != null) {
+        _filterByPresetDate(value);
+      }
+    },
       items: [
         DropdownMenuItem(
           value: 'today',

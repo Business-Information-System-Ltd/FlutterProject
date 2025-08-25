@@ -4,75 +4,13 @@ import 'package:advance_budget_request_system/views/data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-// class CustomSearchBar extends StatefulWidget {
-//   final Function(String) onSearch;
-//   final String hintText;
-//   final double width;
-
-//   const CustomSearchBar({
-//     Key? key,
-//     required this.onSearch,
-//     this.hintText = 'Search...',
-//     this.width = 300,
-//   }) : super(key: key);
-
-//   @override
-//   _CustomSearchBarState createState() => _CustomSearchBarState();
-// }
-
-// class _CustomSearchBarState extends State<CustomSearchBar> {
-//   final TextEditingController _controller = TextEditingController();
-//   Timer? _debounce;
-
-//   @override
-//   void dispose() {
-//     _debounce?.cancel();
-//     _controller.dispose();
-//     super.dispose();
-//   }
-
-//   void _onSearchChanged(String query) {
-//     if (_debounce?.isActive ?? false) _debounce?.cancel();
-
-//     _debounce = Timer(const Duration(milliseconds: 500), () {
-//       widget.onSearch(query);
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return SizedBox(
-//       width: widget.width,
-//       child: TextField(
-//         controller: _controller,
-//         decoration: InputDecoration(
-//           hintText: widget.hintText,
-//           prefixIcon: const Icon(Icons.search),
-//           border: OutlineInputBorder(
-//             borderRadius: BorderRadius.circular(8),
-//           ),
-//           suffixIcon: _controller.text.isNotEmpty
-//               ? IconButton(
-//                   icon: const Icon(Icons.clear),
-//                   onPressed: () {
-//                     _controller.clear();
-//                     widget.onSearch('');
-//                   },
-//                 )
-//               : null,
-//         ),
-//         onChanged: _onSearchChanged,
-//       ),
-//     );
-//   }
-// }
-
 class CustomSearchBar extends StatefulWidget {
   final Function(String) onSearch;
   final String hintText;
   final double? minWidth;
   final double? maxWidth;
   final double? flex;
+  final String? initialValue;
 
   const CustomSearchBar({
     Key? key,
@@ -80,16 +18,31 @@ class CustomSearchBar extends StatefulWidget {
     this.hintText = 'Search...',
     this.minWidth = 300,
     this.maxWidth,
-    this.flex,
+    this.flex, 
+    this.initialValue,
   }) : super(key: key);
 
   @override
   _CustomSearchBarState createState() => _CustomSearchBarState();
-}
-
-class _CustomSearchBarState extends State<CustomSearchBar> {
-  final TextEditingController _controller = TextEditingController();
+ }
+  class _CustomSearchBarState extends State<CustomSearchBar> {
+  late TextEditingController _controller;
   Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue ?? '');
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomSearchBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controller text when parent passes new initialValue
+    if (widget.initialValue != oldWidget.initialValue) {
+      _controller.text = widget.initialValue ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -110,8 +63,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        double responsiveWidth =
-            constraints.maxWidth * 0.5; // Default to 50% of available space
+        double responsiveWidth = constraints.maxWidth * 0.5;
 
         if (widget.minWidth != null && responsiveWidth < widget.minWidth!) {
           responsiveWidth = widget.minWidth!;

@@ -53,7 +53,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
     _columns = _buildColumns();
     _rows = _buildRows(projects);
     _fetchProjects();
-    _refreshButton();
+   _refreshData();
     _isLoading=false;
     print(" Rows loaded: ${_rows.length}");
   }
@@ -265,7 +265,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
         width: 120,
       ),
       PlutoColumn(
-        title: 'Requestable',
+        title: 'Status',
         field: 'requestable',
         type: PlutoColumnType.text(),
         enableEditingMode: false,
@@ -320,7 +320,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
     ];
   }
 
-  void _refreshButton() async{
+  void _refreshData() async{
     setState(() {
       _searchQuery = "";
       _currentDateRange = null;
@@ -477,7 +477,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
                     flex: 1,
                     child: DateFilterDropdown(
                       onDateRangeChanged: _handleDateRangeChange,
-                      initialValue: _currentFilterType,
+                      selectedValue: _currentFilterType,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -500,14 +500,15 @@ class _ProjectInformationState extends State<ProjectInformation> {
                     width: 20,
                   ),
                   Flexible(
-                    flex: 3,
-                    child: CustomSearchBar(
-                      onSearch: _handleSearch,
-                      hintText: 'Search...',
-                      minWidth: 500,
-                      maxWidth: 800,
+                      flex: 3,
+                      child: CustomSearchBar(
+                        onSearch: _handleSearch,
+                        hintText: 'Search...',
+                        minWidth: 500,
+                        maxWidth: 800,
+                        initialValue: _searchQuery,
+                      ),
                     ),
-                  ),
                 ],
               ),
               const SizedBox(
@@ -552,7 +553,7 @@ class _ProjectInformationState extends State<ProjectInformation> {
                       Container(
                         child: IconButton(
                           icon: const Icon(Icons.refresh),
-                          onPressed: _refreshButton,
+                          onPressed: _refreshData,
                           color: Colors.black,
                         ),
                       ),

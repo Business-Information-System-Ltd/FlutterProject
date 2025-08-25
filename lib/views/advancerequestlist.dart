@@ -73,8 +73,6 @@ class AdvanceRequestPage extends StatefulWidget {
 
 class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
   int _selectedTab = 0;
-
-  // Data holders
   List<Advance> advances = [];
   List<Advance> filteredAdvances = [];
   List<Project> projects = [];
@@ -82,16 +80,27 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
   List<Trips> trips = [];
   List<Trips> filteredTrips = [];
   final NumberFormat _formatter = NumberFormat('#,###');
-  String _searchQuery = '';
+  String _searchQuery = "";
+  String? _globalDateFilterType;
   DateTimeRange? _currentDateRange;
-  String? _currentFilterType;
-  int _currentPage = 1;
+
   int _rowsPerPage = 10;
-  PlutoGridStateManager? _gridStateManager;
   bool _loading = true;
   int _currentPageAdvance = 1;
   int _currentPageProject = 1;
   int _currentPageTrip = 1;
+
+  // String _searchQueryAdvance = '';
+  // String _searchQueryProject = '';
+  // String _searchQueryTrip = '';
+
+  // DateTimeRange? _currentDateRangeAdvance;
+  // DateTimeRange? _currentDateRangeProject;
+  // DateTimeRange? _currentDateRangeTrip;
+
+  String? _currentFilterTypeAdvance;
+  String? _currentFilterTypeProject;
+  String? _currentFilterTypeTrip;
 
   PlutoGridStateManager? _gridStateManagerAdvance;
   PlutoGridStateManager? _gridStateManagerProject;
@@ -116,123 +125,310 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
           .where((t) => t.directAdvanceReq == false)
           .toList();
       filteredTrips = List.from(trips);
+
+      _applyCurrentTabFilter();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error loading data: $e')),
       );
-      _applyFilter();
     }
     setState(() => _loading = false);
   }
 
   void _refreshData() async {
     setState(() {
-      _searchQuery = "";
+      // _searchQueryAdvance = "";
+      // _searchQueryProject = "";
+      // _searchQueryTrip = "";
+      _searchQuery = '';
       _currentDateRange = null;
-      _currentFilterType = null;
-      _currentPage = 1;
+      _globalDateFilterType = null;
+
+      // _currentDateRangeAdvance = null;
+      // _currentDateRangeProject = null;
+      // _currentDateRangeTrip = null;
+
+      _currentFilterTypeAdvance = null;
+      _currentFilterTypeProject = null;
+      _currentFilterTypeTrip = null;
+
+      _currentPageAdvance = 1;
+      _currentPageProject = 1;
+      _currentPageTrip = 1;
     });
+
     try {
       List<Advance> advance = await ApiService().fetchAdvanceRequests();
       List<Project> project = await ApiService().fetchProjects();
       List<Trips> trip = await ApiService().fetchTrips();
+
       setState(() {
         advances = advance;
         projects =
             project.where((p) => p.requestable.toLowerCase() == 'yes').toList();
         trips = trip.where((t) => t.directAdvanceReq == false).toList();
-      });
-      _applyFilter();
 
-      // _applyDateFilter();
+        filteredAdvances = List.from(advances);
+        filteredProjects = List.from(projects);
+        filteredTrips = List.from(trips);
+        _applyCurrentTabFilter();
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to refresh trips: ${e.toString()}')),
+        SnackBar(content: Text('Failed to refresh: ${e.toString()}')),
       );
+    }
+  }
+
+  void _requestAdvanceProject(PlutoRow row) {
+    final projectId = row.cells['id']?.value;
+    if (projectId != null) {
+      final project = projects.firstWhere((p) => p.id == projectId.toString());
+
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => AddAdvanceRequestForm(
+                    advanceId: '0',
+                    requestType: 'Project',
+                    projectCode: project.projectCode,
+                    description: project.projectDescription,
+                    totalAmount: project.totalAmount.toString(),
+                    currency: project.currency,
+                    department: project.departmentName,
+                    requestDate: DateFormat('yyyy-MM-dd').format(project.date),
+                  ))).then((success) {
+        if (success == true) {
+          _refreshData();
+        }
+      });
+    }
+  }
+
+  void _requestAdvanceTrip(PlutoRow row) {
+    final tripId = row.cells['id']?.value;
+    if (tripId != null) {
+      final trip = trips.firstWhere((t) => t.id == tripId.toString());
+
+      final tripData = {
+        'roundTrip': trip.roundTrip ? 'Yes' : 'No',
+        'source': trip.source,
+        'destination': trip.destination,
+        'deptName': trip.departmentName,
+        'departure': DateFormat('yyyy-MM-dd').format(trip.departureDate),
+        'return': DateFormat('yyyy-MM-dd').format(trip.returnDate),
+        'expenditure':
+            trip.expenditureOption == 0 ? 'Fix Allowance' : 'Claim later',
+      };
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => AddAdvanceRequestForm(
+                    advanceId: '0',
+                    requestType: 'Trip',
+                    tripCode: trip.tripCode,
+                    description: trip.tripDescription,
+                    totalAmount: trip.totalAmount.toString(),
+                    currency: trip.currency,
+                    department: trip.departmentName,
+                    requestDate: DateFormat('yyyy-MM-dd').format(trip.date),
+                    tripData: tripData,
+                  ))).then((success) {
+        if (success == true) {
+          _refreshData();
+        }
+      });
     }
   }
 
   void _handleSearch(String query) {
     setState(() {
       _searchQuery = query;
-      _applyFilter();
+      _applyCurrentTabFilter();
     });
   }
 
   void _handleDateRangeChanged(DateTimeRange range, String selectedValue) {
     setState(() {
-      _currentDateRange = range;
-      _currentFilterType = selectedValue;
-      _applyFilter();
+      switch (_selectedTab) {
+        case 0:
+          _currentDateRange = range;
+          _currentFilterTypeAdvance = selectedValue;
+          _applyAdvanceFilter();
+          break;
+        case 1:
+          _currentDateRange = range;
+          _currentFilterTypeProject = selectedValue;
+          _applyProjectFilter();
+          break;
+        case 2:
+          _currentDateRange = range;
+          _currentFilterTypeTrip = selectedValue;
+          _applyTripFilter();
+          break;
+      }
     });
   }
 
-  void _applyFilter() {
+  void _applyCurrentTabFilter() {
+    switch (_selectedTab) {
+      case 0:
+        _applyAdvanceFilter();
+        break;
+      case 1:
+        _applyProjectFilter();
+        break;
+      case 2:
+        _applyTripFilter();
+        break;
+    }
+  }
+
+  void _applyAdvanceFilter() {
     filteredAdvances = List.from(advances);
-    filteredProjects = List.from(projects);
-    filteredTrips = List.from(trips);
+
     if (_searchQuery.isNotEmpty) {
       filteredAdvances = filteredAdvances.where((advance) {
         return SearchUtils.matchesSearchAdvance(advance, _searchQuery);
       }).toList();
+    }
 
-      filteredProjects = filteredProjects.where((project) {
-        return SearchUtils.matchesSearchProject(project, _searchQuery);
-      }).toList();
-
-      filteredTrips = filteredTrips.where((trip) {
-        return SearchUtils.matchesSearchTrip(trip, _searchQuery);
-      }).toList();
-    } 
-    // else {
-    //   filteredAdvances = List.from(advances);
-    //   filteredProjects = List.from(projects);
-    //   filteredTrips = List.from(trips);
-    // }
     if (_currentDateRange != null) {
       filteredAdvances = filteredAdvances.where((advance) {
-        return advance.date.isAfter(
-                _currentDateRange!.start.subtract(const Duration(days: 1))) &&
+        return advance.date.isAfter(_currentDateRange!.start) &&
             advance.date
                 .isBefore(_currentDateRange!.end.add(const Duration(days: 1)));
       }).toList();
+    }
+
+    _currentPageAdvance = 1;
+    if (_gridStateManagerAdvance != null) {
+      final rows = _getAdvanceRows(_paginatedAdvances);
+      _gridStateManagerAdvance!.setPage(1);
+      _gridStateManagerAdvance!.removeAllRows();
+      _gridStateManagerAdvance!.appendRows(rows);
+      _gridStateManagerAdvance!.resetCurrentState();
+      _gridStateManagerAdvance!.notifyListeners();
+    }
+  }
+
+  void _applyProjectFilter() {
+    filteredProjects = List.from(projects);
+
+    if (_searchQuery.isNotEmpty) {
       filteredProjects = filteredProjects.where((project) {
-        return project.date.isAfter(
-                _currentDateRange!.start.subtract(const Duration(days: 1))) &&
+        return SearchUtils.matchesSearchProject(project, _searchQuery);
+      }).toList();
+    }
+
+    if (_currentDateRange != null) {
+      filteredProjects = filteredProjects.where((project) {
+        return project.date.isAfter(_currentDateRange!.start) &&
             project.date
                 .isBefore(_currentDateRange!.end.add(const Duration(days: 1)));
       }).toList();
+    }
 
+    _currentPageProject = 1;
+    if (_gridStateManagerProject != null) {
+      final rows = _getProjectRows(_paginatedProjects);
+      _gridStateManagerProject!.setPage(1);
+      _gridStateManagerProject!.removeAllRows();
+      _gridStateManagerProject!.appendRows(rows);
+      _gridStateManagerProject!.resetCurrentState();
+      _gridStateManagerProject!.notifyListeners();
+    }
+  }
+
+  void _applyTripFilter() {
+    filteredTrips = List.from(trips);
+
+    if (_searchQuery.isNotEmpty) {
       filteredTrips = filteredTrips.where((trip) {
-        return trip.date.isAfter(
-                _currentDateRange!.start.subtract(const Duration(days: 1))) &&
+        return SearchUtils.matchesSearchTrip(trip, _searchQuery);
+      }).toList();
+    }
+
+    if (_currentDateRange != null) {
+      filteredTrips = filteredTrips.where((trip) {
+        return trip.date.isAfter(_currentDateRange!.start) &&
             trip.date
                 .isBefore(_currentDateRange!.end.add(const Duration(days: 1)));
       }).toList();
     }
-    _currentPageAdvance = 1;
-    _currentPageProject = 1;
     _currentPageTrip = 1;
-    if (_gridStateManagerAdvance != null) {
-      _gridStateManagerAdvance!.setPage(1);
-      _gridStateManagerAdvance!.setPageSize(_rowsPerPage);
-      _gridStateManagerAdvance!.resetCurrentState();
-      _gridStateManagerAdvance!.notifyListeners();
-    }
-    if (_gridStateManagerProject != null) {
-      _gridStateManagerProject!.setPage(1);
-      _gridStateManagerProject!.setPageSize(_rowsPerPage);
-      _gridStateManagerProject!.resetCurrentState();
-      _gridStateManagerProject!.notifyListeners();
-    }
     if (_gridStateManagerTrip != null) {
+      final rows = _getTripRows(_paginatedTrips);
       _gridStateManagerTrip!.setPage(1);
-      _gridStateManagerTrip!.setPageSize(_rowsPerPage);
+      _gridStateManagerTrip!.removeAllRows();
+      _gridStateManagerTrip!.appendRows(rows);
       _gridStateManagerTrip!.resetCurrentState();
       _gridStateManagerTrip!.notifyListeners();
     }
   }
 
+  List<PlutoRow> _getAdvanceRows(List<Advance> data) {
+    return data
+        .map((advance) => PlutoRow(cells: {
+              'id': PlutoCell(value: advance.id),
+              'requestdate': PlutoCell(
+                  value: DateFormat('yyyy-MM-dd').format(advance.date)),
+              'requestno': PlutoCell(value: advance.requestNo),
+              'requesttype': PlutoCell(value: advance.requestType),
+              'requestcode': PlutoCell(value: advance.requestCode),
+              'requestamount': PlutoCell(value: advance.requestAmount),
+              'currency': PlutoCell(value: advance.currency),
+              'requester': PlutoCell(value: advance.requester),
+              'action': PlutoCell(value: '')
+            }))
+        .toList();
+  }
+
+  List<PlutoRow> _getProjectRows(List<Project> data) {
+    return data
+        .map((project) => PlutoRow(cells: {
+              'id': PlutoCell(value: project.id),
+              'requestDate': PlutoCell(
+                  value: DateFormat('yyyy-MM-dd').format(project.date)),
+              'projectCode': PlutoCell(value: project.projectCode),
+              'projectDesc': PlutoCell(value: project.projectDescription),
+              'department': PlutoCell(value: project.departmentName),
+              'amount': PlutoCell(value: project.totalAmount.toString()),
+              'currency': PlutoCell(value: project.currency),
+              'Requester': PlutoCell(value: project.requesterName),
+              'action': PlutoCell(value: ''),
+            }))
+        .toList();
+  }
+
+  List<PlutoRow> _getTripRows(List<Trips> data) {
+    return data
+        .map((trip) => PlutoRow(cells: {
+              'id': PlutoCell(value: trip.id),
+              'requestDate':
+                  PlutoCell(value: DateFormat('yyyy-MM-dd').format(trip.date)),
+              'tripCode': PlutoCell(value: trip.tripCode),
+              'tripDesc': PlutoCell(value: trip.tripDescription),
+              'amount': PlutoCell(value: trip.totalAmount.toString()),
+              'currency': PlutoCell(value: trip.currency),
+              'Requester': PlutoCell(value: trip.requesterName),
+              'action': PlutoCell(value: ''),
+              'department': PlutoCell(value: trip.departmentName),
+              'roundTrip':
+                  PlutoCell(value: trip.roundTrip == true ? 'Yes' : 'No'),
+              'source': PlutoCell(value: trip.source),
+              'destination': PlutoCell(value: trip.destination),
+              'departureDate': PlutoCell(
+                  value: DateFormat('yyyy-MM-dd').format(trip.departureDate)),
+              'returnDate': PlutoCell(
+                  value: DateFormat('yyyy-MM-dd').format(trip.returnDate)),
+              'expenditureOption': PlutoCell(
+                  value: trip.expenditureOption == 0
+                      ? 'Fix Allowance'
+                      : 'Claim later'),
+            }))
+        .toList();
+  }
 
   //Export button
   Future<void> exportToCSV() async {
@@ -554,7 +750,8 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
                       ? filteredAdvances.length
                       : start + rowsPerPage;
 
-                  final _paginatedAdvances = filteredAdvances.sublist(start, end);
+                  final _paginatedAdvances =
+                      filteredAdvances.sublist(start, end);
 
                   final rows = _paginatedAdvances
                       .map((advance) => PlutoRow(cells: {
@@ -642,7 +839,18 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(onPressed: null, child: Text("Request Advance"))
+              ElevatedButton(
+                  onPressed: () => _requestAdvanceProject(rendererContext.row),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFB2C8A8),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text("Request Advance"))
             ],
           );
         },
@@ -784,7 +992,18 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(onPressed: null, child: Text("Request Advance"))
+              ElevatedButton(
+                  onPressed: () => _requestAdvanceTrip(rendererContext.row),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFB2C8A8),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text("Request Advance"))
             ],
           );
         },
@@ -913,21 +1132,28 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
                     Flexible(
                       flex: 1,
                       child: DateFilterDropdown(
-                        onDateRangeChanged: _handleDateRangeChanged,
-                        initialValue: _currentFilterType,
+                        selectedValue: _globalDateFilterType,
+                        customRange: _currentDateRange,
+                        onDateRangeChanged: (range, type) {
+                          setState(() {
+                            _currentDateRange = range;
+                            _globalDateFilterType = type;
+                          });
+                          _applyCurrentTabFilter();
+                        },
                       ),
                     ),
                     const SizedBox(width: 10),
-                    if (_currentFilterType != null)
+                    if (_globalDateFilterType != null)
                       Chip(
                         label: Text(
-                            'Filter: ${_currentFilterType!.replaceAll('_', ' ')}'),
+                            'Filter: ${_globalDateFilterType!.replaceAll('_', ' ')}'),
                         onDeleted: () {
                           setState(() {
+                            _globalDateFilterType = null;
                             _currentDateRange = null;
-                            _currentFilterType = null;
                           });
-                          _applyFilter();
+                          _applyCurrentTabFilter();
                         },
                       ),
                     const SizedBox(width: 16),
@@ -938,6 +1164,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
                         hintText: 'Search...',
                         minWidth: 500,
                         maxWidth: 800,
+                        initialValue: _searchQuery,
                       ),
                     ),
                   ],
@@ -955,8 +1182,9 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
                         onTap: () {
                           setState(() {
                             _selectedTab = 0;
-                            _currentPage = 1;
+                            _currentPageAdvance = 1;
                           });
+                          _applyAdvanceFilter();
                           _fetchAllData();
                         },
                       ),
@@ -966,8 +1194,9 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
                         onTap: () {
                           setState(() {
                             _selectedTab = 1;
-                            _currentPage = 1;
+                            _currentPageProject = 1;
                           });
+                          _applyProjectFilter();
                           _fetchAllData();
                         },
                       ),
@@ -977,8 +1206,9 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
                         onTap: () {
                           setState(() {
                             _selectedTab = 2;
-                            _currentPage = 1;
+                            _currentPageTrip = 1;
                           });
+                          _applyTripFilter();
                           _fetchAllData();
                         },
                       ),
@@ -1040,5 +1270,43 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
         ),
       ),
     );
+  }
+
+  String? _getCurrentFilterType() {
+    switch (_selectedTab) {
+      case 0:
+        return _currentFilterTypeAdvance;
+      case 1:
+        return _currentFilterTypeProject;
+      case 2:
+        return _currentFilterTypeTrip;
+      default:
+        return null;
+    }
+  }
+
+  void _clearCurrentFilter() {
+    setState(() {
+      switch (_selectedTab) {
+        case 0:
+          _currentDateRange = null;
+          _currentFilterTypeAdvance = null;
+          _searchQuery = '';
+          _applyAdvanceFilter();
+          break;
+        case 1:
+          _currentDateRange = null;
+          _currentFilterTypeProject = null;
+          _searchQuery = '';
+          _applyProjectFilter();
+          break;
+        case 2:
+          _currentDateRange = null;
+          _currentFilterTypeTrip = null;
+          _searchQuery = '';
+          _applyTripFilter();
+          break;
+      }
+    });
   }
 }
