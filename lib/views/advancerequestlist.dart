@@ -603,6 +603,58 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
     }
   }
 
+  void _requestAdvanceProject(PlutoRow row){
+    final projectId= row.cells['id']?.value;
+    if (projectId!=null) {
+      final project= projects.firstWhere((p)=> p.id==projectId.toString());
+
+      Navigator.push(context, MaterialPageRoute(builder: (context)=> AddAdvanceRequestForm(advanceId: '0',
+      requestType: 'Project',
+          projectCode: project.projectCode,
+          description: project.projectDescription,
+          totalAmount: project.totalAmount.toString(),
+          currency: project.currency,
+          department: project.departmentName,
+          requestDate: DateFormat('yyyy-MM-dd').format(project.date),
+      ) ) ).then((success){
+        if (success==true) {
+          _refreshData();
+        }
+      });
+    }
+  }
+
+  void _requestAdvanceTrip(PlutoRow row){
+    final tripId= row.cells['id']?.value;
+    if (tripId!=null) {
+      final trip = trips.firstWhere((t) => t.id == tripId.toString());
+      
+      final tripData= {
+         'roundTrip': trip.roundTrip ? 'Yes' : 'No',
+      'source': trip.source,
+      'destination': trip.destination,
+      'deptName': trip.departmentName,
+      'departure': DateFormat('yyyy-MM-dd').format(trip.departureDate),
+      'return': DateFormat('yyyy-MM-dd').format(trip.returnDate),
+      'expenditure': trip.expenditureOption == 0 ? 'Fix Allowance' : 'Claim later',
+      };
+      Navigator.push(context, MaterialPageRoute(builder: (context)=> AddAdvanceRequestForm(advanceId: '0',
+        requestType: 'Trip',
+          tripCode: trip.tripCode,
+          description: trip.tripDescription,
+          totalAmount: trip.totalAmount.toString(),
+          currency: trip.currency,
+          department: trip.departmentName,
+          requestDate: DateFormat('yyyy-MM-dd').format(trip.date),
+          tripData: tripData,
+      ))).then((success){
+        if (success==true) {
+          _refreshData();
+        }
+      });
+    }
+  }
+
   Widget _buildAdvanceGrid() {
     final columns = [
       PlutoColumn(

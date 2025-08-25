@@ -147,6 +147,9 @@ void _newPayment(PlutoRow row) {
       _filterAdvance = filteredAdvance; 
       
     });
+    print('Filtered Draft Payments Count: ${_filteredDraftPayments.length}');
+    print('Filtered Posted Payments Count: ${_filteredPostedPayments.length}');
+    print('Filtered Advance Requests Count: ${_filterAdvance.length}');
 
     if (_stateManagerDraft != null) {
       _stateManagerDraft!.removeAllRows();
@@ -584,6 +587,33 @@ void _handleDraftPageChange(int page, int rowsPerPage) {
     }
   }
 
+  //new cash payment
+  void _newPayment(PlutoRow row) {
+    final advanceId = row.cells['id']?.value;
+    final advance = _advance.firstWhere((a) => a.id == advanceId.toString());
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CashPaymentFormScreen(
+                  cashId: '0',
+                  requestNo: advance.requestNo,
+                  requestType: advance.requestType,
+                  currency: advance.currency,
+                  requestCode: advance.requestCode,
+                  description: advance.requestDes,
+                  requestAmount: advance.requestAmount,
+                  purpose: advance.purpose,
+                  requester: advance.requester,
+                  requestDate: advance.date,
+                  approveAmount: advance.approvedAmount,
+                ))).then((success){
+                  if (success==true) {
+                    _refreshData();
+                  }
+                });
+  }
+
   //edit
   void _editPayment(PlutoRow row) async {
     try {
@@ -702,23 +732,24 @@ void _handleDraftPageChange(int page, int rowsPerPage) {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text('New'),
-                    onPressed: () async {
-                      final success = await Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => AdvancePage()),
-                      );
-                      if (success == true) _loadPayments();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade300,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
+                  Container(),
+                  // ElevatedButton.icon(
+                  //   icon: const Icon(Icons.add),
+                  //   label: const Text('New'),
+                  //   onPressed: () async {
+                  //     final success = await Navigator.of(context).push(
+                  //       MaterialPageRoute(builder: (context) => AdvancePage()),
+                  //     );
+                  //     if (success == true) _loadPayments();
+                  //   },
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.grey.shade300,
+                  //     foregroundColor: Colors.black,
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(8),
+                  //     ),
+                  //   ),
+                  // ),
                   Row(
                     children: [
                       IconButton(
@@ -750,7 +781,9 @@ void _handleDraftPageChange(int page, int rowsPerPage) {
                       children: [
                         Expanded(
                             child: buildDraftGrid(
-                                _mapPaymentsToRows(paginatedDrafts))),
+                                _mapPaymentsToRows(paginatedDrafts)
+                                // _mapPaymentsToRows(_getPaginatedPayments(_filteredDraftPayments, _currentDraftPage))
+                                )),
                         if (_stateManagerDraft != null)
                           PlutoGridPagination(
                             stateManager: _stateManagerDraft!,
@@ -763,8 +796,10 @@ void _handleDraftPageChange(int page, int rowsPerPage) {
                     Column(
                       children: [
                         Expanded(
-                            child: buildPostedGrid(
-                                _mapPaymentsToRows(paginatedPosted))),
+                            child: buildPostedGrid(_mapPaymentsToRows(
+                                paginatedPosted
+                                //  _getPaginatedPayments(_filteredPostedPayments, _currentPostedPage),
+                                ))),
                         if (_stateManagerPosted != null)
                           PlutoGridPagination(
                             stateManager: _stateManagerPosted!,
