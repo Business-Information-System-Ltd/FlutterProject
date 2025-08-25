@@ -360,7 +360,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
-                ),
+                ),  
               ), child: const Text("Add Payment"),
               
               )
@@ -777,7 +777,7 @@ class _CashPaymentPageState extends State<CashPaymentPage> {
                     flex: 1,
                     child: DateFilterDropdown(
                       onDateRangeChanged: _handleDateRangeChange,
-                      initialValue: _currentFilterType,
+                      selectedValue: _currentFilterType,
                     ),
                   ),
                   const SizedBox(width: 10),

@@ -965,9 +965,16 @@ class ApiService {
       // print('Request can create successfully!');
     }
   }
+  Future<void> deleteSettlement(String id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/settlements/$id'));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception(
+          'Failed to delete settlement. Status code: ${response.statusCode}');
+    }
+  }
 
   //getSettlementbyID
-  Future<List<Settlement>> getSettlementById(int id) async {
+  Future<List<Settlement?>> getSettlementById(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/settlements/$id'));
     return jsonDecode(response.body);
   }
