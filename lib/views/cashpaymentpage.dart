@@ -587,32 +587,9 @@ void _handleDraftPageChange(int page, int rowsPerPage) {
     }
   }
 
-  //new cash payment
-  void _newPayment(PlutoRow row) {
-    final advanceId = row.cells['id']?.value;
-    final advance = _advance.firstWhere((a) => a.id == advanceId.toString());
 
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => CashPaymentFormScreen(
-                  cashId: '0',
-                  requestNo: advance.requestNo,
-                  requestType: advance.requestType,
-                  currency: advance.currency,
-                  requestCode: advance.requestCode,
-                  description: advance.requestDes,
-                  requestAmount: advance.requestAmount,
-                  purpose: advance.purpose,
-                  requester: advance.requester,
-                  requestDate: advance.date,
-                  approveAmount: advance.approvedAmount,
-                ))).then((success){
-                  if (success==true) {
-                    _refreshData();
-                  }
-                });
-  }
+  
+  
 
   //edit
   void _editPayment(PlutoRow row) async {
@@ -733,23 +710,7 @@ void _handleDraftPageChange(int page, int rowsPerPage) {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(),
-                  // ElevatedButton.icon(
-                  //   icon: const Icon(Icons.add),
-                  //   label: const Text('New'),
-                  //   onPressed: () async {
-                  //     final success = await Navigator.of(context).push(
-                  //       MaterialPageRoute(builder: (context) => AdvancePage()),
-                  //     );
-                  //     if (success == true) _loadPayments();
-                  //   },
-                  //   style: ElevatedButton.styleFrom(
-                  //     backgroundColor: Colors.grey.shade300,
-                  //     foregroundColor: Colors.black,
-                  //     shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.circular(8),
-                  //     ),
-                  //   ),
-                  // ),
+                  
                   Row(
                     children: [
                       IconButton(
