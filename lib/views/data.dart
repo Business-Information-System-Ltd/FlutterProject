@@ -1190,7 +1190,7 @@ class Payment {
 } 
 
 class Settlement {
-  final int id;
+  final String id;
   final DateTime settlementDate;
   final String paymentNo;
   final DateTime paymentDate;
@@ -1216,15 +1216,16 @@ class Settlement {
 
   factory Settlement.fromJson(Map<String, dynamic> json) {
     return Settlement(
-      id: json['id'] is int
-          ? json['id']
-          : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'],
+      // is int
+      //     ? json['id']
+      //     : int.tryParse(json['id'].toString()) ?? 0,
       settlementDate: DateTime.parse(json['SettlementDate']),
-      paymentNo: json['PaymentNo'],
-      paymentDate: DateTime.parse(json['PaymentDate']),
-      withdrawnAmount: json['WithdrawnAmount'],
-      settleAmount: json['SettleAmount'],
-      refundAmount: json['RefundAmount'],
+      paymentNo: json['PaymentNo']??'',
+      paymentDate: DateTime.parse(json['PaymentDate'])?? DateTime.now(),
+      withdrawnAmount: json['WithdrawnAmount']??0,
+      settleAmount: json['SettleAmount']??0,
+      refundAmount: json['RefundAmount']??0,
       settled: json['Settled'],
       // paymentId: json['PaymentID'],
       payment: json['Payments'] != null

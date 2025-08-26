@@ -164,8 +164,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
 
       setState(() {
         advances = advance;
-        projects =
-            project.where((p) => p.requestable.toLowerCase() == 'yes').toList();
+        projects = project.where((p) => p.requestable.toLowerCase() == 'yes').toList();
         trips = trip.where((t) => t.directAdvanceReq == false).toList();
 
         filteredAdvances = List.from(advances);
@@ -248,7 +247,7 @@ class _AdvanceRequestPageState extends State<AdvanceRequestPage> {
     });
   }
 
-  void _handleDateRangeChanged(DateTimeRange range, String selectedValue) {
+   void _handleDateRangeChanged(DateTimeRange range, String selectedValue) {
     setState(() {
       switch (_selectedTab) {
         case 0:
