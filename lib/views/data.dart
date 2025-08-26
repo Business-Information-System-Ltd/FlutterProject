@@ -1474,7 +1474,7 @@ class ApprovalSetupStep {
   final int stepNo;
   final double maximumApprovalAmount;
   final String approverEmail;
-  final String isAllApprover; // Enum handled as String
+  final String isAllApprover;
   final DateTime? limitedTime;
   final bool requestStatus;
   final List<UserApproval> userApprovals;
@@ -1552,3 +1552,17 @@ class UserApproval {
   }
 }
 
+class StepData {
+  int stepNo;
+  List<ApproverData> approvers;
+  
+  StepData({required this.stepNo, required this.approvers});
+}
+
+class ApproverData {
+  String? approverEmail;
+  String? approverName;
+  double maxAmount;
+  
+  ApproverData({this.approverEmail, this.approverName, required this.maxAmount, });
+}

@@ -224,6 +224,7 @@ void _handleSearch(String query){
                     hintText: 'Search...',
                     minWidth: 400,
                     maxWidth: 600,
+                    initialValue: _searchQuery,
                     
                      ),
                 ),

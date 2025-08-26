@@ -1,3 +1,4 @@
+import 'package:advance_budget_request_system/views/data.dart';
 import 'package:advance_budget_request_system/views/pagination.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -22,9 +23,9 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
 
-  List<PlutoColumn> _columns=[];
-  List<PlutoRow> _rows=[];
-  List<PlutoRow> _pagedRows=[];
+  List<PlutoColumn> _columns = [];
+  List<PlutoRow> _rows = [];
+  List<PlutoRow> _pagedRows = [];
   PlutoGridStateManager? _stateManager;
 
   final flowNameController = TextEditingController();
@@ -38,14 +39,32 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
   int? approvalSteps;
 
   bool isManagementApprover = false;
-
+  List<StepData> stepsData = [];
+  List<Map<String, dynamic>> allApprovers = [];
+  List<String> approverEmails = [
+    'age@gmail.com',
+    'myo@gmail.com',
+    'Idnin@gmail.com'
+  ];
+  Map<String, String> emailToNameMap = {
+    'age@gmail.com': 'age',
+    'myo@gmail.com': 'rage',
+    'Idnin@gmail.com': 'Idnin'
+  };
   final requestTypes = ["Project", "Trip", "Operation"];
   final currencies = ["USD", "MMK"];
   final departments = ["HR", "Finance", "IT"];
   final steps = [1, 2, 3, 4, 5];
 
   String? selectedApproverEmail;
-  final approverEmails = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _isLoading = false;
+    _columns = _buildColumns();
+    _rows = [];
+  }
 
   void _clearForm() {
     flowNameController.clear();
@@ -57,75 +76,221 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
 
   Future<void> _submitForm() async {}
 
-  @override
-  void initState() {
-    super.initState();
-    _isLoading = false;
-     _columns = _buildColumns();
-    _rows = [];
+  void _initializeSteps(int numberOfSteps) {
+    setState(() {
+      stepsData = List.generate(numberOfSteps,
+          (index) => StepData(stepNo: index + 1, approvers: [ApproverData(maxAmount: 0)]));
+      _updateRows();
+    });
   }
 
-List<PlutoColumn> _buildColumns(){
-  return [
-   PlutoColumn(
+  void _updateRows() {
+    List<PlutoRow> newRows = [];
+
+    for (var step in stepsData) {
+      for (var approver in step.approvers) {
+        newRows.add(PlutoRow(
+          cells: {
+            "step_no": PlutoCell(value: step.stepNo),
+            "approver_email": PlutoCell(value: approver.approverEmail),
+            "approver_name": PlutoCell(value: approver.approverName),
+            "max_amount": PlutoCell(value: approver.maxAmount),
+            "action": PlutoCell(value: ''),
+          },
+        ));
+      }
+
+      newRows.add(PlutoRow(
+        cells: {
+          "step_no": PlutoCell(value: 'add_${step.stepNo}'),
+          "approver_email": PlutoCell(value: null),
+          "approver_name": PlutoCell(value: null),
+          "max_amount": PlutoCell(value: null),
+          "action": PlutoCell(value: null),
+        },
+      ));
+    }
+    _rows = newRows;
+
+    // if (_stateManager != null) {
+    //   _stateManager!.resetRows(_rows);
+    // }
+
+    setState(() {});
+  }
+
+  void _addApprover(int stepNo) {
+    setState(() {
+      final stepIndex = stepsData.indexWhere((s) => s.stepNo == stepNo);
+      if (stepIndex != -1) {
+        stepsData[stepIndex].approvers.add(ApproverData(maxAmount:0));
+        _updateRows();
+      }
+    });
+  }
+
+
+
+  void _removeApprover(int stepNo, int approverIndex) {
+    setState(() {
+      final stepIndex = stepsData.indexWhere((s) => s.stepNo == stepNo);
+      if (stepIndex != -1 && stepsData[stepIndex].approvers.length > 1) {
+        stepsData[stepIndex].approvers.removeAt(approverIndex);
+        _updateRows();
+      }
+    });
+  }
+
+
+  List<PlutoColumn> _buildColumns() {
+    return [
+      PlutoColumn(
         title: 'Step No',
         field: 'step_no',
-        type: PlutoColumnType.number(),
+        type: PlutoColumnType.text(),
         readOnly: true,
-        width: 100,
+        width: 110,
+        renderer: (rendererContext) {
+          final value = rendererContext.row.cells['step_no']!.value.toString();
+
+          // "Add Approver" row
+          if (value.startsWith('add_')) {
+            final stepNo = int.parse(value.split('_')[1]);
+            return ElevatedButton(
+              onPressed: () => _addApprover(stepNo),
+              child: const Text('Add '),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                backgroundColor:Colors.blueGrey,
+                foregroundColor: Colors.black,
+              ),
+            );
+          }
+
+          return Text(value,
+              style: const TextStyle(fontWeight: FontWeight.bold));
+        },
       ),
       PlutoColumn(
         title: "Approver's Email",
         field: 'approver_email',
         type: PlutoColumnType.text(),
-        width: 200,
+        width: 250,
+        renderer: (rendererContext) {
+          final stepValue =
+              rendererContext.row.cells['step_no']!.value.toString();
+          if (stepValue.startsWith('add_')) return Container();
+
+          return DropdownButtonFormField<String>(
+            value: rendererContext.row.cells['approver_email']!.value,
+            items: approverEmails
+                .map((email) =>
+                    DropdownMenuItem(value: email, child: Text(email)))
+                .toList(),
+            onChanged: (newValue) {
+              rendererContext.stateManager.changeCellValue(
+                  rendererContext.row.cells['approver_email']!, newValue);
+
+              if (newValue != null && emailToNameMap.containsKey(newValue)) {
+                rendererContext.stateManager.changeCellValue(
+                    rendererContext.row.cells['approver_name']!,
+                    emailToNameMap[newValue]);
+              }
+            },
+            decoration: const InputDecoration(border: InputBorder.none),
+          );
+        },
       ),
       PlutoColumn(
         title: 'Approver Name',
         field: 'approver_name',
         type: PlutoColumnType.text(),
-        width: 200,
+        width: 180,
+        renderer: (rendererContext) {
+          final stepValue =
+              rendererContext.row.cells['step_no']!.value.toString();
+          if (stepValue.startsWith('add_')) return Container();
 
+          return Text(
+              rendererContext.row.cells['approver_name']!.value?.toString() ??
+                  '');
+        },
       ),
       PlutoColumn(
         title: 'Maximum Amount',
         field: 'max_amount',
         type: PlutoColumnType.number(),
-        width: 200,
+        width: 170,
+       // enableEditingMode: true,
+        renderer: (rendererContext) {
+          final stepValue =
+              rendererContext.row.cells['step_no']!.value.toString();
+          if (stepValue.startsWith('add_')) return Container();
+
+          return TextField(
+            controller: TextEditingController(
+                text: rendererContext.row.cells['max_amount']!.value
+                        ?.toString() ??
+                    ''),
+            onChanged: (value) {
+              rendererContext.stateManager.changeCellValue(
+                  rendererContext.row.cells['max_amount']!,
+                  double.tryParse(value) ?? 0);
+            },
+            // keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            ),
+          );
+        },
       ),
-     PlutoColumn(
-      title: "Action", 
-      field: "Action",
-      textAlign: PlutoColumnTextAlign.center,
-      titleTextAlign: PlutoColumnTextAlign.center,
-       type: PlutoColumnType.text(),
-       enableEditingMode: false,
-       width: 150,
-       renderer: (rendererContext) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed:(){}, 
-              icon: Icon(Icons.edit, color: Colors.blue),
+      PlutoColumn(
+        title: "Action",
+        field: "action",
+        type: PlutoColumnType.text(),
+        enableEditingMode: false,
+        width: 145,
+        renderer: (rendererContext) {
+          final stepValue =
+              rendererContext.row.cells['step_no']!.value.toString();
+          if (stepValue.startsWith('add_')) return Container();
+
+          final stepNo = int.parse(stepValue);
+          final rowIndex = rendererContext.rowIdx;
+
+          // find approver index within this step
+          int approverIndex = 0;
+          for (int i = 0; i < rowIndex; i++) {
+            final prevStepValue = _rows[i].cells['step_no']!.value.toString();
+            if (!prevStepValue.startsWith('add_') &&
+                int.parse(prevStepValue) == stepNo) {
+              approverIndex++;
+            }
+          }
+
+          return Row(
+            children: [
+               IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue),
+                  onPressed: () {}),
+              IconButton(
+                onPressed: () => _removeApprover(stepNo, approverIndex),
+                icon: const Icon(Icons.delete, color: Colors.red, size: 20),
               ),
               IconButton(
-                onPressed: (){},
-                 icon: Icon(Icons.delete,color: Colors.red),
-                 ),
-                 IconButton(
-                  onPressed: (){},
-                   icon: Icon(Icons.more_horiz, color: Colors.black),
-                   ),
-          ],
-        );
-       },
-       ),
-  ];
-  
-}
-List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
-  return approverlist.map((data){
+                  icon: const Icon(Icons.more_horiz),
+                  onPressed: () => {}),
+            ],
+          );
+         
+        },
+      ),
+    ];
+  }
+
+  List<PlutoRow> _buildRows(List<Map<String, String>> approverlist) {
+    return approverlist.map((data) {
       return PlutoRow(cells: {
         "step_no": PlutoCell(value: data['step_No']),
         "approver_email": PlutoCell(value: data['approver_email']),
@@ -133,18 +298,19 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
         "max_amount": PlutoCell(value: data['max_amount']),
         "Action": PlutoCell(value: data['']),
       });
-  }).toList();
-}
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.green[100],
       appBar: AppBar(
         title: Text(widget.isViewMode
-            ? 'Project Details'
+            ? 'Approval Setup Details'
             : widget.isEditMode
-                ? 'Edit Project'
-                : 'New Project Request'),
+                ? 'Edit Approval Setup'
+                : 'New Approval Setup Request'),
         actions: widget.isViewMode
             ? [
                 IconButton(
@@ -184,6 +350,7 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold))),
                           _buildFormWithSubmit(),
+                          
                         ],
                       ),
                     ),
@@ -242,7 +409,7 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
                     controller: flowNameController,
                     labelText: 'Flow Name',
                     padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 7.0),
                   ),
                 ),
                 SizedBox(width: 5.0),
@@ -251,7 +418,7 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
                     controller: descriptionController,
                     labelText: 'Description',
                     padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 3.0),
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 7.0),
                   ),
                 ),
               ],
@@ -264,7 +431,7 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
                     items: requestTypes,
                     labelText: 'Request Type',
                     padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 7.0),
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedRequestType = newValue;
@@ -280,7 +447,7 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
                     items: currencies,
                     labelText: 'Currency',
                     padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 7.0),
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedCurrency = newValue;
@@ -298,7 +465,7 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
                     items: departments,
                     labelText: 'Department',
                     padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 7.0),
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedDepartment = newValue;
@@ -311,37 +478,7 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
             ),
             Row(
               children: [
-                Expanded(
-                  child: Padding(
-                    
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
-                    child: DropdownButtonFormField<int>(
-                      value: approvalSteps,
-                      items: List.generate(5, (i) => i + 1)
-                          .map((e) => DropdownMenuItem<int>(
-                                value: e,
-                                child: Text("$e"),
-                              ))
-                          .toList(),
-                      onChanged: widget.readOnly
-                          ? null
-                          : (val) => 
-                          setState((){ approvalSteps = val; _buildRows;}),
-                      decoration: InputDecoration(
-                        labelText: 'Approval Steps',
-                        fillColor: Colors.grey[200],
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(color: Colors.grey, width: 1),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                      disabledHint: approvalSteps != null ? Text("$approvalSteps") : null,
-                    ),
-                  ),
-                ),
+                _buildApprovalStepsDropdown(),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Row(
@@ -357,39 +494,13 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
                     ],
                   ),
                 ),
-                 const SizedBox(height: 10),
-             
-           
-          ],
-        ),
-        SizedBox(height: 10),
-         Container(
-               padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 1),
-              height: 170,
-              width: MediaQuery.of(context).size.width ,
-             
-              child: PlutoGrid(
-                columns: _columns,
-                rows: _rows,
-                onLoaded: (PlutoGridOnLoadedEvent event) {
-                  _stateManager = event.stateManager;
-                  _stateManager!.setShowColumnFilter(false);
-                },
-                configuration: PlutoGridConfiguration(
-                  
-                  style: PlutoGridStyleConfig(
-                    columnHeight: 30,
-                    oddRowColor: Colors.blue[50],
-                    rowHeight: 35,
-                    activatedColor: Colors.lightBlueAccent.withOpacity(0.2),
-                  ),
-                ),
-                mode: PlutoGridMode.readOnly,
-              ),
-            ),
+               
+                
               ],
-          
+            ),
+            const SizedBox(height: 12),
+                          _buildApprovalTable(),
+          ],
         ),
       ),
     );
@@ -456,6 +567,64 @@ List <PlutoRow> _buildRows (List <Map<String, String>> approverlist){
           );
         }).toList(),
         disabledHint: value != null ? Text(value) : null,
+      ),
+    );
+  }
+
+  Widget _buildApprovalStepsDropdown() {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
+        child: DropdownButtonFormField<int>(
+          value: approvalSteps,
+          items: List.generate(5, (i) => i + 1)
+              .map((e) => DropdownMenuItem<int>(
+                    value: e,
+                    child: Text("$e"),
+                  ))
+              .toList(),
+          onChanged: widget.readOnly
+              ? null
+              : (val) {
+                  setState(() {
+                    approvalSteps = val;
+                  });
+                  if (val != null) {
+                    _initializeSteps(val);
+                  }
+                },
+          decoration: InputDecoration(
+            labelText: 'Approval Steps',
+            fillColor: Colors.grey[200],
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: BorderSide(color: Colors.grey, width: 1),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          disabledHint: approvalSteps != null ? Text("$approvalSteps") : null,
+        ),
+      ),
+    );
+  }
+
+  // Update the Pluto Grid widget in your build method:
+  Widget _buildApprovalTable() {
+    return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
+      child: Container(
+        height:350,
+        child: PlutoGrid(
+          key: ValueKey('approval_table_${_rows.length}'),
+          columns: _columns,
+          rows: _rows,
+          onLoaded: (event) {
+            _stateManager = event.stateManager;
+          },
+           configuration: const PlutoGridConfiguration(),
+        ),
       ),
     );
   }
