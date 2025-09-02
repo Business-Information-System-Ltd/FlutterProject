@@ -682,3 +682,83 @@ class RequestSetupFacadeViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+
+import requests
+from django.http import JsonResponse
+
+
+ACCOUNT_API_BASE = "http://172.16.0.9:8001/api/accounts/"
+
+def list_accounts(request):
+    try:
+        res = requests.get(ACCOUNT_API_BASE)
+        res.raise_for_status()
+        data = res.json()
+    except requests.RequestException as e:
+        print("Error:", e)
+        data = []
+    return JsonResponse(data, safe=False)
+
+def create_account(request):
+    if request.method == "POST":
+        payload = {
+            "name": request.POST.get("name"),
+            "email": request.POST.get("email")
+        }
+        try:
+            res = requests.post(ACCOUNT_API_BASE, json=payload)
+            res.raise_for_status()
+            data = res.json()
+        except requests.RequestException as e:
+            print("Error:", e)
+            data = {"error": str(e)}
+        return JsonResponse(data)
+
+# views.py
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from .models import ExchangeRate
+from .serializers import ExchangeRateSerializer
+
+class ExchangeRateViewSet(viewsets.ViewSet):
+    """
+    A simple ViewSet for listing, retrieving, and adding exchange rates.
+    """
+
+    def list(self, request):
+        """
+        GET /api/exchange-rate/?date=YYYY-MM-DD&currency=XXX
+        """
+        date = request.GET.get('date', '').strip()
+        currency = request.GET.get('currency', '').strip()
+
+        if not date or not currency:
+            return Response({"error": "Missing date or currency"}, status=status.HTTP_400_BAD_REQUEST)
+
+        records = ExchangeRate.objects.filter(date=date, currency=currency)
+        serializer = ExchangeRateSerializer(records, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        """
+        POST /api/exchange-rate/
+        Body: { "date": "YYYY-MM-DD", "currency": "USD", "rate": 2100.5 }
+        """
+        serializer = ExchangeRateSerializer(data=request.data)
+        if serializer.is_valid():
+            obj, created = ExchangeRate.objects.update_or_create(
+                date=serializer.validated_data['date'],
+                currency=serializer.validated_data['currency'],
+                defaults={'rate': serializer.validated_data['rate']}
+            )
+            return Response({
+                "success": True,
+                "created": created,
+                "date": obj.date.strftime('%Y-%m-%d'),
+                "currency": obj.currency,
+                "rate": float(obj.rate)
+            })
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

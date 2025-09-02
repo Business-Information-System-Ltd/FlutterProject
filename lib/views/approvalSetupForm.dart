@@ -78,52 +78,86 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
 
   void _initializeSteps(int numberOfSteps) {
     setState(() {
-      stepsData = List.generate(numberOfSteps,
-          (index) => StepData(stepNo: index + 1, approvers: [ApproverData(maxAmount: 0)]));
+      stepsData = List.generate(
+          numberOfSteps,
+          (index) => StepData(
+              stepNo: index + 1, approvers: [ApproverData(maxAmount: 0)]));
       _updateRows();
     });
   }
 
+  void _syncGridToSteps() {
+    if (_stateManager == null) return;
+
+    for (var row in _stateManager!.rows) {
+      final stepNo = int.tryParse(row.cells['step_no']?.value.toString() ?? '');
+      if (stepNo == null || row.cells['approver_email']?.value == null)
+        continue;
+
+      final stepIndex = stepsData.indexWhere((s) => s.stepNo == stepNo);
+      if (stepIndex == -1) continue;
+
+      final approverIndex = stepsData[stepIndex].approvers.indexWhere(
+            (a) => a.approverEmail == row.cells['approver_email']?.value,
+          );
+
+      if (approverIndex != -1) {
+        stepsData[stepIndex].approvers[approverIndex]
+          ..approverEmail = row.cells['approver_email']?.value
+          ..approverName = row.cells['approver_name']?.value
+          ..maxAmount = double.tryParse(
+                  row.cells['max_amount']?.value.toString() ?? '0') ??
+              0;
+      }
+    }
+  }
+  
+
+
   void _updateRows() {
-    List<PlutoRow> newRows = [];
+    final newRows = <PlutoRow>[];
 
     for (var step in stepsData) {
       for (var approver in step.approvers) {
-        newRows.add(PlutoRow(
-          cells: {
-            "step_no": PlutoCell(value: step.stepNo),
-            "approver_email": PlutoCell(value: approver.approverEmail),
-            "approver_name": PlutoCell(value: approver.approverName),
-            "max_amount": PlutoCell(value: approver.maxAmount),
-            "action": PlutoCell(value: ''),
-          },
-        ));
+        newRows.add(PlutoRow(cells: {
+          "step_no": PlutoCell(value: step.stepNo),
+          "approver_email": PlutoCell(value: approver.approverEmail),
+          "approver_name": PlutoCell(value: approver.approverName),
+          "max_amount": PlutoCell(value: approver.maxAmount),
+          "action": PlutoCell(value: ''),
+        }));
       }
 
-      newRows.add(PlutoRow(
-        cells: {
-          "step_no": PlutoCell(value: 'add_${step.stepNo}'),
-          "approver_email": PlutoCell(value: null),
-          "approver_name": PlutoCell(value: null),
-          "max_amount": PlutoCell(value: null),
-          "action": PlutoCell(value: null),
-        },
-      ));
+      newRows.add(PlutoRow(cells: {
+        "step_no": PlutoCell(value: 'add_${step.stepNo}'),
+        "approver_email": PlutoCell(value: null),
+        "approver_name": PlutoCell(value: null),
+        "max_amount": PlutoCell(value: null),
+        "action": PlutoCell(value: null),
+      }));
     }
-    _rows = newRows;
 
-    // if (_stateManager != null) {
-    //   _stateManager!.resetRows(_rows);
-    // }
+    if (_stateManager != null) {
+      _stateManager!.removeAllRows();
+      _stateManager!.appendRows(newRows);
+    }
 
-    setState(() {});
+    setState(() {
+      _rows = newRows;
+    });
   }
 
   void _addApprover(int stepNo) {
     setState(() {
+      _syncGridToSteps();
+
       final stepIndex = stepsData.indexWhere((s) => s.stepNo == stepNo);
       if (stepIndex != -1) {
-        stepsData[stepIndex].approvers.add(ApproverData(maxAmount:0));
+        stepsData[stepIndex].approvers.add(ApproverData(
+              approverEmail: null,
+              approverName: null,
+              maxAmount: 0,
+            ));
         _updateRows();
       }
     });
@@ -131,8 +165,11 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
 
 
 
+
   void _removeApprover(int stepNo, int approverIndex) {
     setState(() {
+      _syncGridToSteps();
+
       final stepIndex = stepsData.indexWhere((s) => s.stepNo == stepNo);
       if (stepIndex != -1 && stepsData[stepIndex].approvers.length > 1) {
         stepsData[stepIndex].approvers.removeAt(approverIndex);
@@ -140,7 +177,6 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
       }
     });
   }
-
 
   List<PlutoColumn> _buildColumns() {
     return [
@@ -153,7 +189,6 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
         renderer: (rendererContext) {
           final value = rendererContext.row.cells['step_no']!.value.toString();
 
-          // "Add Approver" row
           if (value.startsWith('add_')) {
             final stepNo = int.parse(value.split('_')[1]);
             return ElevatedButton(
@@ -161,7 +196,7 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
               child: const Text('Add '),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                backgroundColor:Colors.blueGrey,
+                backgroundColor: Colors.blueGrey,
                 foregroundColor: Colors.black,
               ),
             );
@@ -189,12 +224,40 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
                 .toList(),
             onChanged: (newValue) {
               rendererContext.stateManager.changeCellValue(
-                  rendererContext.row.cells['approver_email']!, newValue);
+                rendererContext.row.cells['approver_email']!,
+                newValue,
+              );
 
               if (newValue != null && emailToNameMap.containsKey(newValue)) {
+                final approverName = emailToNameMap[newValue];
+
                 rendererContext.stateManager.changeCellValue(
-                    rendererContext.row.cells['approver_name']!,
-                    emailToNameMap[newValue]);
+                  rendererContext.row.cells['approver_name']!,
+                  approverName,
+                );
+
+                final stepNo = int.tryParse(
+                    rendererContext.row.cells['step_no']!.value.toString());
+                if (stepNo != null) {
+                  final stepIndex =
+                      stepsData.indexWhere((s) => s.stepNo == stepNo);
+                  if (stepIndex != -1) {
+                    final approverIndex = rendererContext.rowIdx -
+                        _rows.indexWhere((r) =>
+                            r.cells['step_no']!.value.toString() ==
+                            stepNo.toString());
+
+                    if (approverIndex >= 0 &&
+                        approverIndex < stepsData[stepIndex].approvers.length) {
+                      stepsData[stepIndex]
+                          .approvers[approverIndex]
+                          .approverEmail = newValue;
+                      stepsData[stepIndex]
+                          .approvers[approverIndex]
+                          .approverName = approverName;
+                    }
+                  }
+                }
               }
             },
             decoration: const InputDecoration(border: InputBorder.none),
@@ -221,28 +284,13 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
         field: 'max_amount',
         type: PlutoColumnType.number(),
         width: 170,
-       // enableEditingMode: true,
+        enableEditingMode: true,
         renderer: (rendererContext) {
           final stepValue =
               rendererContext.row.cells['step_no']!.value.toString();
           if (stepValue.startsWith('add_')) return Container();
 
-          return TextField(
-            controller: TextEditingController(
-                text: rendererContext.row.cells['max_amount']!.value
-                        ?.toString() ??
-                    ''),
-            onChanged: (value) {
-              rendererContext.stateManager.changeCellValue(
-                  rendererContext.row.cells['max_amount']!,
-                  double.tryParse(value) ?? 0);
-            },
-            // keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            ),
-          );
+          return Text(rendererContext.cell.value?.toString() ?? '');
         },
       ),
       PlutoColumn(
@@ -259,7 +307,6 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
           final stepNo = int.parse(stepValue);
           final rowIndex = rendererContext.rowIdx;
 
-          // find approver index within this step
           int approverIndex = 0;
           for (int i = 0; i < rowIndex; i++) {
             final prevStepValue = _rows[i].cells['step_no']!.value.toString();
@@ -271,7 +318,7 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
 
           return Row(
             children: [
-               IconButton(
+              IconButton(
                   icon: const Icon(Icons.edit, color: Colors.blue),
                   onPressed: () {}),
               IconButton(
@@ -279,11 +326,9 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
                 icon: const Icon(Icons.delete, color: Colors.red, size: 20),
               ),
               IconButton(
-                  icon: const Icon(Icons.more_horiz),
-                  onPressed: () => {}),
+                  icon: const Icon(Icons.more_horiz), onPressed: () => {}),
             ],
           );
-         
         },
       ),
     ];
@@ -345,12 +390,13 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Center(
-                              child: Text("Add Approval Setup Form",
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold))),
+                            child: Text(
+                              "Add Approval Setup Form",
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                           _buildFormWithSubmit(),
-                          
                         ],
                       ),
                     ),
@@ -494,12 +540,10 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
                     ],
                   ),
                 ),
-               
-                
               ],
             ),
             const SizedBox(height: 12),
-                          _buildApprovalTable(),
+            _buildApprovalTable(),
           ],
         ),
       ),
@@ -529,8 +573,8 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
             borderRadius: BorderRadius.circular(8.0),
             borderSide: BorderSide(color: Colors.grey, width: 1),
           ),
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 16), // internal padding
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );
@@ -610,20 +654,43 @@ class _ApprovalSetupState extends State<ApprovalSetup> {
     );
   }
 
-  // Update the Pluto Grid widget in your build method:
   Widget _buildApprovalTable() {
     return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
       child: Container(
-        height:350,
+        height: 350,
         child: PlutoGrid(
-          key: ValueKey('approval_table_${_rows.length}'),
           columns: _columns,
           rows: _rows,
           onLoaded: (event) {
             _stateManager = event.stateManager;
           },
-           configuration: const PlutoGridConfiguration(),
+          onChanged: (PlutoGridOnChangedEvent event) {
+            if (event.column.field == 'max_amount') {
+              final stepNo = int.tryParse(
+                  event.row.cells['step_no']?.value.toString() ?? '');
+              final newValue = double.tryParse(event.value.toString()) ?? 0;
+
+              if (stepNo != null) {
+                final stepIndex =
+                    stepsData.indexWhere((s) => s.stepNo == stepNo);
+                if (stepIndex != -1) {
+                  final approverIndex =
+                      stepsData[stepIndex].approvers.indexWhere(
+                            (a) =>
+                                a.approverEmail ==
+                                event.row.cells['approver_email']?.value,
+                          );
+
+                  if (approverIndex != -1) {
+                    stepsData[stepIndex].approvers[approverIndex].maxAmount =
+                        newValue;
+                  }
+                }
+              }
+            }
+          },
+          configuration: const PlutoGridConfiguration(),
         ),
       ),
     );

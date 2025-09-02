@@ -401,4 +401,17 @@ class SettlementDetail(models.Model):
     def __str__(self):
         return str(self.ID)
 
+from django.db import models
+
+class ExchangeRate(models.Model):
+    currency = models.CharField(max_length=10)
+    date = models.DateField()
+    rate = models.DecimalField(max_digits=10, decimal_places=4)
+
+    class Meta:
+        unique_together = ('currency', 'date')
+        db_table = 'exchange_rate'  # match your SQL table name
+
+    def __str__(self):
+        return f"{self.currency} - {self.date}: {self.rate}"
 

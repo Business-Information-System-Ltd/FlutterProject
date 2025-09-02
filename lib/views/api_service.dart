@@ -646,7 +646,7 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> fetchAccounts() async {
-  final response = await http.get(Uri.parse('http://127.0.0.1:8000/api/accounts-list/'));
+  final response = await http.get(Uri.parse('http://172.16.0.9:8001/api/accounts/'));
 
   if (response.statusCode == 200) {
     List<dynamic> data = json.decode(response.body);

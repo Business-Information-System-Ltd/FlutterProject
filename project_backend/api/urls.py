@@ -8,12 +8,14 @@
 # urlpatterns = [
 #     url(r'^', include(router.urls)),
 # ]
-
-from django.urls import path, include  # Changed import
+from django.contrib import admin
+from django.urls import path, include  
 from rest_framework.routers import DefaultRouter
-from .views import BudgetViewSet,DepartmentViewSet, RequestSetupFacadeViewSet,UserViewSet, ProjectViewSet, ProjectBudgetViewSet, TripViewSet, TripBudgetViewSet,OperationViewSet,OperationBudgetViewSet,AdvanceRequestViewSet, CashPaymentViewSet,RequestSetUpViewSet,ApproverSetupStepViewSet,SettlementViewSet
+from .views import ExchangeRateViewSet,BudgetViewSet,DepartmentViewSet, RequestSetupFacadeViewSet,UserViewSet, ProjectViewSet, ProjectBudgetViewSet, TripViewSet, TripBudgetViewSet,OperationViewSet,OperationBudgetViewSet,AdvanceRequestViewSet, CashPaymentViewSet,RequestSetUpViewSet,ApproverSetupStepViewSet,SettlementViewSet
 
 router = DefaultRouter()
+router.register(r'exchange-rate', ExchangeRateViewSet, basename='exchange-rate')
+
 router.register(r'budget', BudgetViewSet)
 router.register(r'department', DepartmentViewSet) 
 router.register(r'user', UserViewSet) 
@@ -35,4 +37,5 @@ router.register(r'request-setups', RequestSetupFacadeViewSet, basename='request-
 
 urlpatterns = [
     path('', include(router.urls)),
+    # path('', include('account.urls')),
 ]

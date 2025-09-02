@@ -812,7 +812,8 @@ class _AddProjectFormState extends State<AddProjectForm> {
 
 Future<double?> fetchUsdRateForDate(DateTime date) async {
   final formattedDate = DateFormat('yyyy-MM-dd').format(date);
-  final url = Uri.parse('http://127.0.0.1:8000/api/exchange-rate??date=$formattedDate&currency=USD');
+//  final currency = 'USD';
+  final url = Uri.parse('http://172.16.0.9:8000/api/exchange-rate/?date=$formattedDate&currency=USD');
 
   try {
     final response = await http.get(url);
@@ -877,6 +878,8 @@ void _calculateHomeAmount(){
  double rate = double.tryParse(_rateController.text) ?? 0;
  _homeAmountController.text = (amount * rate).toStringAsFixed(2);
 }
+
+
   void _initializeForm() {
     if (widget.isEditMode || widget.isViewMode) {
       final project = widget.project!;

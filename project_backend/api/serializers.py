@@ -829,3 +829,11 @@ class SettlementSerializer(serializers.ModelSerializer):
         
         return instance
 
+# serializers.py
+from rest_framework import serializers
+from .models import ExchangeRate
+
+class ExchangeRateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExchangeRate
+        fields = ['id', 'date', 'currency', 'rate']

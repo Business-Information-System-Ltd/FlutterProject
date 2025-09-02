@@ -7,7 +7,8 @@
 # ]
 
 from django.contrib import admin
-from django.urls import path, include  
+from django.urls import path, include 
+#from . import views 
 from api.views import filter_advances, filter_cashpayments, filter_projects, filter_trips, get_next_project_code, get_next_trip_code, get_next_operation_code, get_next_request_code,UserLoginView, get_next_payment_code, get_operation_budgets, get_paginated_advances, get_paginated_payments, get_paginated_projects, get_paginated_trips, get_project_budgets, get_trip_budgets
 
 
@@ -30,5 +31,8 @@ urlpatterns = [
     path('api/advances/pagination/', get_paginated_advances, name='paginated-advances'),
     path('api/payments/filterKeyword/', filter_cashpayments, name='filter-payments'),
     path('api/payments/pagination/', get_paginated_payments, name='paginated-payments'),
-    path('api/login/', UserLoginView.as_view(), name='user_login')
+    path('api/login/', UserLoginView.as_view(), name='user_login'),
+    # path('api/exchange-rate/', exchange_rate, name='exchange_rate'),
+    # path('accounts-list/', views.list_accounts, name='list_accounts'),
+    # path('accounts-create/', views.create_account, name='create_account'),
 ] 
